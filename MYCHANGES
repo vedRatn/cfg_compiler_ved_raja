@@ -1,0 +1,49 @@
+CS306 Assignment Submission by
+								
+								Aditya Raj - 110050025
+								Ved Ratn Dixit - 110050044
+
+MYCHANGES
+---------
+
+In scanner.ll
+
+1) 	Added tokens "if", "else" and "goto" to detect the corresponding keywords in the cfg file.
+
+2) 	Added the token "!" in the Regex for MetaChar
+
+In Parser.yy
+
+1) Modifed Grammar for detection of
+	a)  executable_statement_list
+		Since we have added two fundamental statements to the program structure namely "if" and "goto" 
+		statement, So in order to incorporate them into the program structure we have modified the 
+		definition of executable_statement_list.
+
+
+	b)	assignment_statement
+		Since in the grammar of Level-1 there is a possibility of a Relational_Statement on the RHS of
+		'=', therefore we have added the grammar which takes into account such a case.
+
+2) Added Grammar rules for four Statements:
+	a) if_statement
+		This segment deals with the "if statement" when it occurs in the structure of the program. 
+		A priliminary example of Control Flow Statements.
+
+	b) goto_statement
+		This segment deals with the "goto statement" when it occurs in the structure of the program.
+		This basially deals with the redirection of program from one point of execution to a different
+		basic_block
+
+	c) relational_statement
+		This deals with all binary expressions of equalities and inequalities and is used in the structure
+		of an if_statement and assignment_statement
+
+	d) comparator
+		This gives the parser tool to identify the 6 binary comparators namely
+			i) 		<
+			ii)		>
+			iii)	<=
+			iv)		>=
+			v)		==
+			vi) 	!=

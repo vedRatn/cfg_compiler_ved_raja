@@ -43,17 +43,6 @@
 %token <string_value> NAME
 %token RETURN INTEGER IF ELSE GOTO
 
-%type <symbol_table> declaration_statement_list
-%type <symbol_entry> declaration_statement
-%type <basic_block_list> basic_block_list
-%type <basic_block> basic_block
-%type <ast_list> executable_statement_list
-%type <ast_list> assignment_statement_list
-%type <ast>	if_statement
-%type <ast> goto_statement
-%type <ast> assignment_statement
-%type <ast> variable
-%type <ast> constant
 
 %start program
 
@@ -290,64 +279,9 @@ assignment_statement_list:
 ;
 
 if_statement:
-	IF '(' variable '<' variable ')' goto_statement ELSE goto_statement
+	IF '(' relational_statement ')' goto_statement ELSE goto_statement
 	{ /*
 		
-	*/ }
-|
-	IF '(' variable '<' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
-	*/ }
-|
-	IF '(' variable '>' variable ')' goto_statement ELSE goto_statement
-	{ /*
-		
-	*/ }
-|
-	IF '(' variable '>' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
-	*/ }
-|
-	IF '(' variable '<' '=' variable ')' goto_statement ELSE goto_statement
-	{ /*
-		
-	*/ }
-|
-	IF '(' variable '<' '=' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
-	*/ }
-|
-	IF '(' variable '>' '=' variable ')' goto_statement ELSE goto_statement
-	{ /*
-		
-	*/ }
-|
-	IF '(' variable '>' '=' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
-	*/ }
-|
-	IF '(' variable '=' '=' variable ')' goto_statement ELSE goto_statement
-	{ /*
-		
-	*/ }
-|
-	IF '(' variable '=' '=' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
-	*/ }
-|
-	IF '(' variable '!' '=' variable ')' goto_statement ELSE goto_statement
-	{ /*
-		
-	*/ }
-|
-	IF '(' variable '!' '=' constant ')' goto_statement ELSE goto_statement
-	{ /*
-
 	*/ }
 ;
 
@@ -356,6 +290,70 @@ goto_statement:
 	{ /*
 
 	*/ }
+;
+
+comparator:
+	'<'
+	{
+
+	}
+|
+	'>'
+	{
+		
+	}
+|
+	'<' '='
+	{
+		
+	}
+|
+	'>' '='
+	{
+		
+	}
+|
+	'=' '='
+	{
+		
+	}
+|
+	'!' '='
+	{
+		
+	}
+;
+
+relational_statement:
+	variable comparator variable
+	{
+
+	}
+|
+	variable comparator constant
+	{
+
+	}
+|
+	constant comparator constant
+	{
+
+	}
+|
+	constant comparator variable
+	{
+
+	}
+|
+	relational_statement comparator variable
+	{
+
+	}
+|
+	relational_statement comparator constant
+	{
+
+	}
 ;
 
 assignment_statement:
@@ -374,6 +372,11 @@ assignment_statement:
 		int line = get_line_number();
 		$$->check_ast(line);
 	*/ }
+|
+	variable '=' relational_statement ';'
+	{
+
+	}
 ;
 
 variable:
