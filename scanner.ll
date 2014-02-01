@@ -60,10 +60,67 @@ goto	{
 */
 
 
-[<>:{}();=\!]	{
+[:{}();]	{
 			store_token_name("META CHAR");
 			return matched()[0];
 		}
+
+[<][b][b][ ][[:digit:]]+[>]	{
+						store_token_name("BASIC BLOCK");
+						ParserBase::STYPE__ * val = getSval();
+						val->string_value = new std::string(matched());
+						return Parser::BASIC_BLOCK;
+					}
+
+[=]	{
+		store_token_name("ASSIGN_OP");
+		ParserBase::STYPE__ * val = getSval();
+		val->string_value = new std::string(matched());
+		return Parser::ASSIGN_OP;
+	}
+
+[=][=]	{
+			store_token_name("EQ");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::EQ;
+			
+		}
+
+[!][=]	{
+			store_token_name("NE");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::NE;
+		}
+
+[>][=]	{
+			store_token_name("GE");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::GE;
+		}		
+
+[<][=]	{
+			store_token_name("LE");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::LE;
+		}		
+
+[>]		{
+			store_token_name("GT");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::GT;
+		}		
+
+[<]		{
+			store_token_name("LT");
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::LT;
+		}		
 
 [-]?[[:digit:]_]+ 	{ 
 				store_token_name("NUM");
@@ -103,10 +160,3 @@ goto	{
 			report_error(error_message, line_number);
 		}
 
-/*"=="|"<"	{
-				store_token_name("CMPRT");
-				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-				return Parser::CMPRT;
-			}
-*/

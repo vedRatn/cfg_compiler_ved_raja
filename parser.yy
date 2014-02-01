@@ -41,7 +41,8 @@
 
 %token <integer_value> INTEGER_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO
+%token <string_value> BASIC_BLOCK
+%token RETURN INTEGER IF ELSE GOTO LE GE LT GT EQ NE ASSIGN_OP
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -49,8 +50,8 @@
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
 %type <ast_list> assignment_statement_list
-%type <ast>	if_statement
-%type <ast> goto_statement
+/*%type <ast>	if_statement
+%type <ast> goto_statement*/
 %type <ast> assignment_statement
 %type <ast> relational_statement
 %type <ast> variable
@@ -214,9 +215,9 @@ basic_block_list:
 ;
 
 basic_block:
-	'<' NAME INTEGER_NUMBER '>' ':' executable_statement_list
+	BASIC_BLOCK ':' executable_statement_list
 	{
-		if (*$2 != "bb")
+	/*	if (*$2 != "bb")
 		{
 			int line = get_line_number();
 			report_error("Not basic block lable", line);
@@ -227,17 +228,17 @@ basic_block:
 			int line = get_line_number();
 			report_error("Illegal basic block lable", line);
 		}
-
-		if ($6 != NULL)
-			$$ = new Basic_Block($3, *$6);
+	*/
+		string bbl(*$1);
+		if ($3 != NULL)
+			$$ = new Basic_Block(atoi(bbl.substr(4, bbl.length()-1).c_str()), *$3);
 		else
 		{
 			list<Ast *> * ast_list = new list<Ast *>;
-			$$ = new Basic_Block($3, *ast_list);
+			$$ = new Basic_Block(atoi(bbl.substr(4, bbl.length()-1).c_str()), *ast_list);
 		}
 
-		delete $6;
-		delete $2;
+		delete $3;
 	}
 ;
 
@@ -269,14 +270,14 @@ executable_statement_list:
 |
 	assignment_statement_list goto_statement
 	{
-		Ast * goto = new Goto_Ast();
+		/*Ast * goto = new Goto_Ast();
 
 		if($1 != NULL)
 			$$ = $1;
 		else
 			$$ = new list <Ast *>;
 
-		$$->push_back(goto);
+		$$->push_back(goto);*/
 	}
 ;
 
@@ -305,39 +306,39 @@ if_statement:
 ;
 
 goto_statement:
-	GOTO '<' NAME INTEGER_NUMBER '>' ';'
+	GOTO BASIC_BLOCK ';'
 	{
 
 	}
 ;
 
 comparator:
-	'<'
+	LT
 	{
 
 	}
 |
-	'>'
+	GT
 	{
 		
 	}
 |
-	'<' '='
+	LE
 	{
 		
 	}
 |
-	'>' '='
+	GE
 	{
 		
 	}
 |
-	'=' '='
+	EQ
 	{
 		
 	}
 |
-	'!' '='
+	NE
 	{
 		
 	}
@@ -376,7 +377,7 @@ relational_statement:
 ;
 
 assignment_statement:
-	variable '=' variable ';'
+	variable ASSIGN_OP variable ';'
 	{
 		$$ = new Assignment_Ast($1, $3);
 
@@ -384,7 +385,7 @@ assignment_statement:
 		$$->check_ast(line);
 	}
 |
-	variable '=' constant ';'
+	variable ASSIGN_OP constant ';'
 	{
 		$$ = new Assignment_Ast($1, $3);
 
@@ -392,7 +393,7 @@ assignment_statement:
 		$$->check_ast(line);
 	}
 |
-	variable '=' relational_statement ';'
+	variable ASSIGN_OP relational_statement ';'
 	{
 
 	}

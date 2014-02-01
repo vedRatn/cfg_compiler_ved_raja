@@ -14,7 +14,7 @@ Production Rules
 11: declaration_statement (INTEGER) ->  INTEGER NAME ';'
 12: basic_block_list ->  basic_block_list basic_block
 13: basic_block_list ->  basic_block
-14: basic_block ('<') ->  '<' NAME INTEGER_NUMBER '>' ':' executable_statement_list
+14: basic_block (BASIC_BLOCK) ->  BASIC_BLOCK ':' executable_statement_list
 15: executable_statement_list ->  assignment_statement_list
 16: executable_statement_list (RETURN) ->  assignment_statement_list RETURN ';'
 17: executable_statement_list ->  assignment_statement_list if_statement
@@ -22,22 +22,22 @@ Production Rules
 19: assignment_statement_list ->  <empty>
 20: assignment_statement_list ->  assignment_statement_list assignment_statement
 21: if_statement (IF) ->  IF '(' relational_statement ')' goto_statement ELSE goto_statement
-22: goto_statement (GOTO) ->  GOTO '<' NAME INTEGER_NUMBER '>' ';'
-23: comparator ('<') ->  '<'
-24: comparator ('>') ->  '>'
-25: comparator ('<') ->  '<' '='
-26: comparator ('>') ->  '>' '='
-27: comparator ('=') ->  '=' '='
-28: comparator ('!') ->  '!' '='
+22: goto_statement (GOTO) ->  GOTO BASIC_BLOCK ';'
+23: comparator (LT) ->  LT
+24: comparator (GT) ->  GT
+25: comparator (LE) ->  LE
+26: comparator (GE) ->  GE
+27: comparator (EQ) ->  EQ
+28: comparator (NE) ->  NE
 29: relational_statement ->  variable comparator variable
 30: relational_statement ->  variable comparator constant
 31: relational_statement ->  constant comparator constant
 32: relational_statement ->  constant comparator variable
 33: relational_statement ->  relational_statement comparator variable
 34: relational_statement ->  relational_statement comparator constant
-35: assignment_statement ('=') ->  variable '=' variable ';'
-36: assignment_statement ('=') ->  variable '=' constant ';'
-37: assignment_statement ('=') ->  variable '=' relational_statement ';'
+35: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP variable ';'
+36: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP constant ';'
+37: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP relational_statement ';'
 38: variable (NAME) ->  NAME
 39: constant (INTEGER_NUMBER) ->  INTEGER_NUMBER
 40: program_$ ->  program
@@ -48,21 +48,25 @@ Symbolic Terminal tokens:
        EOF
    257: INTEGER_NUMBER
    258: NAME
-   259: RETURN
-   260: INTEGER
-   261: IF
-   262: ELSE
-   263: GOTO
+   259: BASIC_BLOCK
+   260: RETURN
+   261: INTEGER
+   262: IF
+   263: ELSE
+   264: GOTO
+   265: LE
+   266: GE
+   267: LT
+   268: GT
+   269: EQ
+   270: NE
+   271: ASSIGN_OP
     40: '('
     41: ')'
    123: '{'
    125: '}'
     59: ';'
-    60: '<'
-    62: '>'
     58: ':'
-    61: '='
-    33: '!'
 
 
 Grammar States: 
@@ -156,7 +160,7 @@ State 14:
   2:   On declaration_statement to state 4
   3:   On basic_block to state 20
   4:   On INTEGER to state 6
-  5:   On '<' to state 21
+  5:   On BASIC_BLOCK to state 21
 
 
 State 15:
@@ -188,7 +192,7 @@ State 19:
 12: basic_block_list -> basic_block_list  . basic_block 
   0:   On '}' to state 23
   1:   On basic_block to state 24
-  2:   On '<' to state 21
+  2:   On BASIC_BLOCK to state 21
 
 
 State 20:
@@ -197,15 +201,15 @@ State 20:
 
 
 State 21:
-14: basic_block -> '<'  . NAME INTEGER_NUMBER '>' ':' executable_statement_list 
-  0:   On NAME to state 25
+14: basic_block -> BASIC_BLOCK  . ':' executable_statement_list 
+  0:   On ':' to state 25
 
 
 State 22:
 6: procedure_body -> '{' declaration_statement_list #0003  . basic_block_list '}' 
   0:   On basic_block_list to state 26
   1:   On basic_block to state 20
-  2:   On '<' to state 21
+  2:   On BASIC_BLOCK to state 21
 
 
 State 23:
@@ -219,361 +223,329 @@ State 24:
 
 
 State 25:
-14: basic_block -> '<' NAME  . INTEGER_NUMBER '>' ':' executable_statement_list 
-  0:   On INTEGER_NUMBER to state 27
+14: basic_block -> BASIC_BLOCK ':'  . executable_statement_list 
+  0:   On executable_statement_list to state 27
+  1:   On assignment_statement_list to state 28
+  Reduce by 19: assignment_statement_list ->  . 
 
 
 State 26:
 6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list  . '}' 
 12: basic_block_list -> basic_block_list  . basic_block 
-  0:   On '}' to state 28
+  0:   On '}' to state 29
   1:   On basic_block to state 24
-  2:   On '<' to state 21
+  2:   On BASIC_BLOCK to state 21
 
 
 State 27:
-14: basic_block -> '<' NAME INTEGER_NUMBER  . '>' ':' executable_statement_list 
-  0:   On '>' to state 29
+14: basic_block -> BASIC_BLOCK ':' executable_statement_list  . 
+  Reduce by 14: basic_block -> BASIC_BLOCK ':' executable_statement_list  . 
 
 
 State 28:
-6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
-  Reduce by 6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
-
-
-State 29:
-14: basic_block -> '<' NAME INTEGER_NUMBER '>'  . ':' executable_statement_list 
-  0:   On ':' to state 30
-
-
-State 30:
-14: basic_block -> '<' NAME INTEGER_NUMBER '>' ':'  . executable_statement_list 
-  0:   On executable_statement_list to state 31
-  1:   On assignment_statement_list to state 32
-  Reduce by 19: assignment_statement_list ->  . 
-
-
-State 31:
-14: basic_block -> '<' NAME INTEGER_NUMBER '>' ':' executable_statement_list  . 
-  Reduce by 14: basic_block -> '<' NAME INTEGER_NUMBER '>' ':' executable_statement_list  . 
-
-
-State 32:
 15: executable_statement_list -> assignment_statement_list  . 
 16: executable_statement_list -> assignment_statement_list  . RETURN ';' 
 17: executable_statement_list -> assignment_statement_list  . if_statement 
 18: executable_statement_list -> assignment_statement_list  . goto_statement 
 20: assignment_statement_list -> assignment_statement_list  . assignment_statement 
-  0:   On RETURN to state 33
-  1:   On if_statement to state 34
-  2:   On goto_statement to state 35
-  3:   On assignment_statement to state 36
-  4:   On IF to state 37
-  5:   On GOTO to state 38
-  6:   On variable to state 39
-  7:   On NAME to state 40
+  0:   On RETURN to state 30
+  1:   On if_statement to state 31
+  2:   On goto_statement to state 32
+  3:   On assignment_statement to state 33
+  4:   On IF to state 34
+  5:   On GOTO to state 35
+  6:   On variable to state 36
+  7:   On NAME to state 37
   Reduce by 15: executable_statement_list -> assignment_statement_list  . 
 
 
-State 33:
+State 29:
+6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
+  Reduce by 6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
+
+
+State 30:
 16: executable_statement_list -> assignment_statement_list RETURN  . ';' 
-  0:   On ';' to state 41
+  0:   On ';' to state 38
 
 
-State 34:
+State 31:
 17: executable_statement_list -> assignment_statement_list if_statement  . 
   Reduce by 17: executable_statement_list -> assignment_statement_list if_statement  . 
 
 
-State 35:
+State 32:
 18: executable_statement_list -> assignment_statement_list goto_statement  . 
   Reduce by 18: executable_statement_list -> assignment_statement_list goto_statement  . 
 
 
-State 36:
+State 33:
 20: assignment_statement_list -> assignment_statement_list assignment_statement  . 
   Reduce by 20: assignment_statement_list -> assignment_statement_list assignment_statement  . 
 
 
-State 37:
+State 34:
 21: if_statement -> IF  . '(' relational_statement ')' goto_statement ELSE goto_statement 
-  0:   On '(' to state 42
+  0:   On '(' to state 39
 
 
-State 38:
-22: goto_statement -> GOTO  . '<' NAME INTEGER_NUMBER '>' ';' 
-  0:   On '<' to state 43
+State 35:
+22: goto_statement -> GOTO  . BASIC_BLOCK ';' 
+  0:   On BASIC_BLOCK to state 40
 
 
-State 39:
-35: assignment_statement -> variable  . '=' variable ';' 
-36: assignment_statement -> variable  . '=' constant ';' 
-37: assignment_statement -> variable  . '=' relational_statement ';' 
-  0:   On '=' to state 44
+State 36:
+35: assignment_statement -> variable  . ASSIGN_OP variable ';' 
+36: assignment_statement -> variable  . ASSIGN_OP constant ';' 
+37: assignment_statement -> variable  . ASSIGN_OP relational_statement ';' 
+  0:   On ASSIGN_OP to state 41
 
 
-State 40:
+State 37:
 38: variable -> NAME  . 
   Reduce by 38: variable -> NAME  . 
 
 
-State 41:
+State 38:
 16: executable_statement_list -> assignment_statement_list RETURN ';'  . 
   Reduce by 16: executable_statement_list -> assignment_statement_list RETURN ';'  . 
 
 
-State 42:
+State 39:
 21: if_statement -> IF '('  . relational_statement ')' goto_statement ELSE goto_statement 
-  0:   On relational_statement to state 45
-  1:   On variable to state 46
-  2:   On constant to state 47
-  3:   On NAME to state 40
-  4:   On INTEGER_NUMBER to state 48
+  0:   On relational_statement to state 42
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
-State 43:
-22: goto_statement -> GOTO '<'  . NAME INTEGER_NUMBER '>' ';' 
-  0:   On NAME to state 49
+State 40:
+22: goto_statement -> GOTO BASIC_BLOCK  . ';' 
+  0:   On ';' to state 46
 
 
-State 44:
-35: assignment_statement -> variable '='  . variable ';' 
-36: assignment_statement -> variable '='  . constant ';' 
-37: assignment_statement -> variable '='  . relational_statement ';' 
-  0:   On variable to state 50
-  1:   On constant to state 51
-  2:   On relational_statement to state 52
-  3:   On NAME to state 40
-  4:   On INTEGER_NUMBER to state 48
+State 41:
+35: assignment_statement -> variable ASSIGN_OP  . variable ';' 
+36: assignment_statement -> variable ASSIGN_OP  . constant ';' 
+37: assignment_statement -> variable ASSIGN_OP  . relational_statement ';' 
+  0:   On variable to state 47
+  1:   On constant to state 48
+  2:   On relational_statement to state 49
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
-State 45:
+State 42:
 21: if_statement -> IF '(' relational_statement  . ')' goto_statement ELSE goto_statement 
 33: relational_statement -> relational_statement  . comparator variable 
 34: relational_statement -> relational_statement  . comparator constant 
-  0:   On ')' to state 53
-  1:   On comparator to state 54
-  2:   On '<' to state 55
-  3:   On '>' to state 56
-  4:   On '=' to state 57
-  5:   On '!' to state 58
+  0:   On ')' to state 50
+  1:   On comparator to state 51
+  2:   On LT to state 52
+  3:   On GT to state 53
+  4:   On LE to state 54
+  5:   On GE to state 55
+  6:   On EQ to state 56
+  7:   On NE to state 57
 
 
-State 46:
+State 43:
 29: relational_statement -> variable  . comparator variable 
 30: relational_statement -> variable  . comparator constant 
-  0:   On comparator to state 59
-  1:   On '<' to state 55
-  2:   On '>' to state 56
-  3:   On '=' to state 57
-  4:   On '!' to state 58
+  0:   On comparator to state 58
+  1:   On LT to state 52
+  2:   On GT to state 53
+  3:   On LE to state 54
+  4:   On GE to state 55
+  5:   On EQ to state 56
+  6:   On NE to state 57
 
 
-State 47:
+State 44:
 31: relational_statement -> constant  . comparator constant 
 32: relational_statement -> constant  . comparator variable 
-  0:   On comparator to state 60
-  1:   On '<' to state 55
-  2:   On '>' to state 56
-  3:   On '=' to state 57
-  4:   On '!' to state 58
+  0:   On comparator to state 59
+  1:   On LT to state 52
+  2:   On GT to state 53
+  3:   On LE to state 54
+  4:   On GE to state 55
+  5:   On EQ to state 56
+  6:   On NE to state 57
 
 
-State 48:
+State 45:
 39: constant -> INTEGER_NUMBER  . 
   Reduce by 39: constant -> INTEGER_NUMBER  . 
 
 
+State 46:
+22: goto_statement -> GOTO BASIC_BLOCK ';'  . 
+  Reduce by 22: goto_statement -> GOTO BASIC_BLOCK ';'  . 
+
+
+State 47:
+35: assignment_statement -> variable ASSIGN_OP variable  . ';' 
+29: relational_statement -> variable  . comparator variable 
+30: relational_statement -> variable  . comparator constant 
+  0:   On ';' to state 60
+  1:   On comparator to state 58
+  2:   On LT to state 52
+  3:   On GT to state 53
+  4:   On LE to state 54
+  5:   On GE to state 55
+  6:   On EQ to state 56
+  7:   On NE to state 57
+
+
+State 48:
+36: assignment_statement -> variable ASSIGN_OP constant  . ';' 
+31: relational_statement -> constant  . comparator constant 
+32: relational_statement -> constant  . comparator variable 
+  0:   On ';' to state 61
+  1:   On comparator to state 59
+  2:   On LT to state 52
+  3:   On GT to state 53
+  4:   On LE to state 54
+  5:   On GE to state 55
+  6:   On EQ to state 56
+  7:   On NE to state 57
+
+
 State 49:
-22: goto_statement -> GOTO '<' NAME  . INTEGER_NUMBER '>' ';' 
-  0:   On INTEGER_NUMBER to state 61
+37: assignment_statement -> variable ASSIGN_OP relational_statement  . ';' 
+33: relational_statement -> relational_statement  . comparator variable 
+34: relational_statement -> relational_statement  . comparator constant 
+  0:   On ';' to state 62
+  1:   On comparator to state 51
+  2:   On LT to state 52
+  3:   On GT to state 53
+  4:   On LE to state 54
+  5:   On GE to state 55
+  6:   On EQ to state 56
+  7:   On NE to state 57
 
 
 State 50:
-35: assignment_statement -> variable '=' variable  . ';' 
-29: relational_statement -> variable  . comparator variable 
-30: relational_statement -> variable  . comparator constant 
-  0:   On ';' to state 62
-  1:   On comparator to state 59
-  2:   On '<' to state 55
-  3:   On '>' to state 56
-  4:   On '=' to state 57
-  5:   On '!' to state 58
+21: if_statement -> IF '(' relational_statement ')'  . goto_statement ELSE goto_statement 
+  0:   On goto_statement to state 63
+  1:   On GOTO to state 35
 
 
 State 51:
-36: assignment_statement -> variable '=' constant  . ';' 
-31: relational_statement -> constant  . comparator constant 
-32: relational_statement -> constant  . comparator variable 
-  0:   On ';' to state 63
-  1:   On comparator to state 60
-  2:   On '<' to state 55
-  3:   On '>' to state 56
-  4:   On '=' to state 57
-  5:   On '!' to state 58
+33: relational_statement -> relational_statement comparator  . variable 
+34: relational_statement -> relational_statement comparator  . constant 
+  0:   On variable to state 64
+  1:   On constant to state 65
+  2:   On NAME to state 37
+  3:   On INTEGER_NUMBER to state 45
 
 
 State 52:
-37: assignment_statement -> variable '=' relational_statement  . ';' 
-33: relational_statement -> relational_statement  . comparator variable 
-34: relational_statement -> relational_statement  . comparator constant 
-  0:   On ';' to state 64
-  1:   On comparator to state 54
-  2:   On '<' to state 55
-  3:   On '>' to state 56
-  4:   On '=' to state 57
-  5:   On '!' to state 58
+23: comparator -> LT  . 
+  Reduce by 23: comparator -> LT  . 
 
 
 State 53:
-21: if_statement -> IF '(' relational_statement ')'  . goto_statement ELSE goto_statement 
-  0:   On goto_statement to state 65
-  1:   On GOTO to state 38
+24: comparator -> GT  . 
+  Reduce by 24: comparator -> GT  . 
 
 
 State 54:
-33: relational_statement -> relational_statement comparator  . variable 
-34: relational_statement -> relational_statement comparator  . constant 
-  0:   On variable to state 66
-  1:   On constant to state 67
-  2:   On NAME to state 40
-  3:   On INTEGER_NUMBER to state 48
+25: comparator -> LE  . 
+  Reduce by 25: comparator -> LE  . 
 
 
 State 55:
-23: comparator -> '<'  . 
-25: comparator -> '<'  . '=' 
-  0:   On '=' to state 68
-  Reduce by 23: comparator -> '<'  . 
+26: comparator -> GE  . 
+  Reduce by 26: comparator -> GE  . 
 
 
 State 56:
-24: comparator -> '>'  . 
-26: comparator -> '>'  . '=' 
-  0:   On '=' to state 69
-  Reduce by 24: comparator -> '>'  . 
+27: comparator -> EQ  . 
+  Reduce by 27: comparator -> EQ  . 
 
 
 State 57:
-27: comparator -> '='  . '=' 
-  0:   On '=' to state 70
+28: comparator -> NE  . 
+  Reduce by 28: comparator -> NE  . 
 
 
 State 58:
-28: comparator -> '!'  . '=' 
-  0:   On '=' to state 71
+29: relational_statement -> variable comparator  . variable 
+30: relational_statement -> variable comparator  . constant 
+  0:   On variable to state 66
+  1:   On constant to state 67
+  2:   On NAME to state 37
+  3:   On INTEGER_NUMBER to state 45
 
 
 State 59:
-29: relational_statement -> variable comparator  . variable 
-30: relational_statement -> variable comparator  . constant 
-  0:   On variable to state 72
-  1:   On constant to state 73
-  2:   On NAME to state 40
-  3:   On INTEGER_NUMBER to state 48
+31: relational_statement -> constant comparator  . constant 
+32: relational_statement -> constant comparator  . variable 
+  0:   On constant to state 68
+  1:   On variable to state 69
+  2:   On INTEGER_NUMBER to state 45
+  3:   On NAME to state 37
 
 
 State 60:
-31: relational_statement -> constant comparator  . constant 
-32: relational_statement -> constant comparator  . variable 
-  0:   On constant to state 74
-  1:   On variable to state 75
-  2:   On INTEGER_NUMBER to state 48
-  3:   On NAME to state 40
+35: assignment_statement -> variable ASSIGN_OP variable ';'  . 
+  Reduce by 35: assignment_statement -> variable ASSIGN_OP variable ';'  . 
 
 
 State 61:
-22: goto_statement -> GOTO '<' NAME INTEGER_NUMBER  . '>' ';' 
-  0:   On '>' to state 76
+36: assignment_statement -> variable ASSIGN_OP constant ';'  . 
+  Reduce by 36: assignment_statement -> variable ASSIGN_OP constant ';'  . 
 
 
 State 62:
-35: assignment_statement -> variable '=' variable ';'  . 
-  Reduce by 35: assignment_statement -> variable '=' variable ';'  . 
+37: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
+  Reduce by 37: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
 
 
 State 63:
-36: assignment_statement -> variable '=' constant ';'  . 
-  Reduce by 36: assignment_statement -> variable '=' constant ';'  . 
+21: if_statement -> IF '(' relational_statement ')' goto_statement  . ELSE goto_statement 
+  0:   On ELSE to state 70
 
 
 State 64:
-37: assignment_statement -> variable '=' relational_statement ';'  . 
-  Reduce by 37: assignment_statement -> variable '=' relational_statement ';'  . 
-
-
-State 65:
-21: if_statement -> IF '(' relational_statement ')' goto_statement  . ELSE goto_statement 
-  0:   On ELSE to state 77
-
-
-State 66:
 33: relational_statement -> relational_statement comparator variable  . 
   Reduce by 33: relational_statement -> relational_statement comparator variable  . 
 
 
-State 67:
+State 65:
 34: relational_statement -> relational_statement comparator constant  . 
   Reduce by 34: relational_statement -> relational_statement comparator constant  . 
 
 
-State 68:
-25: comparator -> '<' '='  . 
-  Reduce by 25: comparator -> '<' '='  . 
-
-
-State 69:
-26: comparator -> '>' '='  . 
-  Reduce by 26: comparator -> '>' '='  . 
-
-
-State 70:
-27: comparator -> '=' '='  . 
-  Reduce by 27: comparator -> '=' '='  . 
-
-
-State 71:
-28: comparator -> '!' '='  . 
-  Reduce by 28: comparator -> '!' '='  . 
-
-
-State 72:
+State 66:
 29: relational_statement -> variable comparator variable  . 
   Reduce by 29: relational_statement -> variable comparator variable  . 
 
 
-State 73:
+State 67:
 30: relational_statement -> variable comparator constant  . 
   Reduce by 30: relational_statement -> variable comparator constant  . 
 
 
-State 74:
+State 68:
 31: relational_statement -> constant comparator constant  . 
   Reduce by 31: relational_statement -> constant comparator constant  . 
 
 
-State 75:
+State 69:
 32: relational_statement -> constant comparator variable  . 
   Reduce by 32: relational_statement -> constant comparator variable  . 
 
 
-State 76:
-22: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>'  . ';' 
-  0:   On ';' to state 78
-
-
-State 77:
+State 70:
 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE  . goto_statement 
-  0:   On goto_statement to state 79
-  1:   On GOTO to state 38
+  0:   On goto_statement to state 71
+  1:   On GOTO to state 35
 
 
-State 78:
-22: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>' ';'  . 
-  Reduce by 22: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>' ';'  . 
-
-
-State 79:
+State 71:
 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
   Reduce by 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
 
