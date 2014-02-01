@@ -116,4 +116,52 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
+class Goto_Ast: public Ast
+{
+private:
+	int successor;
+public:
+
+	Goto_Ast(int succ);
+	~Goto_Ast();
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result  & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+
+class If_Else_Ast: public Ast
+{
+private:
+	Relational_Ast rel;
+	Goto_Ast true_goto;
+	Goto_Ast false_goto;
+public:
+	If_Else_Ast();
+	~If_Else_Ast();
+
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
+};
+
+
+class Relational_Ast: public Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+	COMP_ENUM comp;
+	bool return_value;
+
+public:
+
+	Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp);
+
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
+};
+
+
+
 #endif

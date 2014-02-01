@@ -1,11 +1,7 @@
 main()
 {	
-	int a = 4;
-	int b = 3;
-	int c = 3;
-
-	if (c > (a > b)?0:21)
-		a = 6;
-	else
-		b = 6;
+	int i = 0;
+	while(i <= 0){
+		i = -1;
+	}
 }

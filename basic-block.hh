@@ -47,6 +47,13 @@ public:
 
 	void print_bb(ostream & file_buffer);
 
+  /*
+    This function needs to be added as now with the control flow statements
+    included, the program is no longer simply executing from the first bb to
+    the last bb
+  */
+  Basic_Block * get_next_bb(list < Basic_Block * > basic_block_list);
+
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
