@@ -77,3 +77,33 @@ Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file
 
 	return *result;
 }
+
+/* My changes */
+
+Basic_Block * Basic_Block::get_next_bb(list < Basic_Block * > basic_block_list, Local_Environment & eval){
+	int value;
+	value = statement_list.back->next_bb(eval);
+	if(value == 0){
+		bool flag = false;
+		list<Basic_Block *>::iterator i;
+		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		{
+			if((*i)->get_bb_number() == current_bb.get_bb_number())
+			{
+				flag = true;
+				continue;
+			}
+			if (flag)
+				return (*i);
+		}
+	}else{
+		list<Basic_Block *>::iterator i;
+		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		{
+			if((*i)->get_bb_number() == value)
+			{
+				return (*i);
+			}
+		}
+	}
+}

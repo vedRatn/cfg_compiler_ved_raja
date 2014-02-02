@@ -96,11 +96,11 @@ Basic_Block & Procedure::get_start_basic_block()
 	return **i;
 }
 
-Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
+Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb, Local_Environment & eval)
 {
 
 	/*****************************my changes*************************************/
-	return current_bb->get_next_bb(basic_block_list);
+	return current_bb->get_next_bb(basic_block_list, eval);
 	/****************************************************************************/
 
 	/*bool flag = false;
@@ -136,7 +136,7 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	while (current_bb)
 	{
 		result = &(current_bb->evaluate(eval_env, file_buffer));
-		current_bb = get_next_bb(*current_bb);		
+		current_bb = get_next_bb(*current_bb, eval_env);		
 	}
 
 	file_buffer << "\n\n";

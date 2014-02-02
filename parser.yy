@@ -222,14 +222,15 @@ basic_block:
 			int line = get_line_number();
 			report_error("Not basic block lable", line);
 		}
-
-		if ($3 < 2)
+	*/
+		string bbl(*$1);
+		
+		if (atoi(bbl.substr(4, bbl.length()-1).c_str()) < 2)
 		{
 			int line = get_line_number();
 			report_error("Illegal basic block lable", line);
 		}
-	*/
-		string bbl(*$1);
+	
 		if ($3 != NULL)
 			$$ = new Basic_Block(atoi(bbl.substr(4, bbl.length()-1).c_str()), *$3);
 		else

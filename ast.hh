@@ -66,6 +66,8 @@ public:
 
 	void print_ast(ostream & file_buffer);
 
+	int next_bb(Local_Environment & eval);
+
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
@@ -81,7 +83,7 @@ public:
 	Data_Type get_data_type();
 
 	void print_ast(ostream & file_buffer);
-
+	string get_string_value(Local_Environment & eval);
 	void print_value(Local_Environment & eval_env, ostream & file_buffer);
 	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
@@ -98,7 +100,7 @@ public:
 	~Number_Ast();
 
 	Data_Type get_data_type();
-
+	string get_string_value(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -124,7 +126,7 @@ public:
 
 	Goto_Ast(int succ);
 	~Goto_Ast();
-
+	int next_bb(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result  & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -134,13 +136,13 @@ public:
 class If_Else_Ast: public Ast
 {
 private:
-	Relational_Ast rel;
-	Goto_Ast true_goto;
-	Goto_Ast false_goto;
+	Relational_Ast * rel;
+	Goto_Ast * true_goto;
+	Goto_Ast * false_goto;
 public:
-	If_Else_Ast();
+	If_Else_Ast(Relational_Ast * rel_temp, Goto_Ast * true_goto_temp, Goto_Ast * false_goto_temp);
 	~If_Else_Ast();
-
+	int next_bb(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
 };
@@ -157,7 +159,7 @@ private:
 public:
 
 	Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp);
-
+	bool evaluateReturnValue(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
 };

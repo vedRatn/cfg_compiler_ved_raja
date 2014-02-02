@@ -124,6 +124,10 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 
 	return result;
 }
+
+int Assignment_Ast::next_bb(Local_Environment & eval){
+	return 0;
+}
 /////////////////////////////////////////////////////////////////
 
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry)
@@ -210,6 +214,39 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 	return get_value_of_evaluation(eval_env);
 }
 
+string Name_Ast::get_string_value(Local_Environment & eval){
+	string ans = "";
+	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
+	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
+
+	ans += variable_name + " : ";
+
+	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
+		ans += "undefined";
+
+	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
+	{
+		if (loc_var_val->get_result_enum() == int_result)
+			ans += loc_var_val->get_value();
+		else
+			ans += "typeError";
+	}
+
+	else
+	{
+		if (glob_var_val->get_result_enum() == int_result)
+		{
+			if (glob_var_val == NULL)
+				ans += "undefined";
+			else
+				ans += glob_var_val->get_value();
+		}
+		else
+			ans += "typeError";
+	}
+	return ans;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class DATA_TYPE>
@@ -245,6 +282,12 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 
 		return result;
 	}
+}
+
+template < class DATA_TYPE>
+string Number_Ast<DATA_TYPE>::get_string_value(Local_Environment & eval){
+	string ans = "Num : " + constant;	
+	return ans;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,11 +335,84 @@ Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 	return result;
 }
 
+int Goto_Ast::next_bb(Local_Environment & eval){
+	return successor;
+}
+
+/************************************************************************************/
+
+Relational_Ast::Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp){
+	lhs = temp_lhs;
+	rhs = temp_rhs;
+	comp = cmp;
+}
+
+bool Relational_Ast::evaluateReturnValue(Local_Environment & eval){
+	string ansLeft=lhs->get_string_value(eval);
+	string ansRight = rhs->get_string_value(eval);
+
+	/*Now working under the assumption that only int type is valid*/
+	int ansL;
+	int ansR;
+	char cans[200] = ansLeft.c_str();
+	char * temp, prev;
+	temp = strtok(cans, " ");
+	while(1){
+		prev = temp;
+		temp = strtok(NULL, " ");
+		if(temp == NULL)
+			break;
+	}
+	if(strcmp(prev, "undefined")==0){
+		cout<<"ERROR : VARIABLE "<<lhs->variable_name<<" UNDEFINED \n";
+		exit(0);
+	}else if(strcmp(prev , "typeError")==0){
+		cout<<"ERROR : VARIABLE "<<lhs->variable_name<<" CANNOT BE IN A BINARY EXPRESSION \n";
+		exit(0);
+	}else{
+		ansL = atoi(prev);
+	}
+	
+	cans = ansRight.c_str();
+	temp = strtok(cans, " ");
+	while(1){
+		prev = temp;
+		temp = strtok(NULL, " ");
+		if(temp == NULL)
+			break;
+	}
+	if(strcmp(prev, "undefined")==0){
+		cout<<"ERROR : VARIABLE "<<rhs->variable_name<<" UNDEFINED \n";
+		exit(0);
+	}else if(strcmp(prev , "typeError")==0){
+		cout<<"ERROR : VARIABLE "<<rhs->variable_name<<" CANNOT BE IN A BINARY EXPRESSION \n";
+		exit(0);
+	}else{
+		ansR = atoi(prev);
+	}
+	if(ansL == ansR)
+		return true;
+	else
+		return false;
+}
+
 
 
 /************************************************************************************/
 
 
+If_Else_Ast::If_Else_Ast(Relational_Ast * rel_temp, Goto_Ast * true_goto_temp, Goto_Ast * false_goto_temp){
+	rel = rel_temp;
+	true_goto = true_goto_temp;
+	false_goto = false_goto_temp;
+}
 
+int If_Else_Ast::next_bb(Local_Environment & eval){
+	if(rel->evaluateReturnValue(eval))
+		return true_goto->successor;
+	else
+		return false_goto->successor;
+}
 
 /************************************************************************************/
+
