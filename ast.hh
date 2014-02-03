@@ -28,8 +28,11 @@
 
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
+#define AST_NODE_NODE_SPACE "               "
 
 using namespace std;
+
+enum COMP_ENUM { LE, GE, EQ, NE, LT, GT };
 
 class Ast;
 
@@ -43,13 +46,15 @@ public:
 
 	virtual Data_Type get_data_type();
 	virtual bool check_ast(int line);
-
+	virtual int get_successor();
+	virtual bool get_return_value();
 	virtual void print_ast(ostream & file_buffer) = 0;
 	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
 
 	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+	virtual int next_bb();
 };
 
 class Assignment_Ast:public Ast
@@ -66,17 +71,18 @@ public:
 
 	void print_ast(ostream & file_buffer);
 
-	int next_bb(Local_Environment & eval);
+	int next_bb();
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 class Name_Ast:public Ast
 {
-	string variable_name;
+	
 	Symbol_Table_Entry variable_symbol_entry;
-
+	string variable_name;
 public:
+
 	Name_Ast(string & name, Symbol_Table_Entry & var_entry);
 	~Name_Ast();
 
@@ -114,39 +120,22 @@ public:
 	~Return_Ast();
 
 	void print_ast(ostream & file_buffer);
-
+	int next_bb();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 class Goto_Ast: public Ast
 {
 private:
-	int successor;
+	int successor;	
 public:
-
 	Goto_Ast(int succ);
 	~Goto_Ast();
-	int next_bb(Local_Environment & eval);
+	int next_bb();
 	void print_ast(ostream & file_buffer);
-
-	Eval_Result  & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	int get_successor();
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
-
-
-class If_Else_Ast: public Ast
-{
-private:
-	Relational_Ast * rel;
-	Goto_Ast * true_goto;
-	Goto_Ast * false_goto;
-public:
-	If_Else_Ast(Relational_Ast * rel_temp, Goto_Ast * true_goto_temp, Goto_Ast * false_goto_temp);
-	~If_Else_Ast();
-	int next_bb(Local_Environment & eval);
-	void print_ast(ostream & file_buffer);
-	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
-};
-
 
 class Relational_Ast: public Ast
 {
@@ -155,15 +144,28 @@ private:
 	Ast * rhs;
 	COMP_ENUM comp;
 	bool return_value;
-
 public:
-
+	bool get_return_value();
 	Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp);
+	string get_string_value(Local_Environment & eval);
 	bool evaluateReturnValue(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
-	Eval_Result & evaluate(Local_Environment * eval_env, ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
+class If_Else_Ast: public Ast
+{
+private:
+	Ast * rel;
+	Ast * true_goto;
+	Ast * false_goto;
+public:
+	If_Else_Ast(Ast * rel_temp, Ast * true_goto_temp, Ast * false_goto_temp);
+	~If_Else_Ast();
+	int next_bb();
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
 
 
 #endif

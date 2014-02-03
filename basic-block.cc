@@ -64,8 +64,8 @@ Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file
 {
 	Eval_Result * result = NULL;
 
-	file_buffer << "\n" << BB_SPACE << "Basic Block: " << id_number << "\n";
-
+	file_buffer << BB_SPACE << "Basic Block: " << id_number << "\n\n";
+	// cout<<statement_list.size()<<endl;
 	list <Ast *>::iterator i;
 	for (i = statement_list.begin(); i != statement_list.end(); i++)
 	{
@@ -80,15 +80,18 @@ Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file
 
 /* My changes */
 
-Basic_Block * Basic_Block::get_next_bb(list < Basic_Block * > basic_block_list, Local_Environment & eval){
+Basic_Block * Basic_Block::get_next_bb(list < Basic_Block * > basic_block_list){
 	int value;
-	value = statement_list.back->next_bb(eval);
+	value = statement_list.back()->next_bb();
+	// cout<<value<<endl;
+	if(value == -1)
+		return NULL;
 	if(value == 0){
 		bool flag = false;
 		list<Basic_Block *>::iterator i;
 		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
 		{
-			if((*i)->get_bb_number() == current_bb.get_bb_number())
+			if((*i)->get_bb_number() == id_number)
 			{
 				flag = true;
 				continue;

@@ -40,9 +40,11 @@
 };
 
 %token <integer_value> INTEGER_NUMBER
-%token <string_value> NAME
 %token <string_value> BASIC_BLOCK
-%token RETURN INTEGER IF ELSE GOTO LE GE LT GT EQ NE ASSIGN_OP
+%token <string_value> NAME
+%token RETURN INTEGER IF ELSE GOTO ASSIGN_OP
+%token ne eq
+%token lt le gt ge
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -50,12 +52,13 @@
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
 %type <ast_list> assignment_statement_list
-/*%type <ast>	if_statement
-%type <ast> goto_statement*/
+%type <ast>	if_statement
+%type <ast> goto_statement
 %type <ast> assignment_statement
 %type <ast> relational_statement
 %type <ast> variable
 %type <ast> constant
+%type <string_value> comparator
 
 %start program
 
@@ -266,19 +269,23 @@ executable_statement_list:
 |
 	assignment_statement_list if_statement
 	{
+		if($1 != NULL)
+			$$ = $1;
+		else
+			$$ = new list < Ast * >;
 
+		$$->push_back($2);
 	}
 |
 	assignment_statement_list goto_statement
 	{
-		/*Ast * goto = new Goto_Ast();
-
+		
 		if($1 != NULL)
 			$$ = $1;
 		else
 			$$ = new list <Ast *>;
 
-		$$->push_back(goto);*/
+		$$->push_back($2);
 	}
 ;
 
@@ -295,6 +302,7 @@ assignment_statement_list:
 		else
 			$$ = $1;
 
+
 		$$->push_back($2);
 	}
 ;
@@ -302,78 +310,157 @@ assignment_statement_list:
 if_statement:
 	IF '(' relational_statement ')' goto_statement ELSE goto_statement
 	{
-		
+		$$ = new If_Else_Ast($3, $5, $7);
 	}
 ;
 
 goto_statement:
 	GOTO BASIC_BLOCK ';'
 	{
-
+		string str(*$2);
+		$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
 	}
 ;
 
 comparator:
-	LT
+	lt
 	{
-
+		string * str = new string("LT");
+		$$ = str;
 	}
 |
-	GT
+	gt
 	{
-		
+		string * str = new string("GT");
+		$$ = str;
 	}
 |
-	LE
+	le
 	{
-		
+		string * str = new string("LE");
+		$$ = str;
 	}
 |
-	GE
+	ge
 	{
-		
+		string * str = new string("GE");
+		$$ = str;
 	}
 |
-	EQ
+	eq
 	{
-		
+		string * str = new string("EQ");
+		$$ = str;
 	}
 |
-	NE
+	ne
 	{
-		
+		string * str = new string("NE");
+		$$ = str;
 	}
 ;
 
 relational_statement:
 	variable comparator variable
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 |
 	variable comparator constant
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 |
 	constant comparator constant
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 |
 	constant comparator variable
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 |
 	relational_statement comparator variable
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 |
 	relational_statement comparator constant
 	{
-
+		if(*$2 == "LE"){
+			$$ = new Relational_Ast($1, $3, LE);
+		}else if(*$2 == "GE"){
+			$$ = new Relational_Ast($1, $3, GE);
+		}else if(*$2 == "GT"){
+			$$ = new Relational_Ast($1, $3, GT);
+		}else if(*$2 == "LT"){
+			$$ = new Relational_Ast($1, $3, LT);
+		}else if(*$2 == "EQ"){
+			$$ = new Relational_Ast($1, $3, EQ);
+		}else if(*$2 == "NE"){
+			$$ = new Relational_Ast($1, $3, NE);
+		}
 	}
 ;
 
@@ -396,7 +483,7 @@ assignment_statement:
 |
 	variable ASSIGN_OP relational_statement ';'
 	{
-
+		$$ = new Assignment_Ast($1, $3);	
 	}
 ;
 

@@ -23,12 +23,12 @@ Production Rules
 20: assignment_statement_list ->  assignment_statement_list assignment_statement
 21: if_statement (IF) ->  IF '(' relational_statement ')' goto_statement ELSE goto_statement
 22: goto_statement (GOTO) ->  GOTO BASIC_BLOCK ';'
-23: comparator (LT) ->  LT
-24: comparator (GT) ->  GT
-25: comparator (LE) ->  LE
-26: comparator (GE) ->  GE
-27: comparator (EQ) ->  EQ
-28: comparator (NE) ->  NE
+23: comparator (lt) ->  lt
+24: comparator (gt) ->  gt
+25: comparator (le) ->  le
+26: comparator (ge) ->  ge
+27: comparator (eq) ->  eq
+28: comparator (ne) ->  ne
 29: relational_statement ->  variable comparator variable
 30: relational_statement ->  variable comparator constant
 31: relational_statement ->  constant comparator constant
@@ -47,20 +47,20 @@ Symbolic Terminal tokens:
        error
        EOF
    257: INTEGER_NUMBER
-   258: NAME
-   259: BASIC_BLOCK
+   258: BASIC_BLOCK
+   259: NAME
    260: RETURN
    261: INTEGER
    262: IF
    263: ELSE
    264: GOTO
-   265: LE
-   266: GE
-   267: LT
-   268: GT
-   269: EQ
-   270: NE
-   271: ASSIGN_OP
+   265: ASSIGN_OP
+   266: ne
+   267: eq
+   268: lt
+   269: le
+   270: gt
+   271: ge
     40: '('
     41: ')'
    123: '{'
@@ -342,36 +342,36 @@ State 42:
 34: relational_statement -> relational_statement  . comparator constant 
   0:   On ')' to state 50
   1:   On comparator to state 51
-  2:   On LT to state 52
-  3:   On GT to state 53
-  4:   On LE to state 54
-  5:   On GE to state 55
-  6:   On EQ to state 56
-  7:   On NE to state 57
+  2:   On lt to state 52
+  3:   On gt to state 53
+  4:   On le to state 54
+  5:   On ge to state 55
+  6:   On eq to state 56
+  7:   On ne to state 57
 
 
 State 43:
 29: relational_statement -> variable  . comparator variable 
 30: relational_statement -> variable  . comparator constant 
   0:   On comparator to state 58
-  1:   On LT to state 52
-  2:   On GT to state 53
-  3:   On LE to state 54
-  4:   On GE to state 55
-  5:   On EQ to state 56
-  6:   On NE to state 57
+  1:   On lt to state 52
+  2:   On gt to state 53
+  3:   On le to state 54
+  4:   On ge to state 55
+  5:   On eq to state 56
+  6:   On ne to state 57
 
 
 State 44:
 31: relational_statement -> constant  . comparator constant 
 32: relational_statement -> constant  . comparator variable 
   0:   On comparator to state 59
-  1:   On LT to state 52
-  2:   On GT to state 53
-  3:   On LE to state 54
-  4:   On GE to state 55
-  5:   On EQ to state 56
-  6:   On NE to state 57
+  1:   On lt to state 52
+  2:   On gt to state 53
+  3:   On le to state 54
+  4:   On ge to state 55
+  5:   On eq to state 56
+  6:   On ne to state 57
 
 
 State 45:
@@ -390,12 +390,12 @@ State 47:
 30: relational_statement -> variable  . comparator constant 
   0:   On ';' to state 60
   1:   On comparator to state 58
-  2:   On LT to state 52
-  3:   On GT to state 53
-  4:   On LE to state 54
-  5:   On GE to state 55
-  6:   On EQ to state 56
-  7:   On NE to state 57
+  2:   On lt to state 52
+  3:   On gt to state 53
+  4:   On le to state 54
+  5:   On ge to state 55
+  6:   On eq to state 56
+  7:   On ne to state 57
 
 
 State 48:
@@ -404,12 +404,12 @@ State 48:
 32: relational_statement -> constant  . comparator variable 
   0:   On ';' to state 61
   1:   On comparator to state 59
-  2:   On LT to state 52
-  3:   On GT to state 53
-  4:   On LE to state 54
-  5:   On GE to state 55
-  6:   On EQ to state 56
-  7:   On NE to state 57
+  2:   On lt to state 52
+  3:   On gt to state 53
+  4:   On le to state 54
+  5:   On ge to state 55
+  6:   On eq to state 56
+  7:   On ne to state 57
 
 
 State 49:
@@ -418,12 +418,12 @@ State 49:
 34: relational_statement -> relational_statement  . comparator constant 
   0:   On ';' to state 62
   1:   On comparator to state 51
-  2:   On LT to state 52
-  3:   On GT to state 53
-  4:   On LE to state 54
-  5:   On GE to state 55
-  6:   On EQ to state 56
-  7:   On NE to state 57
+  2:   On lt to state 52
+  3:   On gt to state 53
+  4:   On le to state 54
+  5:   On ge to state 55
+  6:   On eq to state 56
+  7:   On ne to state 57
 
 
 State 50:
@@ -442,33 +442,33 @@ State 51:
 
 
 State 52:
-23: comparator -> LT  . 
-  Reduce by 23: comparator -> LT  . 
+23: comparator -> lt  . 
+  Reduce by 23: comparator -> lt  . 
 
 
 State 53:
-24: comparator -> GT  . 
-  Reduce by 24: comparator -> GT  . 
+24: comparator -> gt  . 
+  Reduce by 24: comparator -> gt  . 
 
 
 State 54:
-25: comparator -> LE  . 
-  Reduce by 25: comparator -> LE  . 
+25: comparator -> le  . 
+  Reduce by 25: comparator -> le  . 
 
 
 State 55:
-26: comparator -> GE  . 
-  Reduce by 26: comparator -> GE  . 
+26: comparator -> ge  . 
+  Reduce by 26: comparator -> ge  . 
 
 
 State 56:
-27: comparator -> EQ  . 
-  Reduce by 27: comparator -> EQ  . 
+27: comparator -> eq  . 
+  Reduce by 27: comparator -> eq  . 
 
 
 State 57:
-28: comparator -> NE  . 
-  Reduce by 28: comparator -> NE  . 
+28: comparator -> ne  . 
+  Reduce by 28: comparator -> ne  . 
 
 
 State 58:

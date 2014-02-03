@@ -83,7 +83,7 @@ goto	{
 			store_token_name("EQ");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::EQ;
+			return Parser::eq;
 			
 		}
 
@@ -91,35 +91,35 @@ goto	{
 			store_token_name("NE");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::NE;
+			return Parser::ne;
 		}
 
 [>][=]	{
 			store_token_name("GE");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::GE;
+			return Parser::ge;
 		}		
 
 [<][=]	{
 			store_token_name("LE");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::LE;
+			return Parser::le;
 		}		
 
 [>]		{
 			store_token_name("GT");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::GT;
+			return Parser::gt;
 		}		
 
 [<]		{
 			store_token_name("LT");
 			ParserBase::STYPE__ * val = getSval();
 			val->string_value = new std::string(matched());
-			return Parser::LT;
+			return Parser::lt;
 		}		
 
 [-]?[[:digit:]_]+ 	{ 

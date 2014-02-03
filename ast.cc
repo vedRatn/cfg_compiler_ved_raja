@@ -64,6 +64,18 @@ void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & re
 	report_internal_error("Should not reach, Ast : set_value_of_evaluation");
 }
 
+int Ast::next_bb(){
+	report_internal_error("Should not reach, Ast : next_bb");
+}
+
+int Ast::get_successor(){
+	report_internal_error("Should not reach, Ast : get_successor");
+}
+
+bool Ast::get_return_value(){
+	report_internal_error("Should not reach, Ast : get_return_value");
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs)
@@ -96,6 +108,7 @@ bool Assignment_Ast::check_ast(int line)
 
 void Assignment_Ast::print_ast(ostream & file_buffer)
 {
+	// cout<<"did i come here instead?"<<endl;
 	file_buffer << AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
@@ -125,7 +138,8 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 	return result;
 }
 
-int Assignment_Ast::next_bb(Local_Environment & eval){
+int Assignment_Ast::next_bb(){
+	// print_ast(std::cout);
 	return 0;
 }
 /////////////////////////////////////////////////////////////////
@@ -146,6 +160,7 @@ Data_Type Name_Ast::get_data_type()
 
 void Name_Ast::print_ast(ostream & file_buffer)
 {
+	// cout<<" but i come here like a dick "<<endl;
 	file_buffer << "Name : " << variable_name;
 }
 
@@ -154,7 +169,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 
-	file_buffer << "\n" << AST_SPACE << variable_name << " : ";
+	file_buffer << AST_SPACE << variable_name << " : ";
 
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
 		file_buffer << "undefined";
@@ -179,7 +194,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 		else
 			report_internal_error("Result type can only be int and float");
 	}
-	file_buffer << "\n";
+	file_buffer << "\n\n";
 }
 
 Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
@@ -212,39 +227,6 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	return get_value_of_evaluation(eval_env);
-}
-
-string Name_Ast::get_string_value(Local_Environment & eval){
-	string ans = "";
-	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
-	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
-
-	ans += variable_name + " : ";
-
-	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
-		ans += "undefined";
-
-	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
-	{
-		if (loc_var_val->get_result_enum() == int_result)
-			ans += loc_var_val->get_value();
-		else
-			ans += "typeError";
-	}
-
-	else
-	{
-		if (glob_var_val->get_result_enum() == int_result)
-		{
-			if (glob_var_val == NULL)
-				ans += "undefined";
-			else
-				ans += glob_var_val->get_value();
-		}
-		else
-			ans += "typeError";
-	}
-	return ans;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,12 +266,6 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 	}
 }
 
-template < class DATA_TYPE>
-string Number_Ast<DATA_TYPE>::get_string_value(Local_Environment & eval){
-	string ans = "Num : " + constant;	
-	return ans;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Return_Ast::Return_Ast()
@@ -305,8 +281,13 @@ void Return_Ast::print_ast(ostream & file_buffer)
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
+	print_ast(file_buffer);
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
+}
+
+int Return_Ast::next_bb(){
+	return -1;
 }
 
 template class Number_Ast<int>;
@@ -325,20 +306,24 @@ Goto_Ast::~Goto_Ast()
 
 void Goto_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "Goto Statement\n";
-	file_buffer << AST_NODE_SPACE << "Successor : "<<successor<<"\n";
+	file_buffer << AST_SPACE << "Goto statement:\n";
+	file_buffer << AST_NODE_SPACE << "Successor: "<<successor<<"\n";
 }
 
-Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
+int Goto_Ast::next_bb(){
+	return successor;
+}
+
+Eval_Result & Goto_Ast::evaluate(Local_Environment & eval, ostream & file_buffer){
+	print_ast(file_buffer);
+	file_buffer << AST_SPACE << "GOTO (BB "<<successor<<")\n\n";
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
 }
 
-int Goto_Ast::next_bb(Local_Environment & eval){
+int Goto_Ast::get_successor(){
 	return successor;
 }
-
 /************************************************************************************/
 
 Relational_Ast::Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp){
@@ -347,71 +332,117 @@ Relational_Ast::Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp){
 	comp = cmp;
 }
 
-bool Relational_Ast::evaluateReturnValue(Local_Environment & eval){
-	string ansLeft=lhs->get_string_value(eval);
-	string ansRight = rhs->get_string_value(eval);
+void Relational_Ast::print_ast(ostream & file_buffer){
+	file_buffer << "\n"<<AST_NODE_SPACE << "Condition: ";
+	if(comp == LE)
+		file_buffer << "LE\n";
+	else if(comp == GE)
+		file_buffer << "GE\n";
+	else if(comp == EQ)
+		file_buffer << "EQ\n";
+	else if(comp == NE)
+		file_buffer << "NE\n";
+	else if(comp == GT)
+		file_buffer << "GT\n";
+	else if(comp == LT)
+		file_buffer << "LT\n";
 
-	/*Now working under the assumption that only int type is valid*/
-	int ansL;
-	int ansR;
-	char cans[200] = ansLeft.c_str();
-	char * temp, prev;
-	temp = strtok(cans, " ");
-	while(1){
-		prev = temp;
-		temp = strtok(NULL, " ");
-		if(temp == NULL)
-			break;
-	}
-	if(strcmp(prev, "undefined")==0){
-		cout<<"ERROR : VARIABLE "<<lhs->variable_name<<" UNDEFINED \n";
-		exit(0);
-	}else if(strcmp(prev , "typeError")==0){
-		cout<<"ERROR : VARIABLE "<<lhs->variable_name<<" CANNOT BE IN A BINARY EXPRESSION \n";
-		exit(0);
-	}else{
-		ansL = atoi(prev);
-	}
-	
-	cans = ansRight.c_str();
-	temp = strtok(cans, " ");
-	while(1){
-		prev = temp;
-		temp = strtok(NULL, " ");
-		if(temp == NULL)
-			break;
-	}
-	if(strcmp(prev, "undefined")==0){
-		cout<<"ERROR : VARIABLE "<<rhs->variable_name<<" UNDEFINED \n";
-		exit(0);
-	}else if(strcmp(prev , "typeError")==0){
-		cout<<"ERROR : VARIABLE "<<rhs->variable_name<<" CANNOT BE IN A BINARY EXPRESSION \n";
-		exit(0);
-	}else{
-		ansR = atoi(prev);
-	}
-	if(ansL == ansR)
-		return true;
-	else
-		return false;
+	file_buffer << AST_NODE_NODE_SPACE << "LHS " <<"(";
+	lhs->print_ast(file_buffer);
+	file_buffer <<")\n";
+	file_buffer << AST_NODE_NODE_SPACE<< "RHS " <<"(";
+	rhs->print_ast(file_buffer);
+	file_buffer << ")";
 }
 
+bool Relational_Ast::get_return_value(){
+	return return_value;
+}
+
+Eval_Result & Relational_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
+
+	Eval_Result & result=*new Eval_Result_Value_Int();;
+	Eval_Result & lhsResult = lhs->evaluate(eval_env, file_buffer);
+	Eval_Result & rhsResult = rhs->evaluate(eval_env, file_buffer);
+
+	if(lhsResult.is_variable_defined() == false){
+		report_error("Variable should be defined to be on lhs", NOLINE);
+	}
+	if(rhsResult.is_variable_defined() == false){
+		report_error("Variable should be defined to be on rhs", NOLINE);
+	}
+
+	if(comp == LE){
+		if(lhsResult.get_value() <= rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}else if(comp == GE){
+		if(lhsResult.get_value() >= rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}else if(comp == EQ){
+		if(lhsResult.get_value() == rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}else if(comp == NE){
+		if(lhsResult.get_value() != rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}else if(comp == GT){
+		if(lhsResult.get_value() > rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}else if(comp == LT){
+		if(lhsResult.get_value() < rhsResult.get_value())
+			result.set_value(1);
+		else
+			result.set_value(0);
+	}
+	return_value = (result.get_value()==1?true:false);
+	return result;
+}
 
 
 /************************************************************************************/
 
 
-If_Else_Ast::If_Else_Ast(Relational_Ast * rel_temp, Goto_Ast * true_goto_temp, Goto_Ast * false_goto_temp){
+If_Else_Ast::If_Else_Ast(Ast * rel_temp, Ast * true_goto_temp, Ast * false_goto_temp){
 	rel = rel_temp;
 	true_goto = true_goto_temp;
 	false_goto = false_goto_temp;
 }
 
-int If_Else_Ast::next_bb(Local_Environment & eval){
-	if(rel->evaluateReturnValue(eval))
-		return true_goto->successor;
+int If_Else_Ast::next_bb(){
+	if(rel->get_return_value())
+		return true_goto->get_successor();
 	else
-		return false_goto->successor;
+		return false_goto->get_successor();
+}
+
+void If_Else_Ast::print_ast(ostream & file_buffer){
+	file_buffer << AST_SPACE << "If_Else statement:";
+	// cout<<"Here i call rel "<<endl;
+	rel->print_ast(file_buffer);
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "True Successor: "<<true_goto->get_successor()<<"\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor()<<"\n";
+}
+
+Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval , ostream & file_buffer){
+	print_ast(file_buffer);
+	rel->evaluate(eval, file_buffer);
+	if(rel->get_return_value())
+		file_buffer << AST_SPACE << "Condition True : Goto (BB "<<true_goto->get_successor()<<")\n";
+	else
+		file_buffer << AST_SPACE << "Condition False : Goto (BB "<<false_goto->get_successor()<<")\n";
+	file_buffer << "\n" ;
+	Eval_Result & result = *new Eval_Result_Value_Int();
+	return result;
 }
 
 /************************************************************************************/
