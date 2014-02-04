@@ -17,7 +17,7 @@ do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
-	./cfglp $file -ast -d > out1
-	./cfglp64-sirki $file -ast -d > out2
+	./cfglp $file -eval -d > out1
+	./cfglp64-sirki $file -eval -d > out2
 	diff out1 out2 > tmp/$f
 done

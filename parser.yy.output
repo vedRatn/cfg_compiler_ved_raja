@@ -23,24 +23,18 @@ Production Rules
 20: assignment_statement_list ->  assignment_statement_list assignment_statement
 21: if_statement (IF) ->  IF '(' relational_statement ')' goto_statement ELSE goto_statement
 22: goto_statement (GOTO) ->  GOTO BASIC_BLOCK ';'
-23: comparator (lt) ->  lt
-24: comparator (gt) ->  gt
-25: comparator (le) ->  le
-26: comparator (ge) ->  ge
-27: comparator (eq) ->  eq
-28: comparator (ne) ->  ne
-29: relational_statement ->  variable comparator variable
-30: relational_statement ->  variable comparator constant
-31: relational_statement ->  constant comparator constant
-32: relational_statement ->  constant comparator variable
-33: relational_statement ->  relational_statement comparator variable
-34: relational_statement ->  relational_statement comparator constant
-35: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP variable ';'
-36: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP constant ';'
-37: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP relational_statement ';'
-38: variable (NAME) ->  NAME
-39: constant (INTEGER_NUMBER) ->  INTEGER_NUMBER
-40: program_$ ->  program
+23: relational_statement ->  variable
+24: relational_statement ->  constant
+25: relational_statement (le) ->  relational_statement le relational_statement
+26: relational_statement (ge) ->  relational_statement ge relational_statement
+27: relational_statement (gt) ->  relational_statement gt relational_statement
+28: relational_statement (lt) ->  relational_statement lt relational_statement
+29: relational_statement (eq) ->  relational_statement eq relational_statement
+30: relational_statement (ne) ->  relational_statement ne relational_statement
+31: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP relational_statement ';'
+32: variable (NAME) ->  NAME
+33: constant (INTEGER_NUMBER) ->  INTEGER_NUMBER
+34: program_$ ->  program
 
 
 Symbolic Terminal tokens:
@@ -71,7 +65,7 @@ Symbolic Terminal tokens:
 
 Grammar States: 
 State 0:
-40: program_$ ->  . program 
+34: program_$ ->  . program 
   0:   On program to state 1
   1:   On declaration_statement_list to state 2
   2:   On procedure_name to state 3
@@ -81,7 +75,7 @@ State 0:
 
 
 State 1:
-40: program_$ -> program  . 
+34: program_$ -> program  . 
 
 
 State 2:
@@ -295,15 +289,13 @@ State 35:
 
 
 State 36:
-35: assignment_statement -> variable  . ASSIGN_OP variable ';' 
-36: assignment_statement -> variable  . ASSIGN_OP constant ';' 
-37: assignment_statement -> variable  . ASSIGN_OP relational_statement ';' 
+31: assignment_statement -> variable  . ASSIGN_OP relational_statement ';' 
   0:   On ASSIGN_OP to state 41
 
 
 State 37:
-38: variable -> NAME  . 
-  Reduce by 38: variable -> NAME  . 
+32: variable -> NAME  . 
+  Reduce by 32: variable -> NAME  . 
 
 
 State 38:
@@ -326,57 +318,44 @@ State 40:
 
 
 State 41:
-35: assignment_statement -> variable ASSIGN_OP  . variable ';' 
-36: assignment_statement -> variable ASSIGN_OP  . constant ';' 
-37: assignment_statement -> variable ASSIGN_OP  . relational_statement ';' 
-  0:   On variable to state 47
-  1:   On constant to state 48
-  2:   On relational_statement to state 49
+31: assignment_statement -> variable ASSIGN_OP  . relational_statement ';' 
+  0:   On relational_statement to state 47
+  1:   On variable to state 43
+  2:   On constant to state 44
   3:   On NAME to state 37
   4:   On INTEGER_NUMBER to state 45
 
 
 State 42:
 21: if_statement -> IF '(' relational_statement  . ')' goto_statement ELSE goto_statement 
-33: relational_statement -> relational_statement  . comparator variable 
-34: relational_statement -> relational_statement  . comparator constant 
-  0:   On ')' to state 50
-  1:   On comparator to state 51
-  2:   On lt to state 52
-  3:   On gt to state 53
-  4:   On le to state 54
-  5:   On ge to state 55
-  6:   On eq to state 56
-  7:   On ne to state 57
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On ')' to state 48
+  1:   On le to state 49
+  2:   On ge to state 50
+  3:   On gt to state 51
+  4:   On lt to state 52
+  5:   On eq to state 53
+  6:   On ne to state 54
 
 
 State 43:
-29: relational_statement -> variable  . comparator variable 
-30: relational_statement -> variable  . comparator constant 
-  0:   On comparator to state 58
-  1:   On lt to state 52
-  2:   On gt to state 53
-  3:   On le to state 54
-  4:   On ge to state 55
-  5:   On eq to state 56
-  6:   On ne to state 57
+23: relational_statement -> variable  . 
+  Reduce by 23: relational_statement -> variable  . 
 
 
 State 44:
-31: relational_statement -> constant  . comparator constant 
-32: relational_statement -> constant  . comparator variable 
-  0:   On comparator to state 59
-  1:   On lt to state 52
-  2:   On gt to state 53
-  3:   On le to state 54
-  4:   On ge to state 55
-  5:   On eq to state 56
-  6:   On ne to state 57
+24: relational_statement -> constant  . 
+  Reduce by 24: relational_statement -> constant  . 
 
 
 State 45:
-39: constant -> INTEGER_NUMBER  . 
-  Reduce by 39: constant -> INTEGER_NUMBER  . 
+33: constant -> INTEGER_NUMBER  . 
+  Reduce by 33: constant -> INTEGER_NUMBER  . 
 
 
 State 46:
@@ -385,167 +364,201 @@ State 46:
 
 
 State 47:
-35: assignment_statement -> variable ASSIGN_OP variable  . ';' 
-29: relational_statement -> variable  . comparator variable 
-30: relational_statement -> variable  . comparator constant 
-  0:   On ';' to state 60
-  1:   On comparator to state 58
-  2:   On lt to state 52
-  3:   On gt to state 53
-  4:   On le to state 54
-  5:   On ge to state 55
-  6:   On eq to state 56
-  7:   On ne to state 57
+31: assignment_statement -> variable ASSIGN_OP relational_statement  . ';' 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On ';' to state 55
+  1:   On le to state 49
+  2:   On ge to state 50
+  3:   On gt to state 51
+  4:   On lt to state 52
+  5:   On eq to state 53
+  6:   On ne to state 54
 
 
 State 48:
-36: assignment_statement -> variable ASSIGN_OP constant  . ';' 
-31: relational_statement -> constant  . comparator constant 
-32: relational_statement -> constant  . comparator variable 
-  0:   On ';' to state 61
-  1:   On comparator to state 59
-  2:   On lt to state 52
-  3:   On gt to state 53
-  4:   On le to state 54
-  5:   On ge to state 55
-  6:   On eq to state 56
-  7:   On ne to state 57
+21: if_statement -> IF '(' relational_statement ')'  . goto_statement ELSE goto_statement 
+  0:   On goto_statement to state 56
+  1:   On GOTO to state 35
 
 
 State 49:
-37: assignment_statement -> variable ASSIGN_OP relational_statement  . ';' 
-33: relational_statement -> relational_statement  . comparator variable 
-34: relational_statement -> relational_statement  . comparator constant 
-  0:   On ';' to state 62
-  1:   On comparator to state 51
-  2:   On lt to state 52
-  3:   On gt to state 53
-  4:   On le to state 54
-  5:   On ge to state 55
-  6:   On eq to state 56
-  7:   On ne to state 57
+25: relational_statement -> relational_statement le  . relational_statement 
+  0:   On relational_statement to state 57
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 50:
-21: if_statement -> IF '(' relational_statement ')'  . goto_statement ELSE goto_statement 
-  0:   On goto_statement to state 63
-  1:   On GOTO to state 35
+26: relational_statement -> relational_statement ge  . relational_statement 
+  0:   On relational_statement to state 58
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 51:
-33: relational_statement -> relational_statement comparator  . variable 
-34: relational_statement -> relational_statement comparator  . constant 
-  0:   On variable to state 64
-  1:   On constant to state 65
-  2:   On NAME to state 37
-  3:   On INTEGER_NUMBER to state 45
+27: relational_statement -> relational_statement gt  . relational_statement 
+  0:   On relational_statement to state 59
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 52:
-23: comparator -> lt  . 
-  Reduce by 23: comparator -> lt  . 
+28: relational_statement -> relational_statement lt  . relational_statement 
+  0:   On relational_statement to state 60
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 53:
-24: comparator -> gt  . 
-  Reduce by 24: comparator -> gt  . 
+29: relational_statement -> relational_statement eq  . relational_statement 
+  0:   On relational_statement to state 61
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 54:
-25: comparator -> le  . 
-  Reduce by 25: comparator -> le  . 
+30: relational_statement -> relational_statement ne  . relational_statement 
+  0:   On relational_statement to state 62
+  1:   On variable to state 43
+  2:   On constant to state 44
+  3:   On NAME to state 37
+  4:   On INTEGER_NUMBER to state 45
 
 
 State 55:
-26: comparator -> ge  . 
-  Reduce by 26: comparator -> ge  . 
+31: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
+  Reduce by 31: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
 
 
 State 56:
-27: comparator -> eq  . 
-  Reduce by 27: comparator -> eq  . 
+21: if_statement -> IF '(' relational_statement ')' goto_statement  . ELSE goto_statement 
+  0:   On ELSE to state 63
 
 
 State 57:
-28: comparator -> ne  . 
-  Reduce by 28: comparator -> ne  . 
+25: relational_statement -> relational_statement le relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 49
+  1 (removed by precedence):   On ge to state 50
+  2 (removed by precedence):   On gt to state 51
+  3 (removed by precedence):   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 25: relational_statement -> relational_statement le relational_statement  . 
 
 
 State 58:
-29: relational_statement -> variable comparator  . variable 
-30: relational_statement -> variable comparator  . constant 
-  0:   On variable to state 66
-  1:   On constant to state 67
-  2:   On NAME to state 37
-  3:   On INTEGER_NUMBER to state 45
+26: relational_statement -> relational_statement ge relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 49
+  1 (removed by precedence):   On ge to state 50
+  2 (removed by precedence):   On gt to state 51
+  3 (removed by precedence):   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 26: relational_statement -> relational_statement ge relational_statement  . 
 
 
 State 59:
-31: relational_statement -> constant comparator  . constant 
-32: relational_statement -> constant comparator  . variable 
-  0:   On constant to state 68
-  1:   On variable to state 69
-  2:   On INTEGER_NUMBER to state 45
-  3:   On NAME to state 37
+27: relational_statement -> relational_statement gt relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 49
+  1 (removed by precedence):   On ge to state 50
+  2 (removed by precedence):   On gt to state 51
+  3 (removed by precedence):   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 27: relational_statement -> relational_statement gt relational_statement  . 
 
 
 State 60:
-35: assignment_statement -> variable ASSIGN_OP variable ';'  . 
-  Reduce by 35: assignment_statement -> variable ASSIGN_OP variable ';'  . 
+28: relational_statement -> relational_statement lt relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 49
+  1 (removed by precedence):   On ge to state 50
+  2 (removed by precedence):   On gt to state 51
+  3 (removed by precedence):   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 28: relational_statement -> relational_statement lt relational_statement  . 
 
 
 State 61:
-36: assignment_statement -> variable ASSIGN_OP constant ';'  . 
-  Reduce by 36: assignment_statement -> variable ASSIGN_OP constant ';'  . 
+29: relational_statement -> relational_statement eq relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On le to state 49
+  1:   On ge to state 50
+  2:   On gt to state 51
+  3:   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 29: relational_statement -> relational_statement eq relational_statement  . 
 
 
 State 62:
-37: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
-  Reduce by 37: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
+30: relational_statement -> relational_statement ne relational_statement  . 
+25: relational_statement -> relational_statement  . le relational_statement 
+26: relational_statement -> relational_statement  . ge relational_statement 
+27: relational_statement -> relational_statement  . gt relational_statement 
+28: relational_statement -> relational_statement  . lt relational_statement 
+29: relational_statement -> relational_statement  . eq relational_statement 
+30: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On le to state 49
+  1:   On ge to state 50
+  2:   On gt to state 51
+  3:   On lt to state 52
+  4 (removed by precedence):   On eq to state 53
+  5 (removed by precedence):   On ne to state 54
+  Reduce by 30: relational_statement -> relational_statement ne relational_statement  . 
 
 
 State 63:
-21: if_statement -> IF '(' relational_statement ')' goto_statement  . ELSE goto_statement 
-  0:   On ELSE to state 70
-
-
-State 64:
-33: relational_statement -> relational_statement comparator variable  . 
-  Reduce by 33: relational_statement -> relational_statement comparator variable  . 
-
-
-State 65:
-34: relational_statement -> relational_statement comparator constant  . 
-  Reduce by 34: relational_statement -> relational_statement comparator constant  . 
-
-
-State 66:
-29: relational_statement -> variable comparator variable  . 
-  Reduce by 29: relational_statement -> variable comparator variable  . 
-
-
-State 67:
-30: relational_statement -> variable comparator constant  . 
-  Reduce by 30: relational_statement -> variable comparator constant  . 
-
-
-State 68:
-31: relational_statement -> constant comparator constant  . 
-  Reduce by 31: relational_statement -> constant comparator constant  . 
-
-
-State 69:
-32: relational_statement -> constant comparator variable  . 
-  Reduce by 32: relational_statement -> constant comparator variable  . 
-
-
-State 70:
 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE  . goto_statement 
-  0:   On goto_statement to state 71
+  0:   On goto_statement to state 64
   1:   On GOTO to state 35
 
 
-State 71:
+State 64:
 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
   Reduce by 21: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
 

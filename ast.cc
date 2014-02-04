@@ -97,6 +97,7 @@ Data_Type Assignment_Ast::get_data_type()
 
 bool Assignment_Ast::check_ast(int line)
 {
+	// cout<<"line "<<line<<"is gonna be checked"<<endl;
 	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
@@ -160,7 +161,6 @@ Data_Type Name_Ast::get_data_type()
 
 void Name_Ast::print_ast(ostream & file_buffer)
 {
-	// cout<<" but i come here like a dick "<<endl;
 	file_buffer << "Name : " << variable_name;
 }
 
@@ -326,13 +326,26 @@ int Goto_Ast::get_successor(){
 }
 /************************************************************************************/
 
+Relational_Ast::Relational_Ast(Ast * temp_lhs){
+	lhs = temp_lhs;
+	comp = NONE;
+}
+
 Relational_Ast::Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp){
 	lhs = temp_lhs;
 	rhs = temp_rhs;
 	comp = cmp;
 }
 
+Data_Type Relational_Ast::get_data_type(){
+	return lhs->get_data_type();
+}
+
 void Relational_Ast::print_ast(ostream & file_buffer){
+	if(comp == NONE){
+		lhs->print_ast(file_buffer);
+		return;
+	}
 	file_buffer << "\n"<<AST_NODE_SPACE << "Condition: ";
 	if(comp == LE)
 		file_buffer << "LE\n";
@@ -361,7 +374,11 @@ bool Relational_Ast::get_return_value(){
 
 Eval_Result & Relational_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
 
-	Eval_Result & result=*new Eval_Result_Value_Int();;
+	if(comp == NONE){
+		return lhs->evaluate(eval_env, file_buffer);
+	}
+
+	Eval_Result & result=*new Eval_Result_Value_Int();
 	Eval_Result & lhsResult = lhs->evaluate(eval_env, file_buffer);
 	Eval_Result & rhsResult = rhs->evaluate(eval_env, file_buffer);
 

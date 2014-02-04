@@ -32,7 +32,7 @@
 
 using namespace std;
 
-enum COMP_ENUM { LE, GE, EQ, NE, LT, GT };
+enum COMP_ENUM { LE, GE, EQ, NE, LT, GT, NONE };
 
 class Ast;
 
@@ -147,6 +147,8 @@ private:
 public:
 	bool get_return_value();
 	Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp);
+	Relational_Ast(Ast * temp_lhs);
+	Data_Type get_data_type();
 	string get_string_value(Local_Environment & eval);
 	bool evaluateReturnValue(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);

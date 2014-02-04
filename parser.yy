@@ -43,8 +43,8 @@
 %token <string_value> BASIC_BLOCK
 %token <string_value> NAME
 %token RETURN INTEGER IF ELSE GOTO ASSIGN_OP
-%token ne eq
-%token lt le gt ge
+%left ne eq
+%left lt le gt ge
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -58,7 +58,6 @@
 %type <ast> relational_statement
 %type <ast> variable
 %type <ast> constant
-%type <string_value> comparator
 
 %start program
 
@@ -322,168 +321,63 @@ goto_statement:
 	}
 ;
 
-comparator:
-	lt
-	{
-		string * str = new string("LT");
-		$$ = str;
-	}
-|
-	gt
-	{
-		string * str = new string("GT");
-		$$ = str;
-	}
-|
-	le
-	{
-		string * str = new string("LE");
-		$$ = str;
-	}
-|
-	ge
-	{
-		string * str = new string("GE");
-		$$ = str;
-	}
-|
-	eq
-	{
-		string * str = new string("EQ");
-		$$ = str;
-	}
-|
-	ne
-	{
-		string * str = new string("NE");
-		$$ = str;
-	}
-;
-
 relational_statement:
-	variable comparator variable
+	variable
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line1 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1);
 	}
 |
-	variable comparator constant
+	constant
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line2 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1);
 	}
 |
-	constant comparator constant
+	relational_statement le relational_statement
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line3 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, LE);
 	}
 |
-	constant comparator variable
+	relational_statement ge relational_statement
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line4 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, GE);
 	}
 |
-	relational_statement comparator variable
+	relational_statement gt relational_statement
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line5 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, GT);
 	}
 |
-	relational_statement comparator constant
+	relational_statement lt relational_statement
 	{
-		if(*$2 == "LE"){
-			$$ = new Relational_Ast($1, $3, LE);
-		}else if(*$2 == "GE"){
-			$$ = new Relational_Ast($1, $3, GE);
-		}else if(*$2 == "GT"){
-			$$ = new Relational_Ast($1, $3, GT);
-		}else if(*$2 == "LT"){
-			$$ = new Relational_Ast($1, $3, LT);
-		}else if(*$2 == "EQ"){
-			$$ = new Relational_Ast($1, $3, EQ);
-		}else if(*$2 == "NE"){
-			$$ = new Relational_Ast($1, $3, NE);
-		}
+		//cout<<"line6 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, LT);
+	}
+|
+	relational_statement eq relational_statement
+	{
+		//cout<<"line7 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, EQ);
+	}
+|
+	relational_statement ne relational_statement
+	{
+		//cout<<"line8 = "<<get_line_number()<<endl;
+		$$ = new Relational_Ast($1, $3, NE);
 	}
 ;
 
 assignment_statement:
-	variable ASSIGN_OP variable ';'
-	{
-		$$ = new Assignment_Ast($1, $3);
-
-		int line = get_line_number();
-		$$->check_ast(line);
-	}
-|
-	variable ASSIGN_OP constant ';'
-	{
-		$$ = new Assignment_Ast($1, $3);
-
-		int line = get_line_number();
-		$$->check_ast(line);
-	}
-|
 	variable ASSIGN_OP relational_statement ';'
 	{
-		$$ = new Assignment_Ast($1, $3);	
+		$$ = new Assignment_Ast($1, $3);
+		int line = get_line_number();
+		//cout<<"ass line = "<<line<<endl;
+		$$->check_ast(line);
 	}
 ;
 
@@ -503,7 +397,7 @@ variable:
 			int line = get_line_number();
 			report_error("Variable has not been declared", line);
 		}
-
+		////cout<<"variable "<<get_line_number()<<endl;
 		$$ = new Name_Ast(*$1, var_table_entry);
 
 		delete $1;
