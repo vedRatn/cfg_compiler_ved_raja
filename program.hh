@@ -59,6 +59,9 @@ public:
 
 	bool variable_in_symbol_list_check(string variable);
 	void variable_in_proc_map_check(string symbol, int line);
+
+	int max_bb;
+	int max_bb_call;
 };
 
 #endif

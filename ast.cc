@@ -76,6 +76,10 @@ bool Ast::get_return_value(){
 	report_internal_error("Should not reach, Ast : get_return_value");
 }
 
+int Ast::checkSuccessor(list < int > & allIds){
+	report_internal_error("Should not reach, Ast : checkSuccessor");
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs)
@@ -143,6 +147,11 @@ int Assignment_Ast::next_bb(){
 	// print_ast(std::cout);
 	return 0;
 }
+
+int Assignment_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
+}
+
 /////////////////////////////////////////////////////////////////
 
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry)
@@ -290,6 +299,10 @@ int Return_Ast::next_bb(){
 	return -1;
 }
 
+int Return_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
+}
+
 template class Number_Ast<int>;
 
 
@@ -324,17 +337,29 @@ Eval_Result & Goto_Ast::evaluate(Local_Environment & eval, ostream & file_buffer
 int Goto_Ast::get_successor(){
 	return successor;
 }
+
+int Goto_Ast::checkSuccessor(list < int > & allIds){
+	int ans = successor;
+	for(list < int > :: iterator it = allIds.begin() ; it != allIds.end() ; it ++){
+		if(successor == (int)(*it)){
+			ans = 0;
+		}
+	}
+	return ans;
+}
 /************************************************************************************/
 
 Relational_Ast::Relational_Ast(Ast * temp_lhs){
 	lhs = temp_lhs;
 	comp = NONE;
+	return_value = false;
 }
 
 Relational_Ast::Relational_Ast(Ast * temp_lhs, Ast * temp_rhs, COMP_ENUM cmp){
 	lhs = temp_lhs;
 	rhs = temp_rhs;
 	comp = cmp;
+	return_value = false;
 }
 
 Data_Type Relational_Ast::get_data_type(){
@@ -460,6 +485,27 @@ Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval , ostream & file_bu
 	file_buffer << "\n" ;
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
+}
+
+int If_Else_Ast::checkSuccessor(list < int > & allIds){
+	int ans = true_goto->get_successor();
+	for(list < int > :: iterator it = allIds.begin() ; it != allIds.end() ; it ++){
+		if(true_goto->get_successor() == (int)(*it)){
+			ans = 0;
+		}
+	}
+	if(ans != 0){
+		return ans;
+	}
+
+	ans = false_goto->get_successor();
+
+	for(list < int > :: iterator it = allIds.begin() ; it != allIds.end() ; it ++){
+		if(false_goto->get_successor() == (int)(*it)){
+			ans = 0;
+		}
+	}
+	return ans;
 }
 
 /************************************************************************************/

@@ -55,6 +55,7 @@ public:
 	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 	virtual int next_bb();
+	virtual int checkSuccessor(list < int > & allIds);
 };
 
 class Assignment_Ast:public Ast
@@ -72,6 +73,8 @@ public:
 	void print_ast(ostream & file_buffer);
 
 	int next_bb();
+
+	int checkSuccessor(list < int > & allIds);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
@@ -121,6 +124,7 @@ public:
 
 	void print_ast(ostream & file_buffer);
 	int next_bb();
+	int checkSuccessor(list < int > & allIds);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
@@ -132,6 +136,7 @@ public:
 	Goto_Ast(int succ);
 	~Goto_Ast();
 	int next_bb();
+	int checkSuccessor(list < int > & allIds);
 	void print_ast(ostream & file_buffer);
 	int get_successor();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -165,6 +170,7 @@ public:
 	If_Else_Ast(Ast * rel_temp, Ast * true_goto_temp, Ast * false_goto_temp);
 	~If_Else_Ast();
 	int next_bb();
+	int checkSuccessor(list < int > & allIds);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };

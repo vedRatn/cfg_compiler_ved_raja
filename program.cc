@@ -40,7 +40,10 @@ Program program_object;
 Local_Environment interpreter_global_table;
 
 Program::Program()
-{}
+{
+	max_bb = 0;
+	max_bb_call = 0;
+}
 
 Program::~Program()
 {}

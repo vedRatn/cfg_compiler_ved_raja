@@ -26,6 +26,7 @@
 %filenames parser
 %parsefun-source parser.cc
 
+
 %union 
 {
 	int integer_value;
@@ -71,6 +72,7 @@ program:
 	}
 	procedure_body
 	{
+
 		program_object.set_procedure_map(*current_procedure);
 
 		if ($1)
@@ -104,27 +106,39 @@ procedure_body:
 	}
 	basic_block_list '}'
 	{
-		if (return_statement_used_flag == false)
+		/*if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
 			report_error("Atleast 1 basic block should have a return statement", line);
 		}
-
+		*/
 		current_procedure->set_basic_block_list(*$4);
-
+		if(program_object.max_bb_call > program_object.max_bb){
+			char error[200];
+			sprintf(error , "bb %d doesn't exist" , program_object.max_bb_call);
+			string str(error);
+	        report_error(str, NOLINE);
+		}
 		delete $4;
 	}
 |
 	'{' basic_block_list '}'
 	{
+		/*
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
 			report_error("Atleast 1 basic block should have a return statement", line);
 		}
-
+		*/
+		//cout<<program_object.program_object.max_bb<<":"<<program_object.max_bb_call<<endl;
 		current_procedure->set_basic_block_list(*$2);
-
+		if(program_object.max_bb_call > program_object.max_bb){
+			char error[200];
+			sprintf(error , "bb %d doesn't exist" , program_object.max_bb_call);
+			string str(error);
+	        report_error(str, NOLINE);
+		}
 		delete $2;
 	}
 ;
@@ -226,7 +240,8 @@ basic_block:
 		}
 	*/
 		string bbl(*$1);
-		
+		if(atoi(bbl.substr(4, bbl.length()-1).c_str()) > program_object.max_bb)
+			program_object.max_bb = atoi(bbl.substr(4, bbl.length()-1).c_str());
 		if (atoi(bbl.substr(4, bbl.length()-1).c_str()) < 2)
 		{
 			int line = get_line_number();
@@ -317,6 +332,8 @@ goto_statement:
 	GOTO BASIC_BLOCK ';'
 	{
 		string str(*$2);
+		if(atoi(str.substr(4, str.length()-1).c_str()) > program_object.max_bb_call)
+			program_object.max_bb_call = atoi(str.substr(4, str.length()-1).c_str());
 		$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
 	}
 ;
