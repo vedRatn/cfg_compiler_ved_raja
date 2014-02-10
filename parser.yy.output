@@ -1,0 +1,956 @@
+
+Production Rules
+(rule precedences determined from %prec or 1st terminal between parentheses):
+1: program ->  declaration_statement_list procedure_name #0001 procedure_body
+2: #0001 ->  <empty>
+3: program ->  procedure_name #0002 procedure_body
+4: #0002 ->  <empty>
+5: procedure_name (NAME) ->  NAME '(' ')'
+6: procedure_body ('{') ->  '{' declaration_statement_list #0003 basic_block_list '}'
+7: #0003 ->  <empty>
+8: procedure_body ('{') ->  '{' basic_block_list '}'
+9: declaration_statement_list ->  declaration_statement
+10: declaration_statement_list ->  declaration_statement_list declaration_statement
+11: declaration_statement (INTEGER) ->  INTEGER NAME ';'
+12: declaration_statement (FLOAT) ->  FLOAT NAME ';'
+13: declaration_statement (DOUBLE) ->  DOUBLE NAME ';'
+14: basic_block_list ->  basic_block_list basic_block
+15: basic_block_list ->  basic_block
+16: basic_block (BASIC_BLOCK) ->  BASIC_BLOCK ':' executable_statement_list
+17: executable_statement_list ->  assignment_statement_list
+18: executable_statement_list (RETURN) ->  assignment_statement_list RETURN ';'
+19: executable_statement_list ->  assignment_statement_list if_statement
+20: executable_statement_list ->  assignment_statement_list goto_statement
+21: assignment_statement_list ->  <empty>
+22: assignment_statement_list ->  assignment_statement_list assignment_statement
+23: if_statement (IF) ->  IF '(' relational_statement ')' goto_statement ELSE goto_statement
+24: goto_statement (GOTO) ->  GOTO BASIC_BLOCK ';'
+25: relational_statement ->  arithmetic_expression
+26: relational_statement (le) ->  relational_statement le relational_statement
+27: relational_statement (ge) ->  relational_statement ge relational_statement
+28: relational_statement (gt) ->  relational_statement gt relational_statement
+29: relational_statement (lt) ->  relational_statement lt relational_statement
+30: relational_statement (eq) ->  relational_statement eq relational_statement
+31: relational_statement (ne) ->  relational_statement ne relational_statement
+32: arithmetic_expression ->  constant
+33: arithmetic_expression ->  variable
+34: arithmetic_expression ('-') ->  '-' constant
+35: arithmetic_expression ('-') ->  '-' variable
+36: arithmetic_expression ('+') ->  arithmetic_expression '+' arithmetic_expression
+37: arithmetic_expression ('-') ->  arithmetic_expression '-' arithmetic_expression
+38: arithmetic_expression ('*') ->  arithmetic_expression '*' arithmetic_expression
+39: arithmetic_expression ('/') ->  arithmetic_expression '/' arithmetic_expression
+40: arithmetic_expression ('(') ->  '(' FLOAT ')' '(' arithmetic_expression ')'
+41: arithmetic_expression ('(') ->  '(' DOUBLE ')' '(' arithmetic_expression ')'
+42: arithmetic_expression ('(') ->  '(' INTEGER ')' '(' arithmetic_expression ')'
+43: arithmetic_expression ('(') ->  '(' FLOAT ')' variable
+44: arithmetic_expression ('(') ->  '(' DOUBLE ')' variable
+45: arithmetic_expression ('(') ->  '(' INTEGER ')' variable
+46: assignment_statement (ASSIGN_OP) ->  variable ASSIGN_OP relational_statement ';'
+47: variable (NAME) ->  NAME
+48: constant (INTEGER_NUMBER) ->  INTEGER_NUMBER
+49: constant (FLOAT_NUMBER) ->  FLOAT_NUMBER
+50: program_$ ->  program
+
+
+Symbolic Terminal tokens:
+       error
+       EOF
+   257: INTEGER_NUMBER
+   258: BASIC_BLOCK
+   259: FLOAT_NUMBER
+   260: NAME
+   261: RETURN
+   262: INTEGER
+   263: FLOAT
+   264: DOUBLE
+   265: IF
+   266: ELSE
+   267: GOTO
+   268: ASSIGN_OP
+   269: ne
+   270: eq
+   271: lt
+   272: le
+   273: gt
+   274: ge
+    43: '+'
+    45: '-'
+    42: '*'
+    47: '/'
+    40: '('
+    41: ')'
+   123: '{'
+   125: '}'
+    59: ';'
+    58: ':'
+
+
+Grammar States: 
+State 0:
+50: program_$ ->  . program 
+  0:   On program to state 1
+  1:   On declaration_statement_list to state 2
+  2:   On procedure_name to state 3
+  3:   On declaration_statement to state 4
+  4:   On NAME to state 5
+  5:   On INTEGER to state 6
+  6:   On FLOAT to state 7
+  7:   On DOUBLE to state 8
+
+
+State 1:
+50: program_$ -> program  . 
+
+
+State 2:
+1: program -> declaration_statement_list  . procedure_name #0001 procedure_body 
+10: declaration_statement_list -> declaration_statement_list  . declaration_statement 
+  0:   On procedure_name to state 9
+  1:   On declaration_statement to state 10
+  2:   On NAME to state 5
+  3:   On INTEGER to state 6
+  4:   On FLOAT to state 7
+  5:   On DOUBLE to state 8
+
+
+State 3:
+3: program -> procedure_name  . #0002 procedure_body 
+  0:   On #0002 to state 11
+  Reduce by 4: #0002 ->  . 
+
+
+State 4:
+9: declaration_statement_list -> declaration_statement  . 
+  Reduce by 9: declaration_statement_list -> declaration_statement  . 
+
+
+State 5:
+5: procedure_name -> NAME  . '(' ')' 
+  0:   On '(' to state 12
+
+
+State 6:
+11: declaration_statement -> INTEGER  . NAME ';' 
+  0:   On NAME to state 13
+
+
+State 7:
+12: declaration_statement -> FLOAT  . NAME ';' 
+  0:   On NAME to state 14
+
+
+State 8:
+13: declaration_statement -> DOUBLE  . NAME ';' 
+  0:   On NAME to state 15
+
+
+State 9:
+1: program -> declaration_statement_list procedure_name  . #0001 procedure_body 
+  0:   On #0001 to state 16
+  Reduce by 2: #0001 ->  . 
+
+
+State 10:
+10: declaration_statement_list -> declaration_statement_list declaration_statement  . 
+  Reduce by 10: declaration_statement_list -> declaration_statement_list declaration_statement  . 
+
+
+State 11:
+3: program -> procedure_name #0002  . procedure_body 
+  0:   On procedure_body to state 17
+  1:   On '{' to state 18
+
+
+State 12:
+5: procedure_name -> NAME '('  . ')' 
+  0:   On ')' to state 19
+
+
+State 13:
+11: declaration_statement -> INTEGER NAME  . ';' 
+  0:   On ';' to state 20
+
+
+State 14:
+12: declaration_statement -> FLOAT NAME  . ';' 
+  0:   On ';' to state 21
+
+
+State 15:
+13: declaration_statement -> DOUBLE NAME  . ';' 
+  0:   On ';' to state 22
+
+
+State 16:
+1: program -> declaration_statement_list procedure_name #0001  . procedure_body 
+  0:   On procedure_body to state 23
+  1:   On '{' to state 18
+
+
+State 17:
+3: program -> procedure_name #0002 procedure_body  . 
+  Reduce by 3: program -> procedure_name #0002 procedure_body  . 
+
+
+State 18:
+6: procedure_body -> '{'  . declaration_statement_list #0003 basic_block_list '}' 
+8: procedure_body -> '{'  . basic_block_list '}' 
+  0:   On declaration_statement_list to state 24
+  1:   On basic_block_list to state 25
+  2:   On declaration_statement to state 4
+  3:   On basic_block to state 26
+  4:   On INTEGER to state 6
+  5:   On FLOAT to state 7
+  6:   On DOUBLE to state 8
+  7:   On BASIC_BLOCK to state 27
+
+
+State 19:
+5: procedure_name -> NAME '(' ')'  . 
+  Reduce by 5: procedure_name -> NAME '(' ')'  . 
+
+
+State 20:
+11: declaration_statement -> INTEGER NAME ';'  . 
+  Reduce by 11: declaration_statement -> INTEGER NAME ';'  . 
+
+
+State 21:
+12: declaration_statement -> FLOAT NAME ';'  . 
+  Reduce by 12: declaration_statement -> FLOAT NAME ';'  . 
+
+
+State 22:
+13: declaration_statement -> DOUBLE NAME ';'  . 
+  Reduce by 13: declaration_statement -> DOUBLE NAME ';'  . 
+
+
+State 23:
+1: program -> declaration_statement_list procedure_name #0001 procedure_body  . 
+  Reduce by 1: program -> declaration_statement_list procedure_name #0001 procedure_body  . 
+
+
+State 24:
+6: procedure_body -> '{' declaration_statement_list  . #0003 basic_block_list '}' 
+10: declaration_statement_list -> declaration_statement_list  . declaration_statement 
+  0:   On #0003 to state 28
+  1:   On declaration_statement to state 10
+  2:   On INTEGER to state 6
+  3:   On FLOAT to state 7
+  4:   On DOUBLE to state 8
+  Reduce by 7: #0003 ->  . 
+
+
+State 25:
+8: procedure_body -> '{' basic_block_list  . '}' 
+14: basic_block_list -> basic_block_list  . basic_block 
+  0:   On '}' to state 29
+  1:   On basic_block to state 30
+  2:   On BASIC_BLOCK to state 27
+
+
+State 26:
+15: basic_block_list -> basic_block  . 
+  Reduce by 15: basic_block_list -> basic_block  . 
+
+
+State 27:
+16: basic_block -> BASIC_BLOCK  . ':' executable_statement_list 
+  0:   On ':' to state 31
+
+
+State 28:
+6: procedure_body -> '{' declaration_statement_list #0003  . basic_block_list '}' 
+  0:   On basic_block_list to state 32
+  1:   On basic_block to state 26
+  2:   On BASIC_BLOCK to state 27
+
+
+State 29:
+8: procedure_body -> '{' basic_block_list '}'  . 
+  Reduce by 8: procedure_body -> '{' basic_block_list '}'  . 
+
+
+State 30:
+14: basic_block_list -> basic_block_list basic_block  . 
+  Reduce by 14: basic_block_list -> basic_block_list basic_block  . 
+
+
+State 31:
+16: basic_block -> BASIC_BLOCK ':'  . executable_statement_list 
+  0:   On executable_statement_list to state 33
+  1:   On assignment_statement_list to state 34
+  Reduce by 21: assignment_statement_list ->  . 
+
+
+State 32:
+6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list  . '}' 
+14: basic_block_list -> basic_block_list  . basic_block 
+  0:   On '}' to state 35
+  1:   On basic_block to state 30
+  2:   On BASIC_BLOCK to state 27
+
+
+State 33:
+16: basic_block -> BASIC_BLOCK ':' executable_statement_list  . 
+  Reduce by 16: basic_block -> BASIC_BLOCK ':' executable_statement_list  . 
+
+
+State 34:
+17: executable_statement_list -> assignment_statement_list  . 
+18: executable_statement_list -> assignment_statement_list  . RETURN ';' 
+19: executable_statement_list -> assignment_statement_list  . if_statement 
+20: executable_statement_list -> assignment_statement_list  . goto_statement 
+22: assignment_statement_list -> assignment_statement_list  . assignment_statement 
+  0:   On RETURN to state 36
+  1:   On if_statement to state 37
+  2:   On goto_statement to state 38
+  3:   On assignment_statement to state 39
+  4:   On IF to state 40
+  5:   On GOTO to state 41
+  6:   On variable to state 42
+  7:   On NAME to state 43
+  Reduce by 17: executable_statement_list -> assignment_statement_list  . 
+
+
+State 35:
+6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
+  Reduce by 6: procedure_body -> '{' declaration_statement_list #0003 basic_block_list '}'  . 
+
+
+State 36:
+18: executable_statement_list -> assignment_statement_list RETURN  . ';' 
+  0:   On ';' to state 44
+
+
+State 37:
+19: executable_statement_list -> assignment_statement_list if_statement  . 
+  Reduce by 19: executable_statement_list -> assignment_statement_list if_statement  . 
+
+
+State 38:
+20: executable_statement_list -> assignment_statement_list goto_statement  . 
+  Reduce by 20: executable_statement_list -> assignment_statement_list goto_statement  . 
+
+
+State 39:
+22: assignment_statement_list -> assignment_statement_list assignment_statement  . 
+  Reduce by 22: assignment_statement_list -> assignment_statement_list assignment_statement  . 
+
+
+State 40:
+23: if_statement -> IF  . '(' relational_statement ')' goto_statement ELSE goto_statement 
+  0:   On '(' to state 45
+
+
+State 41:
+24: goto_statement -> GOTO  . BASIC_BLOCK ';' 
+  0:   On BASIC_BLOCK to state 46
+
+
+State 42:
+46: assignment_statement -> variable  . ASSIGN_OP relational_statement ';' 
+  0:   On ASSIGN_OP to state 47
+
+
+State 43:
+47: variable -> NAME  . 
+  Reduce by 47: variable -> NAME  . 
+
+
+State 44:
+18: executable_statement_list -> assignment_statement_list RETURN ';'  . 
+  Reduce by 18: executable_statement_list -> assignment_statement_list RETURN ';'  . 
+
+
+State 45:
+23: if_statement -> IF '('  . relational_statement ')' goto_statement ELSE goto_statement 
+  0:   On relational_statement to state 48
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 46:
+24: goto_statement -> GOTO BASIC_BLOCK  . ';' 
+  0:   On ';' to state 56
+
+
+State 47:
+46: assignment_statement -> variable ASSIGN_OP  . relational_statement ';' 
+  0:   On relational_statement to state 57
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 48:
+23: if_statement -> IF '(' relational_statement  . ')' goto_statement ELSE goto_statement 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On ')' to state 58
+  1:   On le to state 59
+  2:   On ge to state 60
+  3:   On gt to state 61
+  4:   On lt to state 62
+  5:   On eq to state 63
+  6:   On ne to state 64
+
+
+State 49:
+25: relational_statement -> arithmetic_expression  . 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0:   On '+' to state 65
+  1:   On '-' to state 66
+  2:   On '*' to state 67
+  3:   On '/' to state 68
+  Reduce by 25: relational_statement -> arithmetic_expression  . 
+
+
+State 50:
+32: arithmetic_expression -> constant  . 
+  Reduce by 32: arithmetic_expression -> constant  . 
+
+
+State 51:
+33: arithmetic_expression -> variable  . 
+  Reduce by 33: arithmetic_expression -> variable  . 
+
+
+State 52:
+34: arithmetic_expression -> '-'  . constant 
+35: arithmetic_expression -> '-'  . variable 
+  0:   On constant to state 69
+  1:   On variable to state 70
+  2:   On INTEGER_NUMBER to state 54
+  3:   On FLOAT_NUMBER to state 55
+  4:   On NAME to state 43
+
+
+State 53:
+40: arithmetic_expression -> '('  . FLOAT ')' '(' arithmetic_expression ')' 
+41: arithmetic_expression -> '('  . DOUBLE ')' '(' arithmetic_expression ')' 
+42: arithmetic_expression -> '('  . INTEGER ')' '(' arithmetic_expression ')' 
+43: arithmetic_expression -> '('  . FLOAT ')' variable 
+44: arithmetic_expression -> '('  . DOUBLE ')' variable 
+45: arithmetic_expression -> '('  . INTEGER ')' variable 
+  0:   On FLOAT to state 71
+  1:   On DOUBLE to state 72
+  2:   On INTEGER to state 73
+
+
+State 54:
+48: constant -> INTEGER_NUMBER  . 
+  Reduce by 48: constant -> INTEGER_NUMBER  . 
+
+
+State 55:
+49: constant -> FLOAT_NUMBER  . 
+  Reduce by 49: constant -> FLOAT_NUMBER  . 
+
+
+State 56:
+24: goto_statement -> GOTO BASIC_BLOCK ';'  . 
+  Reduce by 24: goto_statement -> GOTO BASIC_BLOCK ';'  . 
+
+
+State 57:
+46: assignment_statement -> variable ASSIGN_OP relational_statement  . ';' 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On ';' to state 74
+  1:   On le to state 59
+  2:   On ge to state 60
+  3:   On gt to state 61
+  4:   On lt to state 62
+  5:   On eq to state 63
+  6:   On ne to state 64
+
+
+State 58:
+23: if_statement -> IF '(' relational_statement ')'  . goto_statement ELSE goto_statement 
+  0:   On goto_statement to state 75
+  1:   On GOTO to state 41
+
+
+State 59:
+26: relational_statement -> relational_statement le  . relational_statement 
+  0:   On relational_statement to state 76
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 60:
+27: relational_statement -> relational_statement ge  . relational_statement 
+  0:   On relational_statement to state 77
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 61:
+28: relational_statement -> relational_statement gt  . relational_statement 
+  0:   On relational_statement to state 78
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 62:
+29: relational_statement -> relational_statement lt  . relational_statement 
+  0:   On relational_statement to state 79
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 63:
+30: relational_statement -> relational_statement eq  . relational_statement 
+  0:   On relational_statement to state 80
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 64:
+31: relational_statement -> relational_statement ne  . relational_statement 
+  0:   On relational_statement to state 81
+  1:   On arithmetic_expression to state 49
+  2:   On constant to state 50
+  3:   On variable to state 51
+  4:   On '-' to state 52
+  5:   On '(' to state 53
+  6:   On INTEGER_NUMBER to state 54
+  7:   On FLOAT_NUMBER to state 55
+  8:   On NAME to state 43
+
+
+State 65:
+36: arithmetic_expression -> arithmetic_expression '+'  . arithmetic_expression 
+  0:   On arithmetic_expression to state 82
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 66:
+37: arithmetic_expression -> arithmetic_expression '-'  . arithmetic_expression 
+  0:   On arithmetic_expression to state 83
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 67:
+38: arithmetic_expression -> arithmetic_expression '*'  . arithmetic_expression 
+  0:   On arithmetic_expression to state 84
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 68:
+39: arithmetic_expression -> arithmetic_expression '/'  . arithmetic_expression 
+  0:   On arithmetic_expression to state 85
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 69:
+34: arithmetic_expression -> '-' constant  . 
+  Reduce by 34: arithmetic_expression -> '-' constant  . 
+
+
+State 70:
+35: arithmetic_expression -> '-' variable  . 
+  Reduce by 35: arithmetic_expression -> '-' variable  . 
+
+
+State 71:
+40: arithmetic_expression -> '(' FLOAT  . ')' '(' arithmetic_expression ')' 
+43: arithmetic_expression -> '(' FLOAT  . ')' variable 
+  0:   On ')' to state 86
+
+
+State 72:
+41: arithmetic_expression -> '(' DOUBLE  . ')' '(' arithmetic_expression ')' 
+44: arithmetic_expression -> '(' DOUBLE  . ')' variable 
+  0:   On ')' to state 87
+
+
+State 73:
+42: arithmetic_expression -> '(' INTEGER  . ')' '(' arithmetic_expression ')' 
+45: arithmetic_expression -> '(' INTEGER  . ')' variable 
+  0:   On ')' to state 88
+
+
+State 74:
+46: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
+  Reduce by 46: assignment_statement -> variable ASSIGN_OP relational_statement ';'  . 
+
+
+State 75:
+23: if_statement -> IF '(' relational_statement ')' goto_statement  . ELSE goto_statement 
+  0:   On ELSE to state 89
+
+
+State 76:
+26: relational_statement -> relational_statement le relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 59
+  1 (removed by precedence):   On ge to state 60
+  2 (removed by precedence):   On gt to state 61
+  3 (removed by precedence):   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 26: relational_statement -> relational_statement le relational_statement  . 
+
+
+State 77:
+27: relational_statement -> relational_statement ge relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 59
+  1 (removed by precedence):   On ge to state 60
+  2 (removed by precedence):   On gt to state 61
+  3 (removed by precedence):   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 27: relational_statement -> relational_statement ge relational_statement  . 
+
+
+State 78:
+28: relational_statement -> relational_statement gt relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 59
+  1 (removed by precedence):   On ge to state 60
+  2 (removed by precedence):   On gt to state 61
+  3 (removed by precedence):   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 28: relational_statement -> relational_statement gt relational_statement  . 
+
+
+State 79:
+29: relational_statement -> relational_statement lt relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0 (removed by precedence):   On le to state 59
+  1 (removed by precedence):   On ge to state 60
+  2 (removed by precedence):   On gt to state 61
+  3 (removed by precedence):   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 29: relational_statement -> relational_statement lt relational_statement  . 
+
+
+State 80:
+30: relational_statement -> relational_statement eq relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On le to state 59
+  1:   On ge to state 60
+  2:   On gt to state 61
+  3:   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 30: relational_statement -> relational_statement eq relational_statement  . 
+
+
+State 81:
+31: relational_statement -> relational_statement ne relational_statement  . 
+26: relational_statement -> relational_statement  . le relational_statement 
+27: relational_statement -> relational_statement  . ge relational_statement 
+28: relational_statement -> relational_statement  . gt relational_statement 
+29: relational_statement -> relational_statement  . lt relational_statement 
+30: relational_statement -> relational_statement  . eq relational_statement 
+31: relational_statement -> relational_statement  . ne relational_statement 
+  0:   On le to state 59
+  1:   On ge to state 60
+  2:   On gt to state 61
+  3:   On lt to state 62
+  4 (removed by precedence):   On eq to state 63
+  5 (removed by precedence):   On ne to state 64
+  Reduce by 31: relational_statement -> relational_statement ne relational_statement  . 
+
+
+State 82:
+36: arithmetic_expression -> arithmetic_expression '+' arithmetic_expression  . 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0 (removed by precedence):   On '+' to state 65
+  1 (removed by precedence):   On '-' to state 66
+  2:   On '*' to state 67
+  3:   On '/' to state 68
+  Reduce by 36: arithmetic_expression -> arithmetic_expression '+' arithmetic_expression  . 
+
+
+State 83:
+37: arithmetic_expression -> arithmetic_expression '-' arithmetic_expression  . 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0 (removed by precedence):   On '+' to state 65
+  1 (removed by precedence):   On '-' to state 66
+  2:   On '*' to state 67
+  3:   On '/' to state 68
+  Reduce by 37: arithmetic_expression -> arithmetic_expression '-' arithmetic_expression  . 
+
+
+State 84:
+38: arithmetic_expression -> arithmetic_expression '*' arithmetic_expression  . 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0 (removed by precedence):   On '+' to state 65
+  1 (removed by precedence):   On '-' to state 66
+  2 (removed by precedence):   On '*' to state 67
+  3 (removed by precedence):   On '/' to state 68
+  Reduce by 38: arithmetic_expression -> arithmetic_expression '*' arithmetic_expression  . 
+
+
+State 85:
+39: arithmetic_expression -> arithmetic_expression '/' arithmetic_expression  . 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0 (removed by precedence):   On '+' to state 65
+  1 (removed by precedence):   On '-' to state 66
+  2 (removed by precedence):   On '*' to state 67
+  3 (removed by precedence):   On '/' to state 68
+  Reduce by 39: arithmetic_expression -> arithmetic_expression '/' arithmetic_expression  . 
+
+
+State 86:
+40: arithmetic_expression -> '(' FLOAT ')'  . '(' arithmetic_expression ')' 
+43: arithmetic_expression -> '(' FLOAT ')'  . variable 
+  0:   On '(' to state 90
+  1:   On variable to state 91
+  2:   On NAME to state 43
+
+
+State 87:
+41: arithmetic_expression -> '(' DOUBLE ')'  . '(' arithmetic_expression ')' 
+44: arithmetic_expression -> '(' DOUBLE ')'  . variable 
+  0:   On '(' to state 92
+  1:   On variable to state 93
+  2:   On NAME to state 43
+
+
+State 88:
+42: arithmetic_expression -> '(' INTEGER ')'  . '(' arithmetic_expression ')' 
+45: arithmetic_expression -> '(' INTEGER ')'  . variable 
+  0:   On '(' to state 94
+  1:   On variable to state 95
+  2:   On NAME to state 43
+
+
+State 89:
+23: if_statement -> IF '(' relational_statement ')' goto_statement ELSE  . goto_statement 
+  0:   On goto_statement to state 96
+  1:   On GOTO to state 41
+
+
+State 90:
+40: arithmetic_expression -> '(' FLOAT ')' '('  . arithmetic_expression ')' 
+  0:   On arithmetic_expression to state 97
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 91:
+43: arithmetic_expression -> '(' FLOAT ')' variable  . 
+  Reduce by 43: arithmetic_expression -> '(' FLOAT ')' variable  . 
+
+
+State 92:
+41: arithmetic_expression -> '(' DOUBLE ')' '('  . arithmetic_expression ')' 
+  0:   On arithmetic_expression to state 98
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 93:
+44: arithmetic_expression -> '(' DOUBLE ')' variable  . 
+  Reduce by 44: arithmetic_expression -> '(' DOUBLE ')' variable  . 
+
+
+State 94:
+42: arithmetic_expression -> '(' INTEGER ')' '('  . arithmetic_expression ')' 
+  0:   On arithmetic_expression to state 99
+  1:   On constant to state 50
+  2:   On variable to state 51
+  3:   On '-' to state 52
+  4:   On '(' to state 53
+  5:   On INTEGER_NUMBER to state 54
+  6:   On FLOAT_NUMBER to state 55
+  7:   On NAME to state 43
+
+
+State 95:
+45: arithmetic_expression -> '(' INTEGER ')' variable  . 
+  Reduce by 45: arithmetic_expression -> '(' INTEGER ')' variable  . 
+
+
+State 96:
+23: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
+  Reduce by 23: if_statement -> IF '(' relational_statement ')' goto_statement ELSE goto_statement  . 
+
+
+State 97:
+40: arithmetic_expression -> '(' FLOAT ')' '(' arithmetic_expression  . ')' 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0:   On ')' to state 100
+  1:   On '+' to state 65
+  2:   On '-' to state 66
+  3:   On '*' to state 67
+  4:   On '/' to state 68
+
+
+State 98:
+41: arithmetic_expression -> '(' DOUBLE ')' '(' arithmetic_expression  . ')' 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0:   On ')' to state 101
+  1:   On '+' to state 65
+  2:   On '-' to state 66
+  3:   On '*' to state 67
+  4:   On '/' to state 68
+
+
+State 99:
+42: arithmetic_expression -> '(' INTEGER ')' '(' arithmetic_expression  . ')' 
+36: arithmetic_expression -> arithmetic_expression  . '+' arithmetic_expression 
+37: arithmetic_expression -> arithmetic_expression  . '-' arithmetic_expression 
+38: arithmetic_expression -> arithmetic_expression  . '*' arithmetic_expression 
+39: arithmetic_expression -> arithmetic_expression  . '/' arithmetic_expression 
+  0:   On ')' to state 102
+  1:   On '+' to state 65
+  2:   On '-' to state 66
+  3:   On '*' to state 67
+  4:   On '/' to state 68
+
+
+State 100:
+40: arithmetic_expression -> '(' FLOAT ')' '(' arithmetic_expression ')'  . 
+  Reduce by 40: arithmetic_expression -> '(' FLOAT ')' '(' arithmetic_expression ')'  . 
+
+
+State 101:
+41: arithmetic_expression -> '(' DOUBLE ')' '(' arithmetic_expression ')'  . 
+  Reduce by 41: arithmetic_expression -> '(' DOUBLE ')' '(' arithmetic_expression ')'  . 
+
+
+State 102:
+42: arithmetic_expression -> '(' INTEGER ')' '(' arithmetic_expression ')'  . 
+  Reduce by 42: arithmetic_expression -> '(' INTEGER ')' '(' arithmetic_expression ')'  . 
+
+
+

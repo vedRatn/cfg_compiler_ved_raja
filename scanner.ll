@@ -65,6 +65,21 @@ goto	{
 			return matched()[0];
 		}
 
+
+float		{
+				store_token_name("META CHAR");
+				ParserBase::STYPE__ * val = getSval();
+				val->string_value = new std::string(matched());
+				return Parser::FLOAT;
+			}
+
+double		{
+				store_token_name("META CHAR");
+				ParserBase::STYPE__ * val = getSval();
+				val->string_value = new std::string(matched());
+				return Parser::DOUBLE;
+			}
+
 [<][b][b][ ][[:digit:]]+[>]	{
 						store_token_name("BASIC BLOCK");
 						ParserBase::STYPE__ * val = getSval();
@@ -78,6 +93,40 @@ goto	{
 		val->string_value = new std::string(matched());
 		return Parser::ASSIGN_OP;
 	}
+
+/*[+]	{
+		store_token_name("ARITHOP");
+		ParserBase::STYPE__ * val = getSval();
+		val->string_value = new std::string(matched());
+		return Parser::ADD_OP;
+	}
+
+[-]	{
+		store_token_name("ARITHOP");
+		ParserBase::STYPE__ * val = getSval();
+		val->string_value = new std::string(matched());
+		return Parser::SUB_OP;
+	}
+
+[*] {
+		store_token_name("ARITHOP");
+		ParserBase::STYPE__ * val = getSval();
+		val->string_value = new std::string(matched());
+		return Parser::MUL_OP;
+	}
+
+[/] {
+		store_token_name("ARITHOP");
+		ParserBase::STYPE__ * val = getSval();
+		val->string_value = new std::string(matched());
+		return Parser::DIV_OP;
+	}
+*/
+[+]|[-]|[*]|[/]	{
+			store_token_name("ARITHOP");
+			return matched()[0];
+		}
+
 
 [=][=]	{
 			store_token_name("EQ");
@@ -129,6 +178,15 @@ goto	{
 				val->integer_value = atoi(matched().c_str());
 
 				return Parser::INTEGER_NUMBER; 
+			}
+
+[-]?[0-9]*\.[0-9]+ 	{ 
+				store_token_name("FNUM");
+
+				ParserBase::STYPE__ * val = getSval();
+				val->integer_value = atoi(matched().c_str());
+
+				return Parser::FLOAT_NUMBER; 
 			}
 
 [[:alpha:]_][[:alpha:][:digit:]_]* {
