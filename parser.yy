@@ -376,9 +376,6 @@ relational_statement:
 		$$ = new Relational_Ast($1);
 	}
 */
-
-
-
 	arithmetic_expression
 	{
 
@@ -462,32 +459,12 @@ arithmetic_expression:
 		
 	}
 |
-	'(' FLOAT ')' '(' arithmetic_expression ')'
+	'-' '(' arithmetic_expression ')'
 	{
 
 	}
 |
-	'(' DOUBLE ')' '(' arithmetic_expression ')'
-	{
-
-	}
-|
-	'(' INTEGER ')' '(' arithmetic_expression ')'
-	{
-
-	}
-|
-	'(' FLOAT ')' variable
-	{
-
-	}
-|
-	'(' DOUBLE ')' variable
-	{
-
-	}
-|
-	'(' INTEGER ')' variable
+	'(' relational_statement ')'
 	{
 
 	}
@@ -495,7 +472,6 @@ arithmetic_expression:
 
 assignment_statement:
 	variable ASSIGN_OP relational_statement ';'
-
 	{/*
 		$$ = new Assignment_Ast($1, $3);
 		int line = get_line_number();

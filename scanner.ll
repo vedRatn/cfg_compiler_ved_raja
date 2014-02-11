@@ -67,14 +67,14 @@ goto	{
 
 
 float		{
-				store_token_name("META CHAR");
+				store_token_name("FLOAT");
 				ParserBase::STYPE__ * val = getSval();
 				val->string_value = new std::string(matched());
 				return Parser::FLOAT;
 			}
 
 double		{
-				store_token_name("META CHAR");
+				store_token_name("DOUBLE");
 				ParserBase::STYPE__ * val = getSval();
 				val->string_value = new std::string(matched());
 				return Parser::DOUBLE;
@@ -171,7 +171,7 @@ double		{
 			return Parser::lt;
 		}		
 
-[-]?[[:digit:]_]+ 	{ 
+[-]?[[:digit:]]+ 	{ 
 				store_token_name("NUM");
 
 				ParserBase::STYPE__ * val = getSval();
