@@ -468,6 +468,36 @@ arithmetic_expression:
 	{
 
 	}
+|
+	'(' FLOAT ')' '(' arithmetic_expression ')'
+	{
+
+	}
+|
+	'(' INTEGER ')' '(' arithmetic_expression ')'
+	{
+
+	}
+|
+	'(' DOUBLE ')' '(' arithmetic_expression ')'	
+	{
+
+	}
+|
+	'(' FLOAT ')' variable
+	{
+
+	}
+|
+	'(' INTEGER ')' variable
+	{
+
+	}
+|
+	'(' DOUBLE ')' variable
+	{
+		
+	}
 ;
 
 assignment_statement:
