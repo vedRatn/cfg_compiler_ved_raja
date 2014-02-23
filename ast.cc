@@ -273,6 +273,14 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 
 		return result;
 	}
+
+	if(node_data_type == float_data_type)
+	{
+		Eval_Result & result = *new Eval_Result_Value_Float();
+		result.set_value(constant);
+
+		return result;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -510,3 +518,20 @@ int If_Else_Ast::checkSuccessor(list < int > & allIds){
 
 /************************************************************************************/
 
+Type_Cast_Ast::Type_Cast_Ast(Ast * ast){
+	this->ast = ast;
+}
+
+void Type_Cast_Ast::print_ast(ostream & file_buffer){
+	return;
+}
+
+Eval_Result & Type_Cast_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
+	Eval_Result & eval = ast->evaluate();
+	if(dest_type==int_data_type){
+		Eval_Result & result = *new Eval_Result_Value_Int();
+		result.set_value((int)eval.get_value)
+	}
+
+
+}

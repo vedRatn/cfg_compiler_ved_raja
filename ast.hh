@@ -176,4 +176,97 @@ public:
 };
 
 
+
+class Type_Cast_Ast: public Ast
+{
+private:
+	Data_Type dest_type;
+	Ast * ast;
+public:
+	Type_Cast_Ast(Ast * ast);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+
+class Arithmetic_Expr_Ast: public Ast
+{
+public:	
+	Arithmetic_Expr_Ast();
+	~Arithmetic_Expr_Ast();
+
+	virtual Data_Type get_data_type() = 0;
+	virtual bool check_ast(int line) = 0;
+	virtual int get_successor() = 0;
+	virtual bool get_return_value() = 0;
+	virtual void print_ast(ostream & file_buffer) = 0;
+	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer) = 0;
+
+	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env) = 0;
+	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result) = 0;
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+	virtual int next_bb() = 0;
+	virtual int checkSuccessor(list < int > & allIds) = 0;
+};
+
+
+class Plus_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Plus_Ast(Ast * l, Ast * r);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Minus_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Minus_Ast(Ast * l, Ast * r);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Division_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Division_Ast(Ast * l, Ast * r);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Multiplication_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Multiplication_Ast(Ast * l, Ast * r);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Unary_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * ast;
+public:
+
+	Unary_Ast(Ast * ast);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 #endif

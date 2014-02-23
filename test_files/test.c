@@ -2,7 +2,9 @@ main()
 {
 	float a;
 	float b;
-	int c;
-	a = -1;
-
+	float c;
+	b = 0.1;
+	c = 0.2;
+	a = 0;
+	a = -(a < b);
 }

@@ -1,10 +1,10 @@
-CS306 Assignment Submission by
+CS306 Assignment 2B: Submission by
 								
 								Aditya Raj - 110050025
 								Ved Ratn Dixit - 110050044
 
-MYCHANGES
----------
+MYCHANGES 2a
+------------
 
 In scanner.ll
 
@@ -47,3 +47,146 @@ In Parser.yy
 			iv)		>=
 			v)		==
 			vi) 	!=
+
+
+MYCHANGES 2b
+------------
+
+Some Scanner Modifications
+----------------------------
+1) Seperate tokens were added for detection of all the binary operators.
+2) A special block of scanner was added to detect <bb i>
+
+
+Main Features Added
+-------------------
+	-ast  :	prints the ast tree of the program in designated structure in sequential order of the
+			basic blocks in cfg
+	-eval : a trace of the program execution is printed in realtime showing all the control flow
+			information and execution of each individual statement of the program.
+
+Implementation
+--------------
+Added three Ast-Classes inherited from the base Ast Class
+
+	a) Relational_Statement
+	   --------------------
+	-->	This class is built with the aim of capturing everything which could occur as the condition
+		clause of a control flow statement, or on the right side of lhs. The grammar is as follows:
+
+		assignment_statement = variable '=' relational_statement ';'
+		relational_statement = 
+		variable | constant | relational_statement "binary_operator" relational_statement
+
+		binary_operators themselves have a strict preference order and order of associativity as 
+		per the conventions.
+		operators '==' and '!=' are at a lower priority than '<' '>' '<=' '>='
+		And within their priority categories they are left associative.
+
+		To enable this structure Relational_Statement class has overloaded constuctors, one which 
+		one input ( constant or variable ) and the other with three (RS , oper , RS)
+
+		It provides a functionality of evaluate which calculates the result of the binary statement
+		given the required variable map
+
+
+	b) Goto_Statement
+	   --------------
+	-->	This is a simple statement crucial to the grammar of cfgs and is used to direct the control
+		flow from the end of one basic block to starting of another. It has a single class member by
+		the name of successor which keeps track of the destination basic_block.
+
+	b) If_Else_Ast
+	   -----------
+	-->	Using the tools provided by the above two classes this class finally implements a structure
+		capable of simple control flow redirection. Using the relational_ast as its condition and 
+		two goto_statements as its true and false successors, it evaluates and directs the control
+		flow of the program.
+	
+
+Details of Print_Ast()
+----------------------
+	In order to implement the functionality to print the program ast structure, each of the previously
+	mentioned classes and the ones already in the module have a function implemented called print_ast 
+	which call each other in the heirarchal structure of the classes give the desired output. The flow
+	of control during the process is as follows.
+	Program --> 
+	Procedure --> 
+	Basic_Blocks --> 
+	Executable_Statements ( which could be : Assignment, Return, If_Else or Goto statement themselves )
+
+Details of Evaluate()
+---------------------
+	This implementation is slightly more complicated than print ast. Here the program starts by calling
+	procedure which inturn starts working with the basic_block_list. Here is what procedure does
+	1) Finds the first Basic Block
+
+	2) Calls evaluate on basic block
+		i) Calls evaluate on each of its executable statement:
+			This means they all use the Local_Environment passed to them to calculate whatever they
+			mean to calculate, after which they modify the variables if they are supposed to.
+
+			It is during this time only that the condition of if_else statement which is itselt a 
+			relational_statement is calculated and whether the program would be redirected to its
+			true_successor or false_successor is decided.
+
+	3) Finds which the next basic block should be:
+		i) For this the last statement of the current basic block is used, If it is a:
+			ASSIGNMENT_STATEMENT: then sequential execution continues
+			GOTO_STATEMENT: then condition_less redirection of program happens
+			IF_ELSE_STATEMENT: then conditional redirection of program happend depending on the
+							   binary condition.
+			RETURN_STATEMENT: a '-1' is returned which tells the program that it has reached the
+			end of its execution
+		NOTE: A next_bb() function is implemented in each of the executable statement classes which
+			  tells the program about which basic block should come next
+
+	4)  If the end of program is reached then execution terminates or else the program goes back to
+		step 2 with the basic block changed.
+
+
+
+A number of checks were applied at appropriate points in the program to avoid errors, like:
+	1) Each basic block should have a successor one way or the other.
+	2) The basic block number in <bb %d> tag should be in range.
+
+
+
+MYCHANGES 3A
+------------
+
+In this part we introduce the notion of an Arithemetic Statement. This arithemetic statement is now
+used as an atomic unit in a relational statement where earlier this part was played by a variable or 
+constant. The grammar for arithmetic statement which we have written is pretty intutive and un-ambi-
+guos. It goes as follows:
+
+	constant
+	|
+	variable
+	|
+	'-' constant
+	|
+	'-' variable
+	|
+	arithmetic_expression '+' arithmetic_expression
+	|
+	arithmetic_expression '-' arithmetic_expression
+	|
+	arithmetic_expression '*' arithmetic_expression
+	|
+	arithmetic_expression '/' arithmetic_expression
+	|
+	'-' '(' arithmetic_expression ')'
+	|
+	'(' relational_statement ')'
+	;
+
+In order for the grammar to be unambiguous the following order of priority and associativity was 
+decided among the operators of arithemetic expression.
+
+	%left '+' '-'
+	%left '*' '/'
+
+
+We have also broadened the scope of a declaration statement by including types float and double as
+valid datatypes. For scanning these, we have introduced appropriate rules in the scanner.

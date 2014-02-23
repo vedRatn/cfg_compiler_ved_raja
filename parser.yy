@@ -50,10 +50,11 @@
 %left ne eq
 %left lt le gt ge
 %left '+' '-'
-%left '*' '/'
+%left '/'
+%left '*'
 
 
-/*%type <symbol_table> declaration_statement_list
+%type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
@@ -65,19 +66,19 @@
 %type <ast> relational_statement
 %type <ast> variable
 %type <ast> constant
-*/
+
 %start program
 
 %%
 
 program:
 	declaration_statement_list procedure_name
-	{/*
+	{
 		program_object.set_global_table(*$1);
 		return_statement_used_flag = false;				// No return statement in the current procedure till now
-	*/}
+	}
 	procedure_body
-	{/*
+	{
 
 		program_object.set_procedure_map(*current_procedure);
 
@@ -85,40 +86,40 @@ program:
 			$1->global_list_in_proc_map_check(get_line_number());
 
 		delete $1;
-	*/}
+	}
 |
 	procedure_name
-	{/*
+	{
 		return_statement_used_flag = false;				// No return statement in the current procedure till now
-	*/}
+	}
 	procedure_body
-	{/*
+	{
 		program_object.set_procedure_map(*current_procedure);
-	*/}
+	}
 ;
 
 procedure_name:
 	NAME '(' ')'
-	{/*
+	{
 		current_procedure = new Procedure(void_data_type, *$1);
-	*/}
+	}
 ;
 
 procedure_body:
 	'{' declaration_statement_list
-	{/*
+	{
 		current_procedure->set_local_list(*$2);
 		delete $2;
-	*/}
+	}
 	basic_block_list '}'
-	{/*
+	{
 		/*
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
 			report_error("Atleast 1 basic block should have a return statement", line);
 		}
-		
+		*/
 		current_procedure->set_basic_block_list(*$4);
 		if(program_object.max_bb_call > program_object.max_bb){
 			char error[200];
@@ -127,17 +128,17 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $4;
-	*/}
+	}
 |
 	'{' basic_block_list '}'
-	{/*
+	{
 		/*
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
 			report_error("Atleast 1 basic block should have a return statement", line);
 		}
-		
+		*/
 		//cout<<program_object.program_object.max_bb<<":"<<program_object.max_bb_call<<endl;
 		current_procedure->set_basic_block_list(*$2);
 		if(program_object.max_bb_call > program_object.max_bb){
@@ -147,12 +148,12 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $2;
-	*/}
+	}
 ;
 
 declaration_statement_list:
 	declaration_statement
-	{/*
+	{
 		int line = get_line_number();
 		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
 
@@ -165,10 +166,10 @@ declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
-	*/}
+	}
 |
 	declaration_statement_list declaration_statement
-	{/*
+	{
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
 
@@ -197,34 +198,30 @@ declaration_statement_list:
 			$$ = new Symbol_Table();
 
 		$$->push_symbol($2);
-	*/}
+	}
 ;
 
 declaration_statement:
 	INTEGER NAME ';'
 
-	{/*
+	{
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 
 		delete $2;
-	*/}
+	}
 |
 	FLOAT NAME ';'
 
-	{/*
+	{
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
-	*/}
-|
-	DOUBLE NAME ';'
-
-	{/*
-
-	*/}
+		delete $2;
+	}
 ;
 
 basic_block_list:
 	basic_block_list basic_block
-	{/*
+	{
 		if (!$2)
 		{
 			int line = get_line_number();
@@ -235,10 +232,10 @@ basic_block_list:
 
 		$$ = $1;
 		$$->push_back($2);
-	*/}
+	}
 |
 	basic_block
-	{/*
+	{
 		if (!$1)
 		{
 			int line = get_line_number();
@@ -247,17 +244,18 @@ basic_block_list:
 
 		$$ = new list<Basic_Block *>;
 		$$->push_back($1);
-	*/}
+	}
 ;
 
 basic_block:
 	BASIC_BLOCK ':' executable_statement_list
-	{/*
-	/*	if (*$2 != "bb")
+	{
+		/*if (*$2 != "bb")
 		{
 			int line = get_line_number();
 			report_error("Not basic block lable", line);
 		}
+		*/
 	
 		string bbl(*$1);
 		if(atoi(bbl.substr(4, bbl.length()-1).c_str()) > program_object.max_bb)
@@ -277,18 +275,18 @@ basic_block:
 		}
 
 		delete $3;
-	*/}
+	}
 ;
 
 executable_statement_list:
 	assignment_statement_list
-	{/*
+	{
 		$$ = $1;
-	*/}
+	}
 |
 	assignment_statement_list RETURN ';'
 
-	{/*
+	{
 		Ast * ret = new Return_Ast();
 
 		return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
@@ -300,20 +298,20 @@ executable_statement_list:
 			$$ = new list<Ast *>;
 
 		$$->push_back(ret);
-	*/}
+	}
 |
 	assignment_statement_list if_statement
-	{/*
+	{
 		if($1 != NULL)
 			$$ = $1;
 		else
 			$$ = new list < Ast * >;
 
 		$$->push_back($2);
-	*/}
+	}
 |
 	assignment_statement_list goto_statement
-	{/*
+	{
 		
 		if($1 != NULL)
 			$$ = $1;
@@ -321,16 +319,16 @@ executable_statement_list:
 			$$ = new list <Ast *>;
 
 		$$->push_back($2);
-	*/}
+	}
 ;
 
 assignment_statement_list:
-	{/*
+	{
 		$$ = NULL;
-	*/}
+	}
 |
 	assignment_statement_list assignment_statement
-	{/*
+	{
 		if ($1 == NULL)
 			$$ = new list<Ast *>;
 
@@ -339,25 +337,25 @@ assignment_statement_list:
 
 
 		$$->push_back($2);
-	*/}
+	}
 ;
 
 if_statement:
 	IF '(' relational_statement ')' goto_statement ELSE goto_statement
-	{/*
+	{
 		$$ = new If_Else_Ast($3, $5, $7);
-	*/}
+	}
 ;
 
 goto_statement:
 	GOTO BASIC_BLOCK ';'
 
-	{/*
+	{
 		string str(*$2);
 		if(atoi(str.substr(4, str.length()-1).c_str()) > program_object.max_bb_call)
 			program_object.max_bb_call = atoi(str.substr(4, str.length()-1).c_str());
 		$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
-	*/}
+	}
 ;
 
 relational_statement:
@@ -382,40 +380,40 @@ relational_statement:
 	}
 |
 	relational_statement le relational_statement
-	{/*
+	{
 		//cout<<"line3 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LE);
-	*/}
+	}
 |
 	relational_statement ge relational_statement
-	{/*
+	{
 		//cout<<"line4 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GE);
-	*/}
+	}
 |
 	relational_statement gt relational_statement
-	{/*
+	{
 		//cout<<"line5 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GT);
-	*/}
+	}
 |
 	relational_statement lt relational_statement
-	{/*
+	{
 		//cout<<"line6 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LT);
-	*/}
+	}
 |
 	relational_statement eq relational_statement
-	{/*
+	{
 		//cout<<"line7 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, EQ);
-	*/}
+	}
 |
 	relational_statement ne relational_statement
-	{/*
+	{
 		//cout<<"line8 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, NE);
-	*/}
+	}
 ;
 
 arithmetic_expression:
@@ -429,12 +427,52 @@ arithmetic_expression:
 
 	}
 |
+	'(' relational_statement ')'
+	{
+
+	}
+|
+	'(' FLOAT ')' variable
+	{
+
+	}
+|
+	'(' INTEGER ')' variable
+	{
+
+	}
+|
+	'(' DOUBLE ')' variable
+	{
+		
+	}
+|
+	'(' INTEGER ')' '(' arithmetic_expression ')'
+	{
+
+	}
+|
+	'(' FLOAT ')' '(' relational_statement ')'
+	{
+
+	}
+|
+	'(' DOUBLE ')' '(' relational_statement ')'	
+	{
+
+	}
+|
 	'-' constant
 	{
 
 	}
 |
 	'-' variable
+	{
+
+	}
+|
+	'-' '(' relational_statement ')'
 	{
 
 	}
@@ -458,61 +496,21 @@ arithmetic_expression:
 	{
 		
 	}
-|
-	'-' '(' arithmetic_expression ')'
-	{
-
-	}
-|
-	'(' relational_statement ')'
-	{
-
-	}
-|
-	'(' FLOAT ')' '(' arithmetic_expression ')'
-	{
-
-	}
-|
-	'(' INTEGER ')' '(' arithmetic_expression ')'
-	{
-
-	}
-|
-	'(' DOUBLE ')' '(' arithmetic_expression ')'	
-	{
-
-	}
-|
-	'(' FLOAT ')' variable
-	{
-
-	}
-|
-	'(' INTEGER ')' variable
-	{
-
-	}
-|
-	'(' DOUBLE ')' variable
-	{
-		
-	}
 ;
 
 assignment_statement:
 	variable ASSIGN_OP relational_statement ';'
-	{/*
+	{
 		$$ = new Assignment_Ast($1, $3);
 		int line = get_line_number();
 		//cout<<"ass line = "<<line<<endl;
 		$$->check_ast(line);
-	*/}
+	}
 ;
 
 variable:
 	NAME
-	{/*
+	{
 		Symbol_Table_Entry var_table_entry;
 
 		if (current_procedure->variable_in_symbol_list_check(*$1))
@@ -530,17 +528,17 @@ variable:
 		$$ = new Name_Ast(*$1, var_table_entry);
 
 		delete $1;
-	*/}
+	}
 ;
 
 constant:
 	INTEGER_NUMBER
-	{/*
-		//$$ = new Number_Ast<int>($1, int_data_type);
-	*/}
+	{
+		$$ = new Number_Ast<int>($1, int_data_type);
+	}
 |
 	FLOAT_NUMBER
-	{/*
-
-	*/}
+	{
+		$$ = new Number_Ast<float>($1, float_data_type);
+	}
 ;
