@@ -223,7 +223,7 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 	Eval_Result_Value * i;
 	if (result.get_result_enum() == int_result)
 	{
-		i = new Eval_Result_Value_Int();
+		i = new Eval_Result_Value<int>();
 	 	i->set_value(result.get_value());
 	}
 
@@ -268,15 +268,15 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 {
 	if (node_data_type == int_data_type)
 	{
-		Eval_Result & result = *new Eval_Result_Value_Int();
+		Eval_Result & result = *new Eval_Result_Value<int>();
 		result.set_value(constant);
 
 		return result;
 	}
 
-	if(node_data_type == float_data_type)
+	if( node_data_type == float_data_type)
 	{
-		Eval_Result & result = *new Eval_Result_Value_Float();
+		Eval_Result & result = *new Eval_Result_Value<float>();
 		result.set_value(constant);
 
 		return result;
@@ -299,7 +299,7 @@ void Return_Ast::print_ast(ostream & file_buffer)
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	print_ast(file_buffer);
-	Eval_Result & result = *new Eval_Result_Value_Int();
+	Eval_Result & result = *new Eval_Result_Value<int>();
 	return result;
 }
 
@@ -338,7 +338,7 @@ int Goto_Ast::next_bb(){
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval, ostream & file_buffer){
 	print_ast(file_buffer);
 	file_buffer << AST_SPACE << "GOTO (BB "<<successor<<")\n\n";
-	Eval_Result & result = *new Eval_Result_Value_Int();
+	Eval_Result & result = *new Eval_Result_Value<int>();
 	return result;
 }
 
@@ -411,7 +411,7 @@ Eval_Result & Relational_Ast::evaluate(Local_Environment & eval_env, ostream & f
 		return lhs->evaluate(eval_env, file_buffer);
 	}
 
-	Eval_Result & result=*new Eval_Result_Value_Int();
+	Eval_Result & result=*new Eval_Result_Value<int>();
 	Eval_Result & lhsResult = lhs->evaluate(eval_env, file_buffer);
 	Eval_Result & rhsResult = rhs->evaluate(eval_env, file_buffer);
 
@@ -491,7 +491,7 @@ Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval , ostream & file_bu
 	else
 		file_buffer << AST_SPACE << "Condition False : Goto (BB "<<false_goto->get_successor()<<")\n";
 	file_buffer << "\n" ;
-	Eval_Result & result = *new Eval_Result_Value_Int();
+	Eval_Result & result = *new Eval_Result_Value<int>();
 	return result;
 }
 
@@ -518,20 +518,31 @@ int If_Else_Ast::checkSuccessor(list < int > & allIds){
 
 /************************************************************************************/
 
-Type_Cast_Ast::Type_Cast_Ast(Ast * ast){
+Type_Cast_Ast::Type_Cast_Ast(Ast * ast, Data_Type dt){
 	this->ast = ast;
+	dest_type = dt;
 }
 
 void Type_Cast_Ast::print_ast(ostream & file_buffer){
-	return;
+	ast->print_ast();
 }
 
 Eval_Result & Type_Cast_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
 	Eval_Result & eval = ast->evaluate();
 	if(dest_type==int_data_type){
-		Eval_Result & result = *new Eval_Result_Value_Int();
-		result.set_value((int)eval.get_value)
+		Eval_Result & result = *new Eval_Result_Value<int>();
+		result.set_value((int)eval.get_value());
+		return result;
 	}
 
+	if(dest_type==float_data_type){
+		Eval_Result & result = *new Eval_Result_Value<float>();
+		result.set_value((float)eval.get_value());
+		return result;
+	}
 
+}
+
+Data_Type Type_Cast_Ast::get_data_type(){
+	return dest_type;
 }

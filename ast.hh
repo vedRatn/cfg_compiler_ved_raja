@@ -183,7 +183,8 @@ private:
 	Data_Type dest_type;
 	Ast * ast;
 public:
-	Type_Cast_Ast(Ast * ast);
+	Type_Cast_Ast(Ast * ast, Data_Type dt);
+	Data_Type get_data_type();
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };

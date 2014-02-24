@@ -57,26 +57,28 @@ public:
 	virtual Result_Enum get_result_enum() = 0;
 };
 
+template <class T>
 class Eval_Result_Value:public Eval_Result
 {
 public:
-	virtual void set_value(int number) = 0;
-	virtual int get_value() = 0;
+	void set_value(int number);
+	void set_value(float number);
+	T get_value();
 
-	virtual bool is_variable_defined() = 0;
-	virtual void set_variable_status(bool def) = 0;
+	bool is_variable_defined();
+	void set_variable_status(bool def);
 
-	virtual void set_result_enum(Result_Enum res) = 0;
-	virtual Result_Enum get_result_enum() = 0;
+	void set_result_enum(Result_Enum res);
+	Result_Enum get_result_enum();
 };
 
-class Eval_Result_Value_Int:public Eval_Result_Value
+/*class Eval_Result_Value<int>:public Eval_Result_Value
 {
 	int value;
 	bool defined;
 public:
-	Eval_Result_Value_Int();
-	~Eval_Result_Value_Int();
+	Eval_Result_Value<int>();
+	~Eval_Result_Value<int>();
 
 	void set_value(int number);
 	int get_value();
@@ -105,7 +107,7 @@ public:
 	void set_result_enum(Result_Enum res);
 	Result_Enum get_result_enum();
 };
-
+*/
 
 class Local_Environment
 {

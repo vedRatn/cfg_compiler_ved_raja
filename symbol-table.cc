@@ -99,7 +99,7 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		string name = (*i)->get_variable_name();
-		Eval_Result_Value_Int * j = new Eval_Result_Value_Int();
+		Eval_Result_Value<int> * j = new Eval_Result_Value<int>();
 		if (scope == global)
 		{
 			j->set_variable_status(true);

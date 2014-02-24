@@ -50,45 +50,106 @@ void Eval_Result::set_variable_status(bool def)
 	report_internal_error("Should not reach, Eval_Result : set_variable_status");
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+Eval_Result_Value::Eval_Result_Value()
+{
+	value = 0;
+	defined = false;
+}
+
+template<class T>
+Eval_Result_Value::~Eval_Result_Value()
+{ }
+
+template<class T>
+void Eval_Result_Value::set_value(int number)
+{
+	value = number;
+	result_type = int_result;
+	defined = true;
+}
+
+template<class T>
+void Eval_Result_Value::set_value(float number)
+{
+	value = number;
+	result_type = float_result;
+	defined = true;
+}
+
+template<class T>
+T Eval_Result_Value::get_value()
+{
+	return value;
+}
+
+template<class T>
+void Eval_Result_Value::set_variable_status(bool def)
+{
+	defined = def;
+}
+
+template<class T>
+bool Eval_Result_Value::is_variable_defined()
+{
+	return defined;
+}
+
+template<class T>
+void Eval_Result_Value::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+template<class T>
+Result_Enum Eval_Result_Value::get_result_enum()
+{
+	return result_type;
+}
+
+/*
+
 ///////////////////////////////////////////////////////////////////////////////
 
-Eval_Result_Value_Int::Eval_Result_Value_Int()
+Eval_Result_Value<int>::Eval_Result_Value<int>()
 {
 	value = 0;
 	defined = false;
 	result_type = int_result;
 }
 
-Eval_Result_Value_Int::~Eval_Result_Value_Int()
+Eval_Result_Value<int>::~Eval_Result_Value<int>()
 { }
 
-void Eval_Result_Value_Int::set_value(int number)
+void Eval_Result_Value<int>::set_value(int number)
 {
 	value = number;
 	defined = true;
 }
 
-int Eval_Result_Value_Int::get_value()
+int Eval_Result_Value<int>::get_value()
 {
 	return value;
 }
 
-void Eval_Result_Value_Int::set_variable_status(bool def)
+void Eval_Result_Value<int>::set_variable_status(bool def)
 {
 	defined = def;
 }
 
-bool Eval_Result_Value_Int::is_variable_defined()
+bool Eval_Result_Value<int>::is_variable_defined()
 {
 	return defined;
 }
 
-void Eval_Result_Value_Int::set_result_enum(Result_Enum res)
+void Eval_Result_Value<int>::set_result_enum(Result_Enum res)
 {
 	result_type = res;
 }
 
-Result_Enum Eval_Result_Value_Int::get_result_enum()
+Result_Enum Eval_Result_Value<int>::get_result_enum()
 {
 	return result_type;
 }
@@ -138,6 +199,8 @@ Result_Enum Eval_Result_Value_Float::get_result_enum()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+*/
 
 Local_Environment::Local_Environment()
 {}
