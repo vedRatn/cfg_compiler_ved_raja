@@ -25,7 +25,6 @@
 #define AST_HH
 
 #include<string>
-
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
 #define AST_NODE_NODE_SPACE "               "
@@ -56,6 +55,7 @@ public:
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 	virtual int next_bb();
 	virtual int checkSuccessor(list < int > & allIds);
+	virtual bool isNumber() = 0;
 };
 
 class Assignment_Ast:public Ast
@@ -77,6 +77,7 @@ public:
 	int checkSuccessor(list < int > & allIds);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 class Name_Ast:public Ast
@@ -97,6 +98,7 @@ public:
 	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 
@@ -113,6 +115,7 @@ public:
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 class Return_Ast:public Ast
@@ -126,6 +129,7 @@ public:
 	int next_bb();
 	int checkSuccessor(list < int > & allIds);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 class Goto_Ast: public Ast
@@ -140,6 +144,7 @@ public:
 	void print_ast(ostream & file_buffer);
 	int get_successor();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 class Relational_Ast: public Ast
@@ -159,6 +164,7 @@ public:
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 	bool check_ast(int line);
+	bool isNumber();
 };
 
 class If_Else_Ast: public Ast
@@ -174,6 +180,7 @@ public:
 	int checkSuccessor(list < int > & allIds);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 
@@ -188,6 +195,7 @@ public:
 	Data_Type get_data_type();
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool isNumber();
 };
 
 
@@ -199,16 +207,17 @@ public:
 
 	virtual Data_Type get_data_type() = 0;
 	virtual bool check_ast(int line) = 0;
-	virtual int get_successor() = 0;
-	virtual bool get_return_value() = 0;
+	virtual int get_successor();
+	virtual bool get_return_value();
 	virtual void print_ast(ostream & file_buffer) = 0;
-	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer) = 0;
+	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
 
-	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env) = 0;
-	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result) = 0;
+	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
-	virtual int next_bb() = 0;
-	virtual int checkSuccessor(list < int > & allIds) = 0;
+	virtual int next_bb();
+	virtual int checkSuccessor(list < int > & allIds);
+	bool isNumber();
 };
 
 
@@ -222,6 +231,8 @@ public:
 	Plus_Ast(Ast * l, Ast * r);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
+	Data_Type get_data_type();
 };
 
 class Minus_Ast: public Arithmetic_Expr_Ast
@@ -234,6 +245,8 @@ public:
 	Minus_Ast(Ast * l, Ast * r);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
+	Data_Type get_data_type();
 };
 
 class Division_Ast: public Arithmetic_Expr_Ast
@@ -246,6 +259,8 @@ public:
 	Division_Ast(Ast * l, Ast * r);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
+	Data_Type get_data_type();
 };
 
 class Multiplication_Ast: public Arithmetic_Expr_Ast
@@ -258,6 +273,8 @@ public:
 	Multiplication_Ast(Ast * l, Ast * r);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
+	Data_Type get_data_type();
 };
 
 class Unary_Ast: public Arithmetic_Expr_Ast
@@ -269,6 +286,8 @@ public:
 	Unary_Ast(Ast * ast);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
+	Data_Type get_data_type();
 };
 
 #endif

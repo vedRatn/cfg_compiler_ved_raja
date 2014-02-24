@@ -184,7 +184,7 @@ double		{
 				store_token_name("FNUM");
 
 				ParserBase::STYPE__ * val = getSval();
-				val->integer_value = (float)atof(matched().c_str());
+				val->string_value = new std::string(matched());
 
 				return Parser::FLOAT_NUMBER; 
 			}

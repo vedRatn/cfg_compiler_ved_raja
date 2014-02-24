@@ -30,7 +30,6 @@
 %union 
 {
 	int integer_value;
-	float float_value;
 	std::string * string_value;
 	list<Ast *> * ast_list;
 	Ast * ast;
@@ -43,15 +42,14 @@
 
 %token <integer_value> INTEGER_NUMBER
 %token <string_value> BASIC_BLOCK
-%token <float_value> FLOAT_NUMBER
+%token <string_value> FLOAT_NUMBER
 %token <string_value> NAME
 %token RETURN INTEGER FLOAT DOUBLE
 %token IF ELSE GOTO ASSIGN_OP
 %left ne eq
 %left lt le gt ge
 %left '+' '-'
-%left '/'
-%left '*'
+%left '/' '*'
 
 
 %type <symbol_table> declaration_statement_list
@@ -64,6 +62,7 @@
 %type <ast> goto_statement
 %type <ast> assignment_statement
 %type <ast> relational_statement
+%type <ast> arithmetic_expression
 %type <ast> variable
 %type <ast> constant
 
@@ -216,6 +215,13 @@ declaration_statement:
 		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
 		delete $2;
+	}
+|
+	DOUBLE NAME ';'
+	{
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
+
+		delete $2;	
 	}
 ;
 
@@ -376,8 +382,7 @@ relational_statement:
 */
 	arithmetic_expression
 	{
-		int line = get_line_number();
-		$$->check_ast(line);
+		$$ = new Relational_Ast($1);
 	}
 |
 	relational_statement le relational_statement
@@ -432,82 +437,96 @@ relational_statement:
 arithmetic_expression:
 	constant
 	{
-
+		$$ = $1;
 	}
 |
 	variable
 	{
-
+		$$ = $1;
 	}
 |
 	'(' relational_statement ')'
 	{
-
+		$$ = $2;
 	}
 |
 	'(' FLOAT ')' variable
 	{
-
+		$$ = new Type_Cast_Ast($4, float_data_type);
 	}
 |
 	'(' INTEGER ')' variable
 	{
-
+		$$ = new Type_Cast_Ast($4, int_data_type);
 	}
 |
 	'(' DOUBLE ')' variable
 	{
-		
+		$$ = new Type_Cast_Ast($4, float_data_type);
 	}
 |
 	'(' INTEGER ')' '(' arithmetic_expression ')'
 	{
-
+		$$ = new Type_Cast_Ast($5, int_data_type);
 	}
 |
 	'(' FLOAT ')' '(' relational_statement ')'
 	{
-
+		$$ = new Type_Cast_Ast($5, float_data_type);
 	}
 |
 	'(' DOUBLE ')' '(' relational_statement ')'	
 	{
-
+		$$ = new Type_Cast_Ast($5, float_data_type);
 	}
 |
 	'-' constant
 	{
-
+		$$ = new Unary_Ast($2);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	'-' variable
 	{
-
+		$$ = new Unary_Ast($2);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	'-' '(' relational_statement ')'
 	{
-
+		$$ = new Unary_Ast($3);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	arithmetic_expression '+' arithmetic_expression
 	{
-
+		$$ = new Plus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	arithmetic_expression '-' arithmetic_expression
 	{
-		
+		$$ = new Minus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	arithmetic_expression '*' arithmetic_expression
 	{
-		
+		$$ = new Multiplication_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	arithmetic_expression '/' arithmetic_expression
 	{
-		
+		$$ = new Division_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 ;
 
@@ -555,7 +574,9 @@ constant:
 	FLOAT_NUMBER
 	{
 		Value_Type vt;
-		vt.f = $1;
+		string str(*$1);
+		vt.f = (float)atof(str.c_str());
+		//cout<<vt.f<<endl;
 		$$ = new Number_Ast(vt, float_data_type);
 	}
 ;
