@@ -99,13 +99,13 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-template <class T>
+
 class Number_Ast:public Ast
 {
-	T constant;
+	Value_Type constant;
 
 public:
-	Number_Ast(T number, Data_Type constant_data_type);
+	Number_Ast(Value_Type number, Data_Type constant_data_type);
 	~Number_Ast();
 
 	Data_Type get_data_type();
@@ -158,6 +158,7 @@ public:
 	bool evaluateReturnValue(Local_Environment & eval);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast(int line);
 };
 
 class If_Else_Ast: public Ast

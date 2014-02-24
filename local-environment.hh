@@ -38,6 +38,12 @@ typedef enum
 	void_result
 } Result_Enum;
 
+union Value_Type
+{
+	float f;
+	int i;
+};
+
 class Eval_Result;
 class Local_Environment;
 
@@ -47,8 +53,8 @@ protected:
 	Result_Enum result_type;
 
 public:
-	virtual int get_value();
-	virtual void set_value(int value);
+	virtual Value_Type get_value();
+	virtual void set_value(Value_Type value);
 
 	virtual bool is_variable_defined();
 	virtual void set_variable_status(bool def);
@@ -57,13 +63,16 @@ public:
 	virtual Result_Enum get_result_enum() = 0;
 };
 
-template <class T>
+
 class Eval_Result_Value:public Eval_Result
 {
+	Value_Type value;
+	bool defined;
 public:
-	void set_value(int number);
-	void set_value(float number);
-	T get_value();
+	Eval_Result_Value(Result_Enum rt);
+	~Eval_Result_Value();
+	void set_value(Value_Type number);
+	Value_Type get_value();
 
 	bool is_variable_defined();
 	void set_variable_status(bool def);
@@ -111,7 +120,7 @@ public:
 
 class Local_Environment
 {
-	map<string, Eval_Result_Value *> variable_table;
+	map<string, Eval_Result *> variable_table;
 
 public:
 	Local_Environment();
@@ -119,8 +128,8 @@ public:
 
 	void print(ostream & file_buffer);
 	bool is_variable_defined(string name);
-	Eval_Result_Value * get_variable_value(string name);
-	void put_variable_value(Eval_Result_Value & value, string name);
+	Eval_Result * get_variable_value(string name);
+	void put_variable_value(Eval_Result & value, string name);
 	bool does_variable_exist(string name);
 };
 

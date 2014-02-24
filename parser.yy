@@ -376,43 +376,56 @@ relational_statement:
 */
 	arithmetic_expression
 	{
-
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement le relational_statement
 	{
 		//cout<<"line3 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LE);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement ge relational_statement
 	{
 		//cout<<"line4 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GE);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement gt relational_statement
 	{
 		//cout<<"line5 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GT);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement lt relational_statement
 	{
 		//cout<<"line6 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LT);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement eq relational_statement
 	{
 		//cout<<"line7 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, EQ);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 |
 	relational_statement ne relational_statement
 	{
 		//cout<<"line8 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, NE);
+		int line = get_line_number();
+		$$->check_ast(line);
 	}
 ;
 
@@ -534,11 +547,15 @@ variable:
 constant:
 	INTEGER_NUMBER
 	{
-		$$ = new Number_Ast<int>($1, int_data_type);
+		Value_Type vt;
+		vt.i = $1;
+		$$ = new Number_Ast(vt, int_data_type);
 	}
 |
 	FLOAT_NUMBER
 	{
-		$$ = new Number_Ast<float>($1, float_data_type);
+		Value_Type vt;
+		vt.f = $1;
+		$$ = new Number_Ast(vt, float_data_type);
 	}
 ;

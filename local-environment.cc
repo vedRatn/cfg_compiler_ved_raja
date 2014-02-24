@@ -30,15 +30,16 @@ using namespace std;
 #include"error-display.hh"
 #include"user-options.hh"
 
-int Eval_Result::get_value()
+Value_Type Eval_Result::get_value()
 {
 	report_internal_error("Should not reach, Eval_Result : get_value");
 }
 
-void Eval_Result::set_value(int number)
+void Eval_Result::set_value(Value_Type number)
 {
 	report_internal_error("Should not reach, Eval_Result : set_value");
 }
+
 
 bool Eval_Result::is_variable_defined()
 {
@@ -52,58 +53,56 @@ void Eval_Result::set_variable_status(bool def)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<class T>
-Eval_Result_Value::Eval_Result_Value()
+
+Eval_Result_Value::Eval_Result_Value(Result_Enum rt)
 {
-	value = 0;
+	if(rt == int_result)
+		value.i = 0;
+	if(rt == float_result)
+		value.f = 0.0;
 	defined = false;
+	result_type = rt;
 }
 
-template<class T>
+
 Eval_Result_Value::~Eval_Result_Value()
 { }
 
-template<class T>
-void Eval_Result_Value::set_value(int number)
+
+void Eval_Result_Value::set_value(Value_Type number)
 {
-	value = number;
-	result_type = int_result;
+	if(result_type == int_result)
+		value.i = number.i;
+	if(result_type == float_result)
+		value.f = number.f;
 	defined = true;
 }
 
-template<class T>
-void Eval_Result_Value::set_value(float number)
-{
-	value = number;
-	result_type = float_result;
-	defined = true;
-}
 
-template<class T>
-T Eval_Result_Value::get_value()
+Value_Type Eval_Result_Value::get_value()
 {
 	return value;
 }
 
-template<class T>
+
 void Eval_Result_Value::set_variable_status(bool def)
 {
 	defined = def;
 }
 
-template<class T>
+
 bool Eval_Result_Value::is_variable_defined()
 {
 	return defined;
 }
 
-template<class T>
+
 void Eval_Result_Value::set_result_enum(Result_Enum res)
 {
 	result_type = res;
 }
 
-template<class T>
+
 Result_Enum Eval_Result_Value::get_result_enum()
 {
 	return result_type;
@@ -210,37 +209,41 @@ Local_Environment::~Local_Environment()
 
 void Local_Environment::print(ostream & file_buffer)
 {
-	map<string, Eval_Result_Value *>::iterator i;
+	map<string, Eval_Result *>::iterator i;
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
-		Eval_Result_Value * vi = variable_table[(*i).first];
+		Eval_Result * vi = variable_table[(*i).first];
 		if (vi != NULL)
 		{
 			if (vi->is_variable_defined() == false)
 				file_buffer << VAR_SPACE << (*i).first << " : undefined" << "\n";
 		
-			else
-				file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value() << "\n";
+			else{
+				if(vi->get_result_enum() == int_result)
+					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().i << "\n";
+				else if(vi->get_result_enum() == float_result)
+					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().f << "\n";
+			}
 		}
 	}
 }
 
 bool Local_Environment::is_variable_defined(string name)
 {
-	Eval_Result_Value * i = variable_table[name];
+	Eval_Result * i = variable_table[name];
 	if (i != NULL)
 		return i->is_variable_defined();
 	else
 		return false;
 }
 
-Eval_Result_Value * Local_Environment::get_variable_value(string name)
+Eval_Result * Local_Environment::get_variable_value(string name)
 {
-	Eval_Result_Value * i = variable_table[name];
+	Eval_Result * i = variable_table[name];
 	return i;
 }
 
-void Local_Environment::put_variable_value(Eval_Result_Value & i, string name)
+void Local_Environment::put_variable_value(Eval_Result & i, string name)
 {
 	variable_table[name] = &i;
 }
