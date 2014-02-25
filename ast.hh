@@ -55,7 +55,7 @@ public:
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 	virtual int next_bb();
 	virtual int checkSuccessor(list < int > & allIds);
-	virtual bool isNumber() = 0;
+	//virtual bool isNumber() = 0;
 };
 
 class Assignment_Ast:public Ast
@@ -77,7 +77,7 @@ public:
 	int checkSuccessor(list < int > & allIds);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 class Name_Ast:public Ast
@@ -98,7 +98,7 @@ public:
 	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 
@@ -115,7 +115,7 @@ public:
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 class Return_Ast:public Ast
@@ -129,7 +129,7 @@ public:
 	int next_bb();
 	int checkSuccessor(list < int > & allIds);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 class Goto_Ast: public Ast
@@ -144,7 +144,7 @@ public:
 	void print_ast(ostream & file_buffer);
 	int get_successor();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 class Relational_Ast: public Ast
@@ -164,7 +164,7 @@ public:
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 	bool check_ast(int line);
-	bool isNumber();
+	//bool isNumber();
 };
 
 class If_Else_Ast: public Ast
@@ -180,7 +180,7 @@ public:
 	int checkSuccessor(list < int > & allIds);
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 
@@ -195,7 +195,7 @@ public:
 	Data_Type get_data_type();
 	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	bool isNumber();
+	//bool isNumber();
 };
 
 
@@ -217,7 +217,7 @@ public:
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 	virtual int next_bb();
 	virtual int checkSuccessor(list < int > & allIds);
-	bool isNumber();
+	//bool isNumber();
 };
 
 

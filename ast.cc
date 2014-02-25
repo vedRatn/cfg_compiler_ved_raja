@@ -103,7 +103,7 @@ bool Assignment_Ast::check_ast(int line)
 {
 	// cout<<"line "<<line<<"is gonna be checked"<<endl;
 
-	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -153,10 +153,10 @@ int Assignment_Ast::checkSuccessor(list < int > & allIds){
 	return 0;
 }
 
-bool Assignment_Ast::isNumber(){
+/*bool Assignment_Ast::isNumber(){
 	return false;
 }
-
+*/
 /////////////////////////////////////////////////////////////////
 
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry)
@@ -259,9 +259,9 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 	return get_value_of_evaluation(eval_env);
 }
 
-bool Name_Ast::isNumber(){
+/*bool Name_Ast::isNumber(){
 	return false;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -319,9 +319,9 @@ Eval_Result & Number_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 	}
 }
 
-bool Number_Ast::isNumber(){
+/*bool Number_Ast::isNumber(){
 	return true;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -351,9 +351,9 @@ int Return_Ast::checkSuccessor(list < int > & allIds){
 	return 0;
 }
 
-bool Return_Ast::isNumber(){
+/*bool Return_Ast::isNumber(){
 	return false;
-}
+}*/
 /************************************************************************************/
 
 
@@ -396,9 +396,9 @@ int Goto_Ast::checkSuccessor(list < int > & allIds){
 	return ans;
 }
 
-bool Goto_Ast::isNumber(){
+/*bool Goto_Ast::isNumber(){
 	return false;
-}
+}*/
 /************************************************************************************/
 
 Relational_Ast::Relational_Ast(Ast * temp_lhs){
@@ -542,7 +542,7 @@ bool Relational_Ast::check_ast(int line){
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-	else if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	else if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = int_data_type;
 		return true;
@@ -551,12 +551,12 @@ bool Relational_Ast::check_ast(int line){
 	report_error("Relational statement data type not compatible", line);
 }
 
-bool Relational_Ast::isNumber(){
+/*bool Relational_Ast::isNumber(){
 	if(comp == NONE && lhs->isNumber())
 		return true;
 	else
 		return false;
-}
+}*/
 
 /************************************************************************************/
 
@@ -616,10 +616,10 @@ int If_Else_Ast::checkSuccessor(list < int > & allIds){
 	return ans;
 }
 
-bool If_Else_Ast::isNumber(){
+/*bool If_Else_Ast::isNumber(){
 	return false;
 }
-
+*/
 /************************************************************************************/
 
 Type_Cast_Ast::Type_Cast_Ast(Ast * ast, Data_Type dt){
@@ -672,9 +672,9 @@ Data_Type Type_Cast_Ast::get_data_type(){
 	return node_data_type;
 }
 
-bool Type_Cast_Ast::isNumber(){
+/*bool Type_Cast_Ast::isNumber(){
 	return false;
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -718,9 +718,9 @@ int Arithmetic_Expr_Ast::checkSuccessor(list < int > & allIds){
 	report_internal_error("Should not reach, Arithmetic_Expr_Ast : checkSuccessor");
 }
 
-bool Arithmetic_Expr_Ast::isNumber(){
+/*bool Arithmetic_Expr_Ast::isNumber(){
 	return false;
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -730,7 +730,7 @@ Plus_Ast::Plus_Ast(Ast * l, Ast * r){
 }
 
 bool Plus_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -783,7 +783,7 @@ Minus_Ast::Minus_Ast(Ast * l , Ast * r){
 }
 
 bool Minus_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -835,12 +835,9 @@ Division_Ast::Division_Ast(Ast * l , Ast * r){
 }
 
 bool Division_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || lhs->isNumber() && lhs->get_data_type() == int_data_type|| rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
-		if(!rhs->isNumber()){
-			node_data_type = rhs->get_data_type();
-		}
 		return true;
 	}
 	else
@@ -897,7 +894,7 @@ Multiplication_Ast::Multiplication_Ast(Ast * l , Ast * r){
 }
 
 bool Multiplication_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber() && rhs->get_data_type() == int_data_type)
+	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
