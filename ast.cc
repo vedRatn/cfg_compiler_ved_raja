@@ -103,7 +103,7 @@ bool Assignment_Ast::check_ast(int line)
 {
 	// cout<<"line "<<line<<"is gonna be checked"<<endl;
 
-	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber())
+	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -538,15 +538,12 @@ Eval_Result & Relational_Ast::evaluate(Local_Environment & eval_env, ostream & f
 }
 
 bool Relational_Ast::check_ast(int line){
-	/*cout<<(lhs->get_data_type()==int_data_type? "lhs is int" : "lhs is float")<<" and ";
-	cout<<(rhs->get_data_type()==int_data_type? "rhs is int" : "rhs is float")<<" with comp = "<<comp<<endl;*/
 	if(comp == NONE){
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-	else if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber())
+	else if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
-		// cout<<" i came here " <<endl;
 		node_data_type = int_data_type;
 		return true;
 	}
@@ -733,7 +730,7 @@ Plus_Ast::Plus_Ast(Ast * l, Ast * r){
 }
 
 bool Plus_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber())
+	if (lhs->get_data_type() == rhs->get_data_type() || rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -786,13 +783,13 @@ Minus_Ast::Minus_Ast(Ast * l , Ast * r){
 }
 
 bool Minus_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber())
+	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
 
-	report_error("Plus statement data type not compatible", line);
+	report_error("Minus statement data type not compatible", line);
 }
 
 void Minus_Ast::print_ast(ostream & file_buffer){
@@ -838,7 +835,7 @@ Division_Ast::Division_Ast(Ast * l , Ast * r){
 }
 
 bool Division_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || lhs->isNumber() || rhs->isNumber())
+	if (lhs->get_data_type() == rhs->get_data_type()  || lhs->isNumber() && lhs->get_data_type() == int_data_type|| rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		if(!rhs->isNumber()){
@@ -847,7 +844,7 @@ bool Division_Ast::check_ast(int line){
 		return true;
 	}
 	else
-		report_error("Plus statement data type not compatible", line);
+		report_error("Division statement data type not compatible", line);
 }
 
 void Division_Ast::print_ast(ostream & file_buffer){
@@ -900,13 +897,13 @@ Multiplication_Ast::Multiplication_Ast(Ast * l , Ast * r){
 }
 
 bool Multiplication_Ast::check_ast(int line){
-	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber())
+	if (lhs->get_data_type() == rhs->get_data_type()  || rhs->isNumber() && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
 
-	report_error("Plus statement data type not compatible", line);
+	report_error("Multiplication statement data type not compatible", line);
 }
 
 void Multiplication_Ast::print_ast(ostream & file_buffer){
