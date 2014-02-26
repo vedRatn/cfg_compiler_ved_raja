@@ -44,7 +44,7 @@
 %token <string_value> BASIC_BLOCK
 %token <string_value> FLOAT_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER FLOAT DOUBLE
+%token RETURN INTEGER FLOAT DOUBLE VOID
 %token IF ELSE GOTO ASSIGN_OP
 %left ne eq
 %left lt le gt ge
@@ -52,8 +52,16 @@
 %left '/' '*'
 
 
-%type <symbol_table> declaration_statement_list
-%type <symbol_entry> declaration_statement
+/*%type <symbol_table> variable_declaration_statement_list
+%type <symbol_entry> variable_declaration_statement
+%type <symbol_table> function_declaration_statement_list
+%type <symbol_entry> function_declaration_statement
+%type <symbol_table> function_parameter_list
+%type <symbol_entry> function_parameter
+%type <ast_list> function_call_list
+%type <ast> function_call
+%type <ast_list> function_argument_list
+%type <ast> function_argument
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
@@ -64,61 +72,114 @@
 %type <ast> relational_statement
 %type <ast> arithmetic_expression
 %type <ast> variable
-%type <ast> constant
+%type <ast> constant*/
 
 %start program
 
 %%
 
 program:
-	declaration_statement_list procedure_name
+	variable_declaration_statement_list function_declaration_statement_list
+   {
+   	//	cout<<"main aaya var_decl mein1"<<endl;
+   /*
+		
+   */}
+   procedure_list
+   {/*
+
+   */}
+|
+	variable_declaration_statement_list
 	{
-		program_object.set_global_table(*$1);
-		return_statement_used_flag = false;				// No return statement in the current procedure till now
+	//	cout<<"main aaya var_decl mein2"<<endl;
 	}
-	procedure_body
+	procedure_list
 	{
 
-		program_object.set_procedure_map(*current_procedure);
-
-		if ($1)
-			$1->global_list_in_proc_map_check(get_line_number());
-
-		delete $1;
 	}
 |
-	procedure_name
+	function_declaration_statement_list
 	{
-		return_statement_used_flag = false;				// No return statement in the current procedure till now
+	//	cout<<"main aaya fun_decl mein3"<<endl;
 	}
-	procedure_body
+	procedure_list
 	{
-		program_object.set_procedure_map(*current_procedure);
+
 	}
+|
+	procedure_list
+	{
+
+	}
+
+// 	declaration_statement_list procedure_name
+// 	{
+// 		program_object.set_global_table(*$1);
+// 		return_statement_used_flag = false;				// No return statement in the current procedure till now
+// 	}
+// 	procedure_body
+// 	{
+
+// 		program_object.set_procedure_map(*current_procedure);
+
+// 		if ($1)
+// 			$1->global_list_in_proc_map_check(get_line_number());
+
+// 		delete $1;
+// 	}
+// |
+// 	procedure_name
+// 	{
+// 		return_statement_used_flag = false;				// No return statement in the current procedure till now
+// 	}
+// 	procedure_body
+// 	{
+// 		program_object.set_procedure_map(*current_procedure);
+// 	}
+
+;
+
+procedure_list:
+	procedure_name procedure_body
+   {/*
+
+   */}
+|
+	procedure_list procedure_name procedure_body
+   {/*
+
+   */}
 ;
 
 procedure_name:
-	NAME '(' ')'
-	{
+	NAME '(' function_parameter_list ')'
+   {/*
 		current_procedure = new Procedure(void_data_type, *$1);
-	}
+   */}
+|
+	NAME '(' ')'
+   {/*
+		current_procedure = new Procedure(void_data_type, *$1);
+   */}
+
 ;
 
 procedure_body:
-	'{' declaration_statement_list
-	{
+	'{' variable_declaration_statement_list
+   {/*
 		current_procedure->set_local_list(*$2);
 		delete $2;
-	}
+   */}
 	basic_block_list '}'
-	{
-		/*
-		if (return_statement_used_flag == false)
-		{
-			int line = get_line_number();
-			report_error("Atleast 1 basic block should have a return statement", line);
-		}
-		*/
+   {/*
+		
+		// if (return_statement_used_flag == false)
+		// {
+		// 	int line = get_line_number();
+		// 	report_error("Atleast 1 basic block should have a return statement", line);
+		// }
+		
 		current_procedure->set_basic_block_list(*$4);
 		if(program_object.max_bb_call > program_object.max_bb){
 			char error[200];
@@ -127,17 +188,17 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $4;
-	}
+   */}
 |
 	'{' basic_block_list '}'
-	{
-		/*
-		if (return_statement_used_flag == false)
-		{
-			int line = get_line_number();
-			report_error("Atleast 1 basic block should have a return statement", line);
-		}
-		*/
+   {/*
+		
+		// if (return_statement_used_flag == false)
+		// {
+		// 	int line = get_line_number();
+		// 	report_error("Atleast 1 basic block should have a return statement", line);
+		// }
+		
 		//cout<<program_object.program_object.max_bb<<":"<<program_object.max_bb_call<<endl;
 		current_procedure->set_basic_block_list(*$2);
 		if(program_object.max_bb_call > program_object.max_bb){
@@ -147,12 +208,24 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $2;
-	}
+   */}
 ;
 
-declaration_statement_list:
-	declaration_statement
-	{
+function_declaration_statement_list:
+	function_declaration_statement
+   {/*
+
+   */}
+|
+	function_declaration_statement_list function_declaration_statement
+   {/*
+
+   */}
+;
+
+variable_declaration_statement_list:
+	variable_declaration_statement
+   {/*
 		int line = get_line_number();
 		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
 
@@ -165,10 +238,10 @@ declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
-	}
+   */}
 |
-	declaration_statement_list declaration_statement
-	{
+	variable_declaration_statement_list variable_declaration_statement
+   {/*
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
 
@@ -197,37 +270,120 @@ declaration_statement_list:
 			$$ = new Symbol_Table();
 
 		$$->push_symbol($2);
-	}
+   */}
 ;
 
-declaration_statement:
+variable_declaration_statement:
 	INTEGER NAME ';'
 
-	{
+   {
+ //  		cout<<"main aaya var_decl ke bache int mein1"<<endl;
+   /*
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 
 		delete $2;
-	}
+   */}
 |
 	FLOAT NAME ';'
 
-	{
+   {
+   //		cout<<"main aaya var_decl ke bache float mein1"<<endl;
+
+   	/*
 		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
 		delete $2;
-	}
+   */}
 |
 	DOUBLE NAME ';'
-	{
+   {/*
 		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
 		delete $2;	
-	}
+   */}
+;
+
+function_declaration_statement:
+	VOID NAME '(' function_parameter_list ')' ';'
+   {/*
+
+   */}
+|
+	VOID NAME '(' ')' ';'
+   {/*
+
+   */}
+|
+	INTEGER NAME '(' function_parameter_list ')' ';'
+   {/*
+
+   */}
+|
+	INTEGER NAME '(' ')' ';'
+   {/*
+
+   */}
+|
+	FLOAT NAME '(' function_parameter_list ')' ';'
+   {
+   	//	cout<<"main aaya fun_decl ke bache float mein1"<<endl;
+   /*
+
+   */}
+|
+	FLOAT NAME '(' ')' ';'
+   {
+   	//	cout<<"main aaya fun_decl ke bache float mein1"<<endl;
+   /*
+
+   */}
+|
+	DOUBLE NAME '(' function_parameter_list ')' ';'
+   {/*
+
+   */}
+|
+	DOUBLE NAME '(' ')' ';'
+   {/*
+
+   */}
+
+;
+
+function_parameter_list:
+	function_parameter
+   {/*
+
+   */}
+|
+	function_parameter ',' function_parameter_list
+   {/*
+
+   */}
+;
+
+function_parameter:
+	INTEGER NAME 
+
+   {/*
+	
+   */}
+|
+	FLOAT NAME 
+
+   {/*
+		
+   */}
+|
+	DOUBLE NAME 
+   {/*
+		
+   */}
 ;
 
 basic_block_list:
 	basic_block_list basic_block
-	{
+   {/*
 		if (!$2)
 		{
 			int line = get_line_number();
@@ -238,10 +394,10 @@ basic_block_list:
 
 		$$ = $1;
 		$$->push_back($2);
-	}
+   */}
 |
 	basic_block
-	{
+   {/*
 		if (!$1)
 		{
 			int line = get_line_number();
@@ -250,18 +406,18 @@ basic_block_list:
 
 		$$ = new list<Basic_Block *>;
 		$$->push_back($1);
-	}
+   */}
 ;
 
 basic_block:
 	BASIC_BLOCK ':' executable_statement_list
-	{
-		/*if (*$2 != "bb")
-		{
-			int line = get_line_number();
-			report_error("Not basic block lable", line);
-		}
-		*/
+   {/*
+//		if (*$2 != "bb")
+//		{
+//			int line = get_line_number();
+//			report_error("Not basic block lable", line);
+//		}
+		
 	
 		string bbl(*$1);
 		if(atoi(bbl.substr(4, bbl.length()-1).c_str()) > program_object.max_bb)
@@ -281,268 +437,293 @@ basic_block:
 		}
 
 		delete $3;
+   */}
+;
+
+return_statement:
+	RETURN ';'
+	{
+
+	}
+|
+	RETURN relational_statement ';'
+	{
+
 	}
 ;
 
 executable_statement_list:
-	assignment_statement_list
+	assignment_statement
 	{
-		$$ = $1;
+
 	}
 |
-	assignment_statement_list RETURN ';'
-
+	function_call ';'
 	{
-		Ast * ret = new Return_Ast();
 
-		return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
-
-		if ($1 != NULL)
-			$$ = $1;
-
-		else
-			$$ = new list<Ast *>;
-
-		$$->push_back(ret);
 	}
 |
-	assignment_statement_list if_statement
+	assignment_statement executable_statement_list
 	{
-		if($1 != NULL)
-			$$ = $1;
-		else
-			$$ = new list < Ast * >;
 
-		$$->push_back($2);
 	}
 |
-	assignment_statement_list goto_statement
+	function_call ';' executable_statement_list
 	{
-		
-		if($1 != NULL)
-			$$ = $1;
-		else
-			$$ = new list <Ast *>;
 
-		$$->push_back($2);
+	} 
+|
+	return_statement
+	{
+
+	}
+|
+	if_statement
+	{
+
+	}
+|
+	goto_statement
+	{
+
 	}
 ;
 
-assignment_statement_list:
+function_call:
+	NAME '(' function_argument_list ')'
 	{
-		$$ = NULL;
+
 	}
 |
-	assignment_statement_list assignment_statement
+	NAME '(' ')'
 	{
-		if ($1 == NULL)
-			$$ = new list<Ast *>;
 
-		else
-			$$ = $1;
+	}
+;
 
+function_argument_list:
+	function_argument
+	{
 
-		$$->push_back($2);
+	}
+|
+	function_argument_list ',' function_argument
+	{
+
+	}
+;
+
+function_argument:
+	relational_statement
+	{
+
 	}
 ;
 
 if_statement:
 	IF '(' relational_statement ')' goto_statement ELSE goto_statement
-	{
+   {/*
 		$$ = new If_Else_Ast($3, $5, $7);
-	}
+   */}
 ;
 
 goto_statement:
 	GOTO BASIC_BLOCK ';'
 
-	{
+   {/*
 		string str(*$2);
 		if(atoi(str.substr(4, str.length()-1).c_str()) > program_object.max_bb_call)
 			program_object.max_bb_call = atoi(str.substr(4, str.length()-1).c_str());
 		$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
-	}
+   */}
 ;
 
 relational_statement:
 
 
 
-/*	variable
-	{
-		//cout<<"line1 = "<<get_line_number()<<endl;
-		$$ = new Relational_Ast($1);
-	}
-|
-	constant
-	{
-		//cout<<"line2 = "<<get_line_number()<<endl;
-		$$ = new Relational_Ast($1);
-	}
-*/
+// 	variable
+// 	{
+// 		//cout<<"line1 = "<<get_line_number()<<endl;
+// 		$$ = new Relational_Ast($1);
+// 	}
+// |
+// 	constant
+// 	{
+// 		//cout<<"line2 = "<<get_line_number()<<endl;
+// 		$$ = new Relational_Ast($1);
+// 	}
+
 	arithmetic_expression
-	{
+   {/*
 		$$ = new Relational_Ast($1);
-	}
+   */}
 |
 	relational_statement le relational_statement
-	{
+   {/*
 		//cout<<"line3 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LE);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	relational_statement ge relational_statement
-	{
+   {/*
 		//cout<<"line4 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GE);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	relational_statement gt relational_statement
-	{
+   {/*
 		//cout<<"line5 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GT);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	relational_statement lt relational_statement
-	{
+   {/*
 		//cout<<"line6 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LT);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	relational_statement eq relational_statement
-	{
+   {/*
 		//cout<<"line7 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, EQ);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	relational_statement ne relational_statement
-	{
+   {/*
 		//cout<<"line8 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, NE);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 ;
 
 arithmetic_expression:
 	constant
-	{
+   {/*
 		$$ = $1;
-	}
+   */}
 |
 	variable
-	{
+   {/*
 		$$ = $1;
+   */}
+|
+	function_call
+	{
+
 	}
 |
 	'(' relational_statement ')'
-	{
+   {/*
 		$$ = $2;
-	}
+   */}
+|
+	'(' FLOAT ')' function_call
+   {/*
+		$$ = new Type_Cast_Ast($4, float_data_type);
+   */}
+|
+	'(' INTEGER ')' function_call
+   {/*
+		$$ = new Type_Cast_Ast($4, int_data_type);
+   */}
+|
+	'(' DOUBLE ')' function_call
+   {/*
+		$$ = new Type_Cast_Ast($4, float_data_type);
+   */}
+
 |
 	'(' FLOAT ')' variable
-	{
+   {/*
 		$$ = new Type_Cast_Ast($4, float_data_type);
-	}
+   */}
 |
 	'(' INTEGER ')' variable
-	{
+   {/*
 		$$ = new Type_Cast_Ast($4, int_data_type);
-	}
+   */}
 |
 	'(' DOUBLE ')' variable
-	{
+   {/*
 		$$ = new Type_Cast_Ast($4, float_data_type);
-	}
+   */}
 |
 	'(' INTEGER ')' '(' arithmetic_expression ')'
-	{
+   {/*
 		$$ = new Type_Cast_Ast($5, int_data_type);
-	}
+   */}
 |
 	'(' FLOAT ')' '(' relational_statement ')'
-	{
+   {/*
 		$$ = new Type_Cast_Ast($5, float_data_type);
-	}
+   */}
 |
 	'(' DOUBLE ')' '(' relational_statement ')'	
-	{
+   {/*
 		$$ = new Type_Cast_Ast($5, float_data_type);
-	}
+   */}
 |
-	'-' constant
+	'-' arithmetic_expression
 	{
-		$$ = new Unary_Ast($2);
-		int line = get_line_number();
-		$$->check_ast(line);
-	}
-|
-	'-' variable
-	{
-		$$ = new Unary_Ast($2);
-		int line = get_line_number();
-		$$->check_ast(line);
-	}
-|
-	'-' '(' relational_statement ')'
-	{
-		$$ = new Unary_Ast($3);
-		int line = get_line_number();
-		$$->check_ast(line);
+
 	}
 |
 	arithmetic_expression '+' arithmetic_expression
-	{
+   {/*
 		$$ = new Plus_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	arithmetic_expression '-' arithmetic_expression
-	{
+   {/*
 		$$ = new Minus_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	arithmetic_expression '*' arithmetic_expression
-	{
+   {/*
 		$$ = new Multiplication_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 |
 	arithmetic_expression '/' arithmetic_expression
-	{
+   {/*
 		$$ = new Division_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-	}
+   */}
 ;
 
 assignment_statement:
 	variable ASSIGN_OP relational_statement ';'
-	{
+   {/*
 		$$ = new Assignment_Ast($1, $3);
 		int line = get_line_number();
 		//cout<<"ass line = "<<line<<endl;
 		$$->check_ast(line);
-	}
+   */}
 ;
 
 variable:
 	NAME
-	{
+   {
+//   		cout<<"NAME DETECTED = "<<(*$1)<<endl;
+   /*
 		Symbol_Table_Entry var_table_entry;
 
 		if (current_procedure->variable_in_symbol_list_check(*$1))
@@ -560,23 +741,23 @@ variable:
 		$$ = new Name_Ast(*$1, var_table_entry);
 
 		delete $1;
-	}
+   */}
 ;
 
 constant:
 	INTEGER_NUMBER
-	{
+   {/*
 		Value_Type vt;
 		vt.i = $1;
 		$$ = new Number_Ast(vt, int_data_type);
-	}
+   */}
 |
 	FLOAT_NUMBER
-	{
+   {/*
 		Value_Type vt;
 		string str(*$1);
 		vt.f = (float)atof(str.c_str());
 		//cout<<vt.f<<endl;
 		$$ = new Number_Ast(vt, float_data_type);
-	}
+   */}
 ;

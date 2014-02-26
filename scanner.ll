@@ -28,7 +28,9 @@
 
 int		{
 			store_token_name("INTEGER");
-			return Parser::INTEGER; 
+			ParserBase::STYPE__ * val = getSval();
+			val->string_value = new std::string(matched());
+			return Parser::INTEGER;
 		}
 
 return		{ 
@@ -60,7 +62,7 @@ goto	{
 */
 
 
-[:{}();]	{
+[:{}();,]	{
 			store_token_name("META CHAR");
 			return matched()[0];
 		}
@@ -78,6 +80,13 @@ double		{
 				ParserBase::STYPE__ * val = getSval();
 				val->string_value = new std::string(matched());
 				return Parser::DOUBLE;
+			}
+
+void 		{
+				store_token_name("VOID");
+				ParserBase::STYPE__ * val = getSval();
+				val->string_value = new std::string(matched());
+				return Parser::VOID;
 			}
 
 [<][b][b][ ][[:digit:]]+[>]	{

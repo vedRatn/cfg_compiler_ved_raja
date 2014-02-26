@@ -1,15 +1,14 @@
+int d;
+
 main()
 {
-	int a;
-	int b;
-	float c;
-	float d;
+	int a = 3;
+	int b = 5;
 
-	a = 1;
-	b = 1;
-	c = 1;
-	d = 2.5;
+	fn();
+}
 
-	d = a / 1.5;
-	
+fn()
+{
+	int c = 4;
 }
