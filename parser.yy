@@ -52,27 +52,28 @@
 %left '/' '*'
 
 
-/*%type <symbol_table> variable_declaration_statement_list
+%type <symbol_table> variable_declaration_statement_list
 %type <symbol_entry> variable_declaration_statement
-%type <symbol_table> function_declaration_statement_list
-%type <symbol_entry> function_declaration_statement
+//%type <symbol_table> function_declaration_statement_list
+//%type <symbol_entry> function_declaration_statement
 %type <symbol_table> function_parameter_list
 %type <symbol_entry> function_parameter
-%type <ast_list> function_call_list
+//%type <ast_list> function_call_list
 %type <ast> function_call
 %type <ast_list> function_argument_list
 %type <ast> function_argument
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
-%type <ast_list> assignment_statement_list
+//%type <ast_list> assignment_statement_list
 %type <ast>	if_statement
 %type <ast> goto_statement
 %type <ast> assignment_statement
 %type <ast> relational_statement
 %type <ast> arithmetic_expression
 %type <ast> variable
-%type <ast> constant*/
+%type <ast> constant
+%type <ast> return_statement
 
 %start program
 
@@ -81,37 +82,19 @@
 program:
 	variable_declaration_statement_list function_declaration_statement_list
    {
-   	//	cout<<"main aaya var_decl mein1"<<endl;
-   /*
-		
-   */}
+   		program_object.set_global_table(*$1);
+   }
    procedure_list
-   {/*
-
-   */}
 |
 	variable_declaration_statement_list
 	{
-	//	cout<<"main aaya var_decl mein2"<<endl;
+		program_object.set_global_table(*$1);
 	}
 	procedure_list
-	{
-
-	}
 |
-	function_declaration_statement_list
-	{
-	//	cout<<"main aaya fun_decl mein3"<<endl;
-	}
-	procedure_list
-	{
-
-	}
+	function_declaration_statement_list	procedure_list
 |
 	procedure_list
-	{
-
-	}
 
 // 	declaration_statement_list procedure_name
 // 	{
@@ -142,37 +125,36 @@ program:
 
 procedure_list:
 	procedure_name procedure_body
-   {/*
-
-   */}
 |
 	procedure_list procedure_name procedure_body
-   {/*
-
-   */}
 ;
 
 procedure_name:
 	NAME '(' function_parameter_list ')'
-   {/*
-		current_procedure = new Procedure(void_data_type, *$1);
-   */}
+   {
+		current_procedure = program_object.get_procedure_map(*$1);
+   }
 |
 	NAME '(' ')'
-   {/*
-		current_procedure = new Procedure(void_data_type, *$1);
-   */}
+   {
+   		if(*$1 == "main"){
+   			current_procedure = new Procedure(void_data_type, *$1, *(new Symbol_Table));
+   			program_object.set_procedure_map(*current_procedure);
+   		}
+
+   		current_procedure = program_object.get_procedure_map(*$1);
+   }
 
 ;
 
 procedure_body:
 	'{' variable_declaration_statement_list
-   {/*
-		current_procedure->set_local_list(*$2);
+   {
+		current_procedure->append_local_list(*$2);
 		delete $2;
-   */}
+   }
 	basic_block_list '}'
-   {/*
+   {
 		
 		// if (return_statement_used_flag == false)
 		// {
@@ -188,10 +170,10 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $4;
-   */}
+   }
 |
 	'{' basic_block_list '}'
-   {/*
+   {
 		
 		// if (return_statement_used_flag == false)
 		// {
@@ -208,24 +190,18 @@ procedure_body:
 	        report_error(str, NOLINE);
 		}
 		delete $2;
-   */}
+   }
 ;
 
 function_declaration_statement_list:
 	function_declaration_statement
-   {/*
-
-   */}
 |
 	function_declaration_statement_list function_declaration_statement
-   {/*
-
-   */}
 ;
 
 variable_declaration_statement_list:
 	variable_declaration_statement
-   {/*
+   {
 		int line = get_line_number();
 		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
 
@@ -238,10 +214,10 @@ variable_declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
-   */}
+   }
 |
 	variable_declaration_statement_list variable_declaration_statement
-   {/*
+   {
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
 
@@ -270,7 +246,7 @@ variable_declaration_statement_list:
 			$$ = new Symbol_Table();
 
 		$$->push_symbol($2);
-   */}
+   }
 ;
 
 variable_declaration_statement:
@@ -278,112 +254,135 @@ variable_declaration_statement:
 
    {
  //  		cout<<"main aaya var_decl ke bache int mein1"<<endl;
-   /*
+   
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 
 		delete $2;
-   */}
+   }
 |
 	FLOAT NAME ';'
 
    {
    //		cout<<"main aaya var_decl ke bache float mein1"<<endl;
 
-   	/*
+   	
 		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
 		delete $2;
-   */}
+   }
 |
 	DOUBLE NAME ';'
-   {/*
+   {
 		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
 		delete $2;	
-   */}
+   }
 ;
 
 function_declaration_statement:
 	VOID NAME '(' function_parameter_list ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(void_data_type, *$2, *$4);
+   		program_object.set_procedure_map(*p);
+   }
 |
 	VOID NAME '(' ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(void_data_type, *$2, *(new Symbol_Table()));
+   		program_object.set_procedure_map(*p);
+   }
 |
 	INTEGER NAME '(' function_parameter_list ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(int_data_type, *$2, *$4);
+   		program_object.set_procedure_map(*p);
+   }
 |
 	INTEGER NAME '(' ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(int_data_type, *$2, *(new Symbol_Table()));
+   		program_object.set_procedure_map(*p);
+   }
 |
 	FLOAT NAME '(' function_parameter_list ')' ';'
    {
-   	//	cout<<"main aaya fun_decl ke bache float mein1"<<endl;
-   /*
-
-   */}
+   		Procedure * p = new Procedure(float_data_type, *$2, *$4);
+   		program_object.set_procedure_map(*p);
+   }
 |
 	FLOAT NAME '(' ')' ';'
    {
-   	//	cout<<"main aaya fun_decl ke bache float mein1"<<endl;
-   /*
-
-   */}
+   		Procedure * p = new Procedure(float_data_type, *$2, *(new Symbol_Table()));
+   		program_object.set_procedure_map(*p);
+   }
 |
 	DOUBLE NAME '(' function_parameter_list ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(float_data_type, *$2, *$4);
+   		program_object.set_procedure_map(*p);
+   }
 |
 	DOUBLE NAME '(' ')' ';'
-   {/*
-
-   */}
+   {
+   		Procedure * p = new Procedure(float_data_type, *$2, *(new Symbol_Table()));
+   		program_object.set_procedure_map(*p);
+   }
 
 ;
 
 function_parameter_list:
 	function_parameter
-   {/*
-
-   */}
+   {
+   		$$ = new Symbol_Table();
+		$$->push_symbol($1);
+   }
 |
-	function_parameter ',' function_parameter_list
-   {/*
+	function_parameter_list ',' function_parameter
+   {
+   		if ($1 != NULL)
+		{
+			/*if($2->variable_in_symbol_list_check(var_name))
+			{
+				int line = get_line_number();
+				report_error("Variable is declared twice", line);
+		  	}*/
 
-   */}
+			$$ = $1;
+		}
+
+		else
+			$$ = new Symbol_Table();
+
+		$$->push_symbol($3);
+   }
 ;
 
 function_parameter:
 	INTEGER NAME 
+   {
+		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 
-   {/*
-	
-   */}
+		delete $2;
+   }
 |
 	FLOAT NAME 
+   {
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 
-   {/*
-		
-   */}
+		delete $2;
+   }
 |
 	DOUBLE NAME 
-   {/*
-		
-   */}
+   {
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
+
+		delete $2;
+   }
 ;
 
 basic_block_list:
 	basic_block_list basic_block
-   {/*
+   {
 		if (!$2)
 		{
 			int line = get_line_number();
@@ -394,10 +393,10 @@ basic_block_list:
 
 		$$ = $1;
 		$$->push_back($2);
-   */}
+   }
 |
 	basic_block
-   {/*
+   {
 		if (!$1)
 		{
 			int line = get_line_number();
@@ -406,12 +405,12 @@ basic_block_list:
 
 		$$ = new list<Basic_Block *>;
 		$$->push_back($1);
-   */}
+   }
 ;
 
 basic_block:
 	BASIC_BLOCK ':' executable_statement_list
-   {/*
+   {
 //		if (*$2 != "bb")
 //		{
 //			int line = get_line_number();
@@ -437,105 +436,113 @@ basic_block:
 		}
 
 		delete $3;
-   */}
+   }
 ;
 
 return_statement:
 	RETURN ';'
 	{
-
+		$$ = new Return_Ast(NULL);
 	}
 |
 	RETURN relational_statement ';'
 	{
-
+		$$ = new Return_Ast($2);
 	}
 ;
 
 executable_statement_list:
 	assignment_statement
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_front($1);
 	}
 |
 	function_call ';'
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_front($1);
 	}
 |
 	assignment_statement executable_statement_list
 	{
-
+		$$ = $2;
+		$$->push_front($1);
 	}
 |
 	function_call ';' executable_statement_list
 	{
-
+		$$ = $3;
+		$$->push_front($1);
 	} 
 |
 	return_statement
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_front($1);;
 	}
 |
 	if_statement
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_front($1);
 	}
 |
 	goto_statement
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_front($1);
 	}
 ;
 
 function_call:
 	NAME '(' function_argument_list ')'
 	{
-
+		$$ = new Call_Ast($3,program_object.get_procedure_map(*$1));
 	}
 |
 	NAME '(' ')'
 	{
-
+		$$ = new Call_Ast(NULL,program_object.get_procedure_map(*$1));
 	}
 ;
 
 function_argument_list:
 	function_argument
 	{
-
+		$$ = new list < Ast * >;
+		$$->push_back($1);
 	}
 |
 	function_argument_list ',' function_argument
 	{
-
+		$$->push_back($3);
 	}
 ;
 
 function_argument:
 	relational_statement
 	{
-
+		$$ = $1;
 	}
 ;
 
 if_statement:
 	IF '(' relational_statement ')' goto_statement ELSE goto_statement
-   {/*
+   {
 		$$ = new If_Else_Ast($3, $5, $7);
-   */}
+   }
 ;
 
 goto_statement:
 	GOTO BASIC_BLOCK ';'
 
-   {/*
+   {
 		string str(*$2);
 		if(atoi(str.substr(4, str.length()-1).c_str()) > program_object.max_bb_call)
 			program_object.max_bb_call = atoi(str.substr(4, str.length()-1).c_str());
 		$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
-   */}
+   }
 ;
 
 relational_statement:
@@ -555,69 +562,69 @@ relational_statement:
 // 	}
 
 	arithmetic_expression
-   {/*
+   {
 		$$ = new Relational_Ast($1);
-   */}
+   }
 |
 	relational_statement le relational_statement
-   {/*
+   {
 		//cout<<"line3 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LE);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	relational_statement ge relational_statement
-   {/*
+   {
 		//cout<<"line4 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GE);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	relational_statement gt relational_statement
-   {/*
+   {
 		//cout<<"line5 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, GT);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	relational_statement lt relational_statement
-   {/*
+   {
 		//cout<<"line6 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, LT);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	relational_statement eq relational_statement
-   {/*
+   {
 		//cout<<"line7 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, EQ);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	relational_statement ne relational_statement
-   {/*
+   {
 		//cout<<"line8 = "<<get_line_number()<<endl;
 		$$ = new Relational_Ast($1, $3, NE);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 ;
 
 arithmetic_expression:
 	constant
-   {/*
+   {
 		$$ = $1;
-   */}
+   }
 |
 	variable
-   {/*
+   {
 		$$ = $1;
-   */}
+   }
 |
 	function_call
 	{
@@ -625,105 +632,104 @@ arithmetic_expression:
 	}
 |
 	'(' relational_statement ')'
-   {/*
+   {
 		$$ = $2;
-   */}
+   }
 |
 	'(' FLOAT ')' function_call
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, float_data_type);
-   */}
+   }
 |
 	'(' INTEGER ')' function_call
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, int_data_type);
-   */}
+   }
 |
 	'(' DOUBLE ')' function_call
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, float_data_type);
-   */}
+   }
 
 |
 	'(' FLOAT ')' variable
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, float_data_type);
-   */}
+   }
 |
 	'(' INTEGER ')' variable
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, int_data_type);
-   */}
+   }
 |
 	'(' DOUBLE ')' variable
-   {/*
+   {
 		$$ = new Type_Cast_Ast($4, float_data_type);
-   */}
+   }
 |
 	'(' INTEGER ')' '(' arithmetic_expression ')'
-   {/*
+   {
 		$$ = new Type_Cast_Ast($5, int_data_type);
-   */}
+   }
 |
 	'(' FLOAT ')' '(' relational_statement ')'
-   {/*
+   {
 		$$ = new Type_Cast_Ast($5, float_data_type);
-   */}
+   }
 |
 	'(' DOUBLE ')' '(' relational_statement ')'	
-   {/*
+   {
 		$$ = new Type_Cast_Ast($5, float_data_type);
-   */}
+   }
 |
 	'-' arithmetic_expression
 	{
-
+		$$ = new Unary_Ast($2);
 	}
 |
 	arithmetic_expression '+' arithmetic_expression
-   {/*
+   {
 		$$ = new Plus_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	arithmetic_expression '-' arithmetic_expression
-   {/*
+   {
 		$$ = new Minus_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	arithmetic_expression '*' arithmetic_expression
-   {/*
+   {
 		$$ = new Multiplication_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 |
 	arithmetic_expression '/' arithmetic_expression
-   {/*
+   {
 		$$ = new Division_Ast($1, $3);
 		int line = get_line_number();
 		$$->check_ast(line);
-   */}
+   }
 ;
 
 assignment_statement:
 	variable ASSIGN_OP relational_statement ';'
-   {/*
+   {
 		$$ = new Assignment_Ast($1, $3);
 		int line = get_line_number();
 		//cout<<"ass line = "<<line<<endl;
 		$$->check_ast(line);
-   */}
+   }
 ;
 
 variable:
 	NAME
    {
 //   		cout<<"NAME DETECTED = "<<(*$1)<<endl;
-   /*
 		Symbol_Table_Entry var_table_entry;
 
 		if (current_procedure->variable_in_symbol_list_check(*$1))
@@ -741,23 +747,23 @@ variable:
 		$$ = new Name_Ast(*$1, var_table_entry);
 
 		delete $1;
-   */}
+	}
 ;
 
 constant:
 	INTEGER_NUMBER
-   {/*
+   {
 		Value_Type vt;
 		vt.i = $1;
 		$$ = new Number_Ast(vt, int_data_type);
-   */}
+   }
 |
 	FLOAT_NUMBER
-   {/*
+   {
 		Value_Type vt;
 		string str(*$1);
 		vt.f = (float)atof(str.c_str());
 		//cout<<vt.f<<endl;
 		$$ = new Number_Ast(vt, float_data_type);
-   */}
+   }
 ;

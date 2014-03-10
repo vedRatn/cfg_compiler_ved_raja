@@ -23,6 +23,7 @@
 
 #include<string>
 #include<fstream>
+#include<iomanip>
 
 using namespace std;
 
@@ -222,7 +223,7 @@ void Local_Environment::print(ostream & file_buffer)
 				if(vi->get_result_enum() == int_result)
 					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().i << "\n";
 				else if(vi->get_result_enum() == float_result)
-					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().f << "\n";
+					file_buffer << VAR_SPACE << (*i).first << " : "<<std::fixed<<setprecision(2)<< vi->get_value().f << "\n";
 			}
 		}
 	}

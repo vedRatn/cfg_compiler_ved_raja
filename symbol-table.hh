@@ -47,9 +47,9 @@ typedef enum
 
 class Symbol_Table
 {
-	list<Symbol_Table_Entry *> variable_table;
 	Table_Scope scope;
 public:
+	list<Symbol_Table_Entry *> variable_table;
 	Symbol_Table();
 	~Symbol_Table();
 

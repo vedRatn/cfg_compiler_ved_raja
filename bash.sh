@@ -19,5 +19,5 @@ do
 	f=`echo $f | cut -d '.' -f1`
 	./cfglp $file -tokens -d > out1
 	./cfglp64-sirki $file -tokens -d > out2
-	diff -b out1 out2 > tmp/$f
+	diff -b -B out1 out2 > tmp/$f
 done

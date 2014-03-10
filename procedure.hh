@@ -39,16 +39,17 @@ class Procedure
 {
 	Data_Type return_type;
 	string name;
-	Symbol_Table local_symbol_table;
+	Symbol_Table local_symbol_table, argument_symbol_list;
 	list<Basic_Block *> basic_block_list;
 
 public:
-	Procedure(Data_Type proc_return_type, string proc_name);
+	Procedure(Data_Type proc_return_type, string proc_name, Symbol_Table & s);
 	~Procedure();
 
 	string get_proc_name();
 	void set_basic_block_list(list<Basic_Block *> bb_list);
 	void set_local_list(Symbol_Table & new_list);
+	void append_local_list(Symbol_Table & new_list);
 	Data_Type get_return_type();
 	Symbol_Table_Entry & get_symbol_table_entry(string variable_name);
 
@@ -57,7 +58,7 @@ public:
 	Basic_Block * get_next_bb(Basic_Block & current_bb);
 	Basic_Block & get_start_basic_block();
 
-	Eval_Result & evaluate(ostream & file_buffer);
+	Eval_Result & evaluate(ostream & file_buffer, list<Eval_Result_Value *> argument_list);
 
 	bool variable_in_symbol_list_check(string variable);
 };

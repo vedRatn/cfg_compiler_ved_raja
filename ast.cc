@@ -23,6 +23,7 @@
 
 #include<iostream>
 #include<fstream>
+#include<iomanip>
 
 using namespace std;
 
@@ -115,7 +116,7 @@ bool Assignment_Ast::check_ast(int line)
 void Assignment_Ast::print_ast(ostream & file_buffer)
 {
 	// cout<<"did i come here instead?"<<endl;
-	file_buffer << AST_SPACE << "Asgn:\n";
+	file_buffer <<"\n"<< AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
 	lhs->print_ast(file_buffer);
@@ -123,7 +124,7 @@ void Assignment_Ast::print_ast(ostream & file_buffer)
 
 	file_buffer << AST_NODE_SPACE << "RHS (";
 	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
@@ -138,7 +139,7 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 	// Print the result
 
 	print_ast(file_buffer);
-
+	file_buffer<<"\n";
 	lhs->print_value(eval_env, file_buffer);
 
 	return result;
@@ -221,7 +222,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 		else 
 			report_internal_error("Result type can only be int and float");
 	}
-	file_buffer << "\n\n";
+	file_buffer << "\n";
 }
 
 Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
@@ -293,9 +294,7 @@ void Number_Ast::print_ast(ostream & file_buffer)
 		file_buffer << "Num : " << constant.i;
 	}else if(node_data_type == float_data_type){
 		file_buffer << "Num : " ;
-		std::cout << std::fixed;
-    	cout.precision(2);
-    	std::cout << constant.f;
+		file_buffer << std::fixed<<setprecision(2)<<constant.f;
 	}
 
 }
@@ -325,22 +324,38 @@ Eval_Result & Number_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Return_Ast::Return_Ast()
-{}
+Return_Ast::Return_Ast(Ast * retarg)
+{
+	relst = retarg;
+}
 
 Return_Ast::~Return_Ast()
 {}
 
 void Return_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "Return <NOTHING>\n";
+	file_buffer<<"\n";
+	if(relst==NULL){
+		file_buffer << AST_SPACE << "RETURN <NOTHING>";
+	}
+	else{
+		file_buffer <<AST_SPACE << "RETURN ";
+		relst->print_ast(file_buffer);
+	}
+	file_buffer<<"\n";
 }
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	print_ast(file_buffer);
-	Eval_Result & result = *new Eval_Result_Value(int_result);
-	return result;
+	if(relst==NULL){
+		Eval_Result & result = *new Eval_Result_Value(int_result);
+		return result;
+	}
+	else{
+		Eval_Result & result = relst->evaluate(eval_env,file_buffer);
+		return result;
+	}
 }
 
 int Return_Ast::next_bb(){
@@ -367,8 +382,9 @@ Goto_Ast::~Goto_Ast()
 
 void Goto_Ast::print_ast(ostream & file_buffer)
 {
+	file_buffer<<"\n";
 	file_buffer << AST_SPACE << "Goto statement:\n";
-	file_buffer << AST_NODE_SPACE << "Successor: "<<successor<<"\n";
+	file_buffer << AST_NODE_SPACE << "Successor: "<<successor;
 }
 
 int Goto_Ast::next_bb(){
@@ -377,7 +393,7 @@ int Goto_Ast::next_bb(){
 
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval, ostream & file_buffer){
 	print_ast(file_buffer);
-	file_buffer << AST_SPACE << "GOTO (BB "<<successor<<")\n\n";
+	file_buffer <<"\n"<< AST_SPACE << "GOTO (BB "<<successor<<")";
 	Eval_Result & result = *new Eval_Result_Value(int_result);
 	return result;
 }
@@ -575,22 +591,28 @@ int If_Else_Ast::next_bb(){
 }
 
 void If_Else_Ast::print_ast(ostream & file_buffer){
-	file_buffer << AST_SPACE << "If_Else statement:";
-	// cout<<"Here i call rel "<<endl;
+	file_buffer <<"\n"<< AST_SPACE << "If_Else statement:";
 	rel->print_ast(file_buffer);
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "True Successor: "<<true_goto->get_successor()<<"\n";
-	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor()<<"\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor();
 }
 
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval , ostream & file_buffer){
-	print_ast(file_buffer);
+	file_buffer <<"\n"<< AST_SPACE << "If_Else statement:";
+	rel->print_ast(file_buffer);
+
 	rel->evaluate(eval, file_buffer);
+
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "True Successor: "<<true_goto->get_successor()<<"\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor()<<"\n";
+
 	if(rel->get_return_value())
 		file_buffer << AST_SPACE << "Condition True : Goto (BB "<<true_goto->get_successor()<<")\n";
 	else
 		file_buffer << AST_SPACE << "Condition False : Goto (BB "<<false_goto->get_successor()<<")\n";
-	file_buffer << "\n" ;
+	//file_buffer << "\n" ;
 	Eval_Result & result = *new Eval_Result_Value(int_result);
 	return result;
 }
@@ -978,4 +1000,57 @@ Eval_Result & Unary_Ast::evaluate(Local_Environment & eval_env, ostream & file_b
 
 Data_Type Unary_Ast::get_data_type(){
 	return node_data_type;
+}
+
+///////////////////////////////////////////////////////////////////////
+
+Call_Ast::Call_Ast(list<Ast *>* as, Procedure * p){
+	if(as==NULL){
+		call_list = new list<Ast *>;
+	}
+	else{
+		call_list = as;
+	}
+	proc = p;
+}
+
+Call_Ast::~Call_Ast(){}
+
+void Call_Ast::print_ast(ostream & file_buffer){
+	file_buffer <<"\n"<< AST_SPACE << "FN CALL: "<<proc->get_proc_name()<<"(";
+	list<Ast *>::iterator i;
+	for(i = call_list->begin(); i != call_list->end(); i++){
+		file_buffer<<"\n"<<AST_NODE_NODE_SPACE;
+		(*i)->print_ast(file_buffer);
+	}
+
+	file_buffer<<")";
+}
+
+Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
+	list<Eval_Result_Value *> argument_list;
+	list<Ast *>::iterator j;
+	for(j = call_list->begin(); j != call_list->end(); j++){
+		Eval_Result & result = (*j)->evaluate(eval_env,file_buffer);
+		Eval_Result_Value * i;
+		if (result.get_result_enum() == int_result)
+		{
+			i = new Eval_Result_Value(int_result);
+		 	i->set_value(result.get_value());
+		 	argument_list.push_back(i);
+		}else if(result.get_result_enum() == float_result){
+			i = new Eval_Result_Value(float_result);
+		 	i->set_value(result.get_value());
+		 	argument_list.push_back(i);
+		}
+	}
+	return proc->evaluate(file_buffer,argument_list);
+}
+
+Data_Type Call_Ast::get_data_type(){
+	return proc->get_return_type();
+}
+
+int Call_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
 }

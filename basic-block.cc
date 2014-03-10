@@ -58,18 +58,19 @@ int Basic_Block::get_bb_number()
 }
 void Basic_Block::print_bb(ostream & file_buffer)
 {
-	file_buffer << BB_SPACE << "Basic_Block " << id_number << "\n";
+	file_buffer << BB_SPACE << "Basic_Block " << id_number ;
 
 	list<Ast *>::iterator i;
 	for(i = statement_list.begin(); i != statement_list.end(); i++)
 		(*i)->print_ast(file_buffer);
+	file_buffer<<"\n";
 }
 
 Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	Eval_Result * result = NULL;
 
-	file_buffer << BB_SPACE << "Basic Block: " << id_number << "\n\n";
+	file_buffer <<"\n"<< BB_SPACE << "Basic Block: " << id_number << "\n";
 	// cout<<statement_list.size()<<endl;
 	list <Ast *>::iterator i;
 	for (i = statement_list.begin(); i != statement_list.end(); i++)

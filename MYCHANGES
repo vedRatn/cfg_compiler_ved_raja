@@ -190,3 +190,58 @@ decided among the operators of arithemetic expression.
 
 We have also broadened the scope of a declaration statement by including types float and double as
 valid datatypes. For scanning these, we have introduced appropriate rules in the scanner.
+
+
+
+MYCHANGES 3B
+------------
+
+In this part we implemented the background working of Arithmetic Expression by building the follow-
+ing new classes.
+
+1) Type_Case_Ast : public Ast
+	This class is basically an envelope over another Ast class Object in which it casts the results
+	of the underlying object from its initial type to some other type and returns value of the new
+	type. For this it uses the Eval_Result class functions and the basic C++ typecasting.
+
+2) Arithmetic_Expr_Ast : public Ast
+	The base of all arithmetic functions which declares all functions needed by its children classes
+	and defines the one which have common definition over all the inherited classes.
+
+3) Plus_Ast : public Arithmetic_Expr_Ast
+	This class has two Ast objects as its members and it returns the sum of their values as its own
+	value when called for in function evaluation.
+
+4) Minus_Ast : public Arithmetic_Expr_Ast
+	This class has two Ast objects as its members and it returns the difference of their values as 
+	its own	value when called for in function evaluation.
+
+5) Division_Ast : public Arithmetic_Expr_Ast
+	This class has two Ast objects as its members and it returns the quotient of their values as its
+	own	value when called for in function evaluation.
+
+6) Multiplication_Ast : public Arithmetic_Expr_Ast
+	This class has two Ast objects as its members and it returns the product of their values as its
+	own	value when called for in function evaluation.
+
+7) Unary_Ast : public Arithmetic_Expr_Ast
+	This class has one Ast object as its member and it returns the arithmetic negation of its value 
+	as its own value when called for in function evaluation.
+
+For each of the above mentioned classes the three basic functions
+a) printAst()
+b) evaluate()
+c) checkAst()
+are defined appropriately.
+
+The other major part of this assignment was including the types float and double as valid types and
+making the changes in symbol-table & local_environment framework so that it can handle and manage
+these new types efficiently.
+
+	This we managed by changing the basic unit of numeric data from integer to a union of int, float
+	and double values. Because of this the Eval_Result_Value_Int and Float classes lost their signi-
+	ficance and therefore were deleted. The set_value and get_value function of Eval_Result_value 
+	class were modified and the Result_enum and Data_Type_enum were changed to accomodate for float-
+	ing point values.
+
+

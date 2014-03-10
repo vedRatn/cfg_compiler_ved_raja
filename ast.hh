@@ -34,7 +34,8 @@ using namespace std;
 enum COMP_ENUM { LE, GE, EQ, NE, LT, GT, NONE };
 
 class Ast;
-
+#include "basic-block.hh"
+#include "procedure.hh"
 class Ast
 {
 protected:
@@ -120,9 +121,10 @@ public:
 
 class Return_Ast:public Ast
 {
-
+private:
+	Ast * relst;
 public:
-	Return_Ast();
+	Return_Ast(Ast * retarg);
 	~Return_Ast();
 
 	void print_ast(ostream & file_buffer);
@@ -289,5 +291,21 @@ public:
 	bool check_ast(int line);
 	Data_Type get_data_type();
 };
+
+class Call_Ast: public Ast
+{
+private:
+	list<Ast *>* call_list;
+	Procedure * proc;
+public:
+	Call_Ast(list<Ast *>*, Procedure *);
+	~Call_Ast();
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	Data_Type get_data_type();
+	int checkSuccessor(list < int > & allIds);
+};
+
+
 
 #endif

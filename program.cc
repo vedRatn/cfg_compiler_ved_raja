@@ -66,6 +66,11 @@ void Program::set_procedure_map(Procedure & proc)
 	procedure_map[proc.get_proc_name()] = &proc;
 }
 
+Procedure * Program::get_procedure_map(string name)
+{
+	return procedure_map[name];
+}
+
 bool Program::variable_in_symbol_list_check(string variable)
 {
 	return global_symbol_table.variable_in_symbol_list_check(variable);
@@ -100,15 +105,13 @@ void Program::print_ast()
 	ostream & ast_buffer = command_options.get_ast_buffer();
 
 	ast_buffer << "Program:\n";
-
-	Procedure * main = get_main_procedure(ast_buffer);
-	if (main == NULL)
-		report_error("No main function found in the program", NOLINE);
-
-	else
+	map<string, Procedure *>::iterator i;
+	for(i = procedure_map.begin(); i != procedure_map.end(); i++)
 	{
-		main->print_ast(ast_buffer);
+		if(i->second != NULL)
+			i->second->print_ast(ast_buffer);
 	}
+	
 }
 
 Eval_Result & Program::evaluate()
@@ -125,7 +128,7 @@ Eval_Result & Program::evaluate()
 	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
 	interpreter_global_table.print(file_buffer);
 
-	Eval_Result & result = main->evaluate(file_buffer);
+	Eval_Result & result = main->evaluate(file_buffer,*new list<Eval_Result_Value *>());
 
 	file_buffer << GLOB_SPACE << "Global Variables (after evaluating):\n";
 	interpreter_global_table.print(file_buffer);
