@@ -245,3 +245,69 @@ these new types efficiently.
 	ing point values.
 
 
+MYCHANGES 4a
+------------
+
+In scanner.ll : Added token "VOID" to detect the corresponding keyword in the cfg file.
+
+In Parser.yy
+	In this part we introduce the notion of a function.
+
+	Modifed Grammar for detection of
+		program:
+		Since we have added function to the program structure we need to change grammar of program to 
+		incorporate them. declaration_statement_list has replaced with variable_declaration_statement_list
+		and function_declaration_statement_list. So now before procedure_list program can have 
+		variable_declaration_statement_list or function_declaration_statement_list or a mix of these
+
+	Added Grammar rules for
+		function_declaration_statement:
+			VOID NAME '(' function_parameter_list ')' ';'
+			|
+			VOID NAME '(' ')' ';'
+		and similarly for INT, FLOAT and DOUBLE.
+
+		function_parameter_list :
+			function_parameter
+			|
+			function_parameter ',' function_parameter_list
+
+		function_parameter :
+			INTEGER NAME 
+			|
+			FLOAT NAME 
+			|
+			DOUBLE NAME 
+
+MYCHANGES 4B
+------------
+
+In 4a appropriate changes were made to parse function declarations, definitions and calls.
+
+One new class under the name Call_Ast was added inherited from the base class Ast to handle all the
+functinalities concerning a function call. A crucial member of this class is an object of the proce-
+dure class. The procedure class basically holds all the elements of a procedure i.e its basic blocks,
+declarations etc in an appropriate structure. The Call_Ast class basically provides all the tools of
+interacting with the underlying procedure. In this way it defines the two basic functions of all the
+Ast classes crucial for their functioning namely:
+
+1) void print_ast(ostream & file_buffer);
+2) Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+The Call_Ast class has another member which is a list of Asts which basically hold the parameters
+required for passing in a function call. These are passed in approriate form to the "evaluate" fu-
+nction of the underlying procedure which returns the result in the form of an Eval_Result after 
+calculating it using the arguments passed to it.
+
+The record of all the procedures is held in a private member of the program class under the name
+procedure_map. This is a map between a string and pointer to a procedure class. This way it prov-
+ides means of accessing all the procedure definitions given their name and hence also provides us
+a way to detect name conflicts with other functions and global variables.
+To generate appropriate errors while parsing the program in case some name-conflict is detected,
+we defined the following the following four functions under the program class so that it is acc-
+ssible to all.
+
+1) void variable_in_proc_map_check(string symbol, int line);
+2) void procedure_in_proc_map_check(string symbol, int line);
+3) bool is_program_declared(string name);
+4) void global_variable_exist_error(string name, int line);

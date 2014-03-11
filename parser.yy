@@ -146,25 +146,18 @@ procedure_name:
 	NAME '(' function_parameter_list ')'
    {
 		current_procedure = program_object.get_procedure_map(*$1);
-		if(*$1 != "main"){
-			if(!program_object.is_program_declared(*$1)){
-				int line = get_line_number();
-				report_error("Function definition without declaration is not allowed", line);	
-			}
+		if(!program_object.is_program_declared(*$1)){
+			int line = get_line_number();
+			report_error("Function definition without declaration is not allowed", line);	
 		}
    }
 |
 	NAME '(' ')'
    {
-   		if(*$1 == "main"){
-   			current_procedure = new Procedure(void_data_type, *$1, *(new Symbol_Table));
-   			program_object.set_procedure_map(*current_procedure);
-   		}else{
-   			if(!program_object.is_program_declared(*$1)){
-				int line = get_line_number();
-				report_error("Function definition without declaration is not allowed", line);	
-			}
-   		}
+		if(!program_object.is_program_declared(*$1)){
+			int line = get_line_number();
+			report_error("Function definition without declaration is not allowed", line);	
+		}
 
    		current_procedure = program_object.get_procedure_map(*$1);
    }

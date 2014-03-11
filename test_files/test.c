@@ -1,5 +1,3 @@
-int d;
-
 main()
 {
 	int a = 3;
