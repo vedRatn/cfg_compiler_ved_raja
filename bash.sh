@@ -12,12 +12,12 @@ done
 echo "\nProcessing correct files"
 echo "-------------------------\n"
 
-for file in "test_files"/*.ecfg 
+for file in "test_files"/*.cfg 
 do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
-	./cfglp $file -tokens -d > out1
-	./cfglp64-sirki $file -tokens -d > out2
+	./cfglp $file -eval -d > out1
+	./cfglp64-sirki $file -eval -d > out2
 	diff -b -B out1 out2 > tmp/$f
 done

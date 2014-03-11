@@ -185,17 +185,13 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,list<Eval_Result_Value *
 
 	file_buffer << "\n\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
-	eval_env.print(file_buffer);
 
 	if(result->is_variable_defined()){
-		if(result->get_result_enum() == int_result){
-			file_buffer <<AST_SPACE<< "return : " << result->get_value().i;
-		}else if(result->get_result_enum() == float_result){
-			file_buffer <<AST_SPACE<< "return : " ;
-			file_buffer << std::fixed<<setprecision(2)<<result->get_value().f;
-		}
-		file_buffer<<"\n";
+		eval_env.put_variable_value(*result, "return");
 	}
+
+	eval_env.print(file_buffer);
+
 	return *result;
 }
 
