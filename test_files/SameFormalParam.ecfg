@@ -1,5 +1,5 @@
 
-void fn();
+void main();
 void fn2(int a, int a);
 
 main()

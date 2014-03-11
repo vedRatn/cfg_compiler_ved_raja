@@ -1,5 +1,5 @@
 int a;
-
+void main();
 int fun(int c);
 
 fun(int c)

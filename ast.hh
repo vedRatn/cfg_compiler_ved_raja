@@ -304,6 +304,7 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 	Data_Type get_data_type();
 	int checkSuccessor(list < int > & allIds);
+	int next_bb();
 };
 
 

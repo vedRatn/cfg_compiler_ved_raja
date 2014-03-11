@@ -1,5 +1,5 @@
-void fn();
-int fn2(int a, float b);
+void main();
+int fn2();
 
 main()
 {
@@ -11,10 +11,10 @@ main()
    return;
 
 }
-fn2(int a, float c)
+fn2()
 {
-   int b;
-<bb 2>:
-   b = 2;
-   return a;
+ 	int d;
+ 	<bb 2>:
+ 		d = 1;
+ 		return d;
 }

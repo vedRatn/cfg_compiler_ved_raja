@@ -61,6 +61,7 @@ public:
 	Eval_Result & evaluate(ostream & file_buffer, list<Eval_Result_Value *> argument_list);
 
 	bool variable_in_symbol_list_check(string variable);
+	bool check_parameters_definition_vs_declaration(Symbol_Table & table);
 };
 
 #endif

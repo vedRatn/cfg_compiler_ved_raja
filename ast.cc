@@ -757,7 +757,6 @@ bool Plus_Ast::check_ast(int line){
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-
 	report_error("Plus statement data type not compatible", line);
 }
 
@@ -810,7 +809,6 @@ bool Minus_Ast::check_ast(int line){
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-
 	report_error("Minus statement data type not compatible", line);
 }
 
@@ -964,10 +962,10 @@ Data_Type Multiplication_Ast::get_data_type(){
 
 Unary_Ast::Unary_Ast(Ast * a){
 	this->ast = a;
+	node_data_type = ast->get_data_type();
 }
 
 bool Unary_Ast::check_ast(int line){
-	node_data_type = ast->get_data_type();
 	return true;
 }
 
@@ -1052,5 +1050,9 @@ Data_Type Call_Ast::get_data_type(){
 }
 
 int Call_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
+}
+
+int Call_Ast::next_bb(){
 	return 0;
 }

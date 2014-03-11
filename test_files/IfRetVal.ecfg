@@ -1,3 +1,6 @@
+void main();
+int fn();
+
 fn()
 {
 	int a = 10;

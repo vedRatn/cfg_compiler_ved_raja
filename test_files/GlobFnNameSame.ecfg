@@ -1,6 +1,6 @@
 int a;
 int a(int b);
-
+void main();
 a(int b)
 {
 <bb 2>:

@@ -50,7 +50,7 @@
 %left lt le gt ge
 %left '+' '-'
 %left '/' '*'
-
+%left UMINUS
 
 %type <symbol_table> variable_declaration_statement_list
 %type <symbol_entry> variable_declaration_statement
@@ -150,6 +150,10 @@ procedure_name:
 			int line = get_line_number();
 			report_error("Function definition without declaration is not allowed", line);	
 		}
+		if(!current_procedure->check_parameters_definition_vs_declaration(*$3)){
+			int line = get_line_number();
+			report_error("Variable name of one of the parameters of the procedre and its prototypes doesn't match", line);	
+		}
    }
 |
 	NAME '(' ')'
@@ -158,8 +162,11 @@ procedure_name:
 			int line = get_line_number();
 			report_error("Function definition without declaration is not allowed", line);	
 		}
-
    		current_procedure = program_object.get_procedure_map(*$1);
+   		if(!current_procedure->check_parameters_definition_vs_declaration(*new Symbol_Table)){
+			int line = get_line_number();
+			report_error("Variable name of one of the parameters of the procedre and its prototypes doesn't match", line);	
+		}
    }
 
 ;
@@ -382,11 +389,11 @@ function_parameter_list:
    {
    		if ($1 != NULL)
 		{
-			/*if($2->variable_in_symbol_list_check(var_name))
+			if($1->variable_in_symbol_list_check($3->get_variable_name()))
 			{
 				int line = get_line_number();
-				report_error("Variable is declared twice", line);
-		  	}*/
+				report_error("Formal Parameter is declared twice", line);
+		  	}
 
 			$$ = $1;
 		}
@@ -723,7 +730,7 @@ arithmetic_expression:
 		$$ = new Type_Cast_Ast($5, float_data_type);
    }
 |
-	'-' arithmetic_expression
+	'-' arithmetic_expression %prec UMINUS
 	{
 		$$ = new Unary_Ast($2);
 	}

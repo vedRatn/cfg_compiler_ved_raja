@@ -1,6 +1,7 @@
 int a;
 
 int fun(int c);
+void main();
 
 fun(int c)
 {

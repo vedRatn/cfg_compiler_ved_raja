@@ -76,8 +76,13 @@ void Procedure::set_local_list(Symbol_Table & new_list)
 void Procedure::append_local_list(Symbol_Table & new_list)
 {
 	list<Symbol_Table_Entry *>::iterator i;
-	for (i = new_list.variable_table.begin(); i != new_list.variable_table.end(); i++)
-		local_symbol_table.push_symbol(*i);
+	for (i = new_list.variable_table.begin(); i != new_list.variable_table.end(); i++){
+		if(local_symbol_table.variable_in_symbol_list_check((*i)->get_variable_name())){
+			report_error("Formal parameter and local variable name cannot be same", NOLINE);
+		}else{
+			local_symbol_table.push_symbol(*i);
+		}
+	}
 }
 
 Data_Type Procedure::get_return_type()
@@ -195,3 +200,25 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,list<Eval_Result_Value *
 	return *result;
 }
 
+bool Procedure::check_parameters_definition_vs_declaration(Symbol_Table & new_list){
+	list<Symbol_Table_Entry *>::iterator i,j;
+	if(argument_symbol_list.variable_table.empty()){
+		if(!new_list.variable_table.empty()){
+			return false;
+		}else{
+			return true;
+		}
+	}else{
+		if(new_list.variable_table.empty())
+			return false;
+	}
+	if(new_list.variable_table.size() != argument_symbol_list.variable_table.size()){
+		return false;
+	}
+	for (i = new_list.variable_table.begin(), j = argument_symbol_list.variable_table.begin() ; i != new_list.variable_table.end() && j != argument_symbol_list.variable_table.end(); i++ ,j++){
+		if((*i)->get_variable_name() != (*j)->get_variable_name() || (*i)->get_data_type() != (*j)->get_data_type()){
+			return false;
+		}
+	}
+	return true;
+}
