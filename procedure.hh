@@ -39,10 +39,10 @@ class Procedure
 {
 	Data_Type return_type;
 	string name;
-	Symbol_Table local_symbol_table, argument_symbol_list;
-	list<Basic_Block *> basic_block_list;
 
 public:
+	Symbol_Table local_symbol_table, argument_symbol_list;
+	list<Basic_Block *> basic_block_list;
 	Procedure(Data_Type proc_return_type, string proc_name, Symbol_Table & s);
 	~Procedure();
 

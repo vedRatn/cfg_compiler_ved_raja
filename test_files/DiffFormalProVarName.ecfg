@@ -7,11 +7,11 @@ main()
 
 <bb 2>:
    a = 3;
-   a = fn2(a, 2.3);
+   a = fn2(1.1);
    return;
 
 }
-fn2()
+fn2(int a)
 {
  	int d;
  	<bb 2>:

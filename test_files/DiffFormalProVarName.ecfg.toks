@@ -9,9 +9,6 @@ Line: 2 	Token Name: INTEGER 	Token: int 	Token Code: 262
 Line: 2 	Ignored lexeme: ' '
 Line: 2 	Token Name: NAME 	Token: fn2 	Token Code: 260
 Line: 2 	Token Name: META CHAR 	Token: ( 	Token Code: 40
-Line: 2 	Token Name: INTEGER 	Token: int 	Token Code: 262
-Line: 2 	Ignored lexeme: ' '
-Line: 2 	Token Name: NAME 	Token: a 	Token Code: 260
 Line: 2 	Token Name: META CHAR 	Token: ) 	Token Code: 41
 Line: 2 	Token Name: META CHAR 	Token: ; 	Token Code: 59
 Line: 3 	Ignored NEWLINE character
@@ -53,22 +50,5 @@ Line: 10 	Token Name: ASSIGN_OP 	Token: = 	Token Code: 269
 Line: 10 	Ignored lexeme: ' '
 Line: 10 	Token Name: NAME 	Token: fn2 	Token Code: 260
 Line: 10 	Token Name: META CHAR 	Token: ( 	Token Code: 40
-Line: 10 	Token Name: NAME 	Token: a 	Token Code: 260
-Line: 10 	Token Name: META CHAR 	Token: , 	Token Code: 44
-Line: 10 	Ignored lexeme: ' '
-Line: 10 	Token Name: FNUM 	Token: 2.3 	Token Code: 259
+Line: 10 	Token Name: FNUM 	Token: 1.1 	Token Code: 259
 Line: 10 	Token Name: META CHAR 	Token: ) 	Token Code: 41
-Line: 10 	Token Name: META CHAR 	Token: ; 	Token Code: 59
-Line: 11 	Ignored NEWLINE character
-Line: 11 	Ignored lexeme: ' '
-Line: 11 	Ignored lexeme: ' '
-Line: 11 	Ignored lexeme: ' '
-Line: 11 	Token Name: RETURN 	Token: return 	Token Code: 261
-Line: 11 	Token Name: META CHAR 	Token: ; 	Token Code: 59
-Line: 12 	Ignored NEWLINE character
-Line: 13 	Ignored NEWLINE character
-Line: 13 	Token Name: META CHAR 	Token: } 	Token Code: 125
-Line: 14 	Ignored NEWLINE character
-Line: 14 	Token Name: NAME 	Token: fn2 	Token Code: 260
-Line: 14 	Token Name: META CHAR 	Token: ( 	Token Code: 40
-Line: 14 	Token Name: META CHAR 	Token: ) 	Token Code: 41

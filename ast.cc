@@ -1003,13 +1003,27 @@ Data_Type Unary_Ast::get_data_type(){
 ///////////////////////////////////////////////////////////////////////
 
 Call_Ast::Call_Ast(list<Ast *>* as, Procedure * p){
+	proc = p;
 	if(as==NULL){
+		if(!proc->argument_symbol_list.variable_table.empty()){
+			report_error("Actual and formal parameter count do not match", NOLINE);
+		}
 		call_list = new list<Ast *>;
 	}
 	else{
+		if(proc->argument_symbol_list.variable_table.size() != as->size()){
+			report_error("Actual and formal parameter count do not match", NOLINE);
+		}else{
+			list<Ast *>::iterator i ;
+			list<Symbol_Table_Entry *>::iterator j ;
+			for(i = as->begin(), j = proc->argument_symbol_list.variable_table.begin() ; i != as->end() && j != proc->argument_symbol_list.variable_table.end() ; i++ , j++){
+				if((*i)->get_data_type() != (*j)->get_data_type()){
+					report_error("Actual and formal parameters data types are not matching", NOLINE);
+				}
+			}
+		}
 		call_list = as;
 	}
-	proc = p;
 }
 
 Call_Ast::~Call_Ast(){}
