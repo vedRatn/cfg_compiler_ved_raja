@@ -83,8 +83,9 @@ Symbol_Table_Entry & Program::get_symbol_table_entry(string variable_name)
 
 void Program::variable_in_proc_map_check(string variable, int line)
 {
-	if(procedure_map[variable] != NULL)
+	if(procedure_map[variable] != NULL){
 		report_error("Variable name cannot be same as procedure name", line);
+	}
 }
 
 Procedure * Program::get_main_procedure(ostream & file_buffer)
@@ -134,4 +135,28 @@ Eval_Result & Program::evaluate()
 	interpreter_global_table.print(file_buffer);
 
 	return result;
+}
+
+
+void Program::procedure_in_proc_map_check(string variable, int line){
+	if(procedure_map[variable] != NULL){
+		report_error("Overloading of the procedure is not allowed", line);
+	}	
+}
+
+bool Program::is_program_declared(string name){
+	if(procedure_map[name] != NULL){
+		return true;
+	}		
+	return false;
+}
+
+void Program::global_variable_exist_error(string name, int line){
+	if(global_symbol_table.variable_in_symbol_list_check(name)){
+		report_error("Function name conflicts with global variable", line);
+	}
+}
+
+void Program::insert_in_global_table(Symbol_Table_Entry * entry){
+	global_symbol_table.push_symbol(entry);
 }

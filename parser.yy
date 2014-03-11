@@ -91,10 +91,23 @@ program:
 		program_object.set_global_table(*$1);
 	}
 	procedure_list
+	{
+
+	}
 |
-	function_declaration_statement_list	procedure_list
+	function_declaration_statement_list
+	{
+
+	}
+	procedure_list
+	{
+
+	}
 |
 	procedure_list
+	{
+
+	}
 
 // 	declaration_statement_list procedure_name
 // 	{
@@ -133,6 +146,12 @@ procedure_name:
 	NAME '(' function_parameter_list ')'
    {
 		current_procedure = program_object.get_procedure_map(*$1);
+		if(*$1 != "main"){
+			if(!program_object.is_program_declared(*$1)){
+				int line = get_line_number();
+				report_error("Function definition without declaration is not allowed", line);	
+			}
+		}
    }
 |
 	NAME '(' ')'
@@ -140,6 +159,11 @@ procedure_name:
    		if(*$1 == "main"){
    			current_procedure = new Procedure(void_data_type, *$1, *(new Symbol_Table));
    			program_object.set_procedure_map(*current_procedure);
+   		}else{
+   			if(!program_object.is_program_declared(*$1)){
+				int line = get_line_number();
+				report_error("Function definition without declaration is not allowed", line);	
+			}
    		}
 
    		current_procedure = program_object.get_procedure_map(*$1);
@@ -214,6 +238,10 @@ variable_declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
+		if(current_procedure == NULL){
+			program_object.set_global_table(*$$);
+		}
+		
    }
 |
 	variable_declaration_statement_list variable_declaration_statement
@@ -231,21 +259,17 @@ variable_declaration_statement_list:
 			report_error("Variable name cannot be same as procedure name", line);
 		}
 
-		if ($1 != NULL)
+		if($1->variable_in_symbol_list_check(var_name))
 		{
-			if($1->variable_in_symbol_list_check(var_name))
-			{
-				int line = get_line_number();
-				report_error("Variable is declared twice", line);
-		  	}
+			int line = get_line_number();
+			report_error("Variable is declared twice", line);
+	  	}
 
-			$$ = $1;
-		}
-
-		else
-			$$ = new Symbol_Table();
-
+		$$ = $1;
 		$$->push_symbol($2);
+		if(current_procedure == NULL){
+			program_object.insert_in_global_table($2);
+		}
    }
 ;
 
@@ -282,48 +306,72 @@ variable_declaration_statement:
 function_declaration_statement:
 	VOID NAME '(' function_parameter_list ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);   	
+		program_object.global_variable_exist_error(*$2, line);
    		Procedure * p = new Procedure(void_data_type, *$2, *$4);
    		program_object.set_procedure_map(*p);
    }
 |
 	VOID NAME '(' ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(void_data_type, *$2, *(new Symbol_Table()));
    		program_object.set_procedure_map(*p);
    }
 |
 	INTEGER NAME '(' function_parameter_list ')' ';'
    {
+		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(int_data_type, *$2, *$4);
    		program_object.set_procedure_map(*p);
    }
 |
 	INTEGER NAME '(' ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(int_data_type, *$2, *(new Symbol_Table()));
    		program_object.set_procedure_map(*p);
    }
 |
 	FLOAT NAME '(' function_parameter_list ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(float_data_type, *$2, *$4);
    		program_object.set_procedure_map(*p);
    }
 |
 	FLOAT NAME '(' ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(float_data_type, *$2, *(new Symbol_Table()));
    		program_object.set_procedure_map(*p);
    }
 |
 	DOUBLE NAME '(' function_parameter_list ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(float_data_type, *$2, *$4);
    		program_object.set_procedure_map(*p);
    }
 |
 	DOUBLE NAME '(' ')' ';'
    {
+   		int line = get_line_number();
+		program_object.procedure_in_proc_map_check(*$2, line);
+		program_object.global_variable_exist_error(*$2, line);   	
    		Procedure * p = new Procedure(float_data_type, *$2, *(new Symbol_Table()));
    		program_object.set_procedure_map(*p);
    }

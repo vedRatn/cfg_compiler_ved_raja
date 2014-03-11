@@ -12,7 +12,7 @@ done
 echo "\nProcessing correct files"
 echo "-------------------------\n"
 
-for file in "test_files"/*.cfg 
+for file in "test_files"/*.ecfg 
 do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
