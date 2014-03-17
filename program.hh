@@ -46,28 +46,24 @@ public:
 	~Program();
 	void delete_all();
 
-	void set_procedure_map(Procedure & proc);
-	Procedure * get_procedure_map(string name);
+	void set_procedure_map(Procedure * proc, int line);
 	void set_global_table(Symbol_Table & new_global_table);
-	void insert_in_global_table(Symbol_Table_Entry * entry);
 
 	Symbol_Table_Entry & get_symbol_table_entry(string variable);
 
-	void print_ast();
+	void print();
 
 	Procedure * get_main_procedure(ostream & file_buffer);
 
 	Eval_Result & evaluate();
 
+	bool variable_in_proc_map_check(string symbol);
 	bool variable_in_symbol_list_check(string variable);
-	void variable_in_proc_map_check(string symbol, int line);
-	void procedure_in_proc_map_check(string symbol, int line);
-	bool is_program_declared(string name);
-	void global_variable_exist_error(string name, int line);
+	void global_list_in_proc_map_check();
 
-
-	int max_bb;
-	int max_bb_call;
+	// compile
+	void compile();
+	void print_assembly();
 };
 
 #endif

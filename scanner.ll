@@ -28,15 +28,14 @@
 
 int		{
 			store_token_name("INTEGER");
-			ParserBase::STYPE__ * val = getSval();
-			val->string_value = new std::string(matched());
-			return Parser::INTEGER;
+			return Parser::INTEGER; 
 		}
 
 return		{ 
 			store_token_name("RETURN");
 			return Parser::RETURN; 
 		}
+
 /* control flow detection */
 if		{
 			store_token_name("IF");
@@ -53,89 +52,41 @@ goto	{
 			return Parser::GOTO;
 		}
 
-/*(&&|\|\|)	{
-				store_token_name("CONJ");
+
+[-]?[[:digit:]]+ 	{ 
+				store_token_name("NUM");
+
 				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-				return Parser::CONJ;
-			}
-*/
+				val->integer_value = atoi(matched().c_str());
 
-
-[:{}();,]	{
-			store_token_name("META CHAR");
-			return matched()[0];
-		}
-
-
-float		{
-				store_token_name("FLOAT");
-				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-				return Parser::FLOAT;
+				return Parser::INTEGER_NUMBER; 
 			}
 
-double		{
-				store_token_name("DOUBLE");
+[[:alpha:]_][[:alpha:][:digit:]_]* {
+					store_token_name("NAME");
+
+					ParserBase::STYPE__ * val = getSval();
+					val->string_value = new std::string(matched());
+
+					return Parser::NAME; 
+				}
+
+"<bb "[[:digit:]]+">"	{
+				store_token_name("BASIC BLOCK");
+
+				string bb_num_str = matched().substr(4, matched().length() - 2);
+				CHECK_INPUT_AND_ABORT((atoi(bb_num_str.c_str()) >= 2), "Illegal basic block lable", lineNr());
+
 				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-				return Parser::DOUBLE;
+				val->integer_value = atoi(bb_num_str.c_str());
+
+				return Parser::BBNUM;
 			}
 
-void 		{
-				store_token_name("VOID");
-				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-				return Parser::VOID;
-			}
-
-[<][b][b][ ][[:digit:]]+[>]	{
-						store_token_name("BASIC BLOCK");
-						ParserBase::STYPE__ * val = getSval();
-						val->string_value = new std::string(matched());
-						return Parser::BASIC_BLOCK;
-					}
-
-[=]	{
+"="	{
 		store_token_name("ASSIGN_OP");
-		ParserBase::STYPE__ * val = getSval();
-		val->string_value = new std::string(matched());
-		return Parser::ASSIGN_OP;
+		return Parser::ASSIGN;
 	}
-
-/*[+]	{
-		store_token_name("ARITHOP");
-		ParserBase::STYPE__ * val = getSval();
-		val->string_value = new std::string(matched());
-		return Parser::ADD_OP;
-	}
-
-[-]	{
-		store_token_name("ARITHOP");
-		ParserBase::STYPE__ * val = getSval();
-		val->string_value = new std::string(matched());
-		return Parser::SUB_OP;
-	}
-
-[*] {
-		store_token_name("ARITHOP");
-		ParserBase::STYPE__ * val = getSval();
-		val->string_value = new std::string(matched());
-		return Parser::MUL_OP;
-	}
-
-[/] {
-		store_token_name("ARITHOP");
-		ParserBase::STYPE__ * val = getSval();
-		val->string_value = new std::string(matched());
-		return Parser::DIV_OP;
-	}
-*/
-[+]|[-]|[*]|[/]	{
-			store_token_name("ARITHOP");
-			return matched()[0];
-		}
-
 
 [=][=]	{
 			store_token_name("EQ");
@@ -180,39 +131,17 @@ void 		{
 			return Parser::lt;
 		}		
 
-[-]?[[:digit:]]+ 	{ 
-				store_token_name("NUM");
 
-				ParserBase::STYPE__ * val = getSval();
-				val->integer_value = atoi(matched().c_str());
+[:{}();]	{
+			store_token_name("META CHAR");
+			return matched()[0];
+		}
 
-				return Parser::INTEGER_NUMBER; 
-			}
 
-[-]?[0-9]*\.[0-9]+ 	{ 
-				store_token_name("FNUM");
-
-				ParserBase::STYPE__ * val = getSval();
-				val->string_value = new std::string(matched());
-
-				return Parser::FLOAT_NUMBER; 
-			}
-
-[[:alpha:]_][[:alpha:][:digit:]_]* {
-					store_token_name("NAME");
-
-					ParserBase::STYPE__ * val = getSval();
-					val->string_value = new std::string(matched());
-
-					return Parser::NAME; 
-				}
-
-\n		{ 
-			if (command_options.is_show_tokens_selected())
-				ignore_token();
-		}    
-
+\n    		|
 ";;".*  	|
+[ \t]*";;".*	|
+[ \t]*"//".*	|
 [ \t]		{
 			if (command_options.is_show_tokens_selected())
 				ignore_token();
@@ -223,7 +152,5 @@ void 		{
 			error_message =  "Illegal character `" + matched();
 			error_message += "' on line " + lineNr();
 			
-			int line_number = lineNr();
-			report_error(error_message, line_number);
+			CHECK_INPUT(CONTROL_SHOULD_NOT_REACH, error_message, lineNr());
 		}
-

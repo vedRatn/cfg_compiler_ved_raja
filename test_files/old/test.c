@@ -1,14 +1,6 @@
-int d;
-
+int a;
 main()
 {
-	int a = 3;
-	int b = 5;
-
-	fn();
-}
-
-fn()
-{
-	int c = 4;
+	int b;
+	b = a;
 }

@@ -39,23 +39,25 @@ class Basic_Block
 	int id_number;
 	list<Ast *> statement_list;
 
+	list<Icode_Stmt *> bb_icode_list;
+
+	int lineno;
+
 public:
-	Basic_Block(int basic_block_number, list<Ast *> & ast_list);
+	Basic_Block(int basic_block_number, int line);
 	~Basic_Block();
 
 	int get_bb_number();
+	void set_ast_list(list<Ast *> & ast_list);
+
 	void print_bb(ostream & file_buffer);
-  list < Ast *> & get_statement_list();
-  /*
-    This function needs to be added as now with the control flow statements
-    included, the program is no longer simply executing from the first bb to
-    the last bb
-  */
-  Basic_Block * get_next_bb(list < Basic_Block * > basic_block_list);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-  int invalidSuccessor(list < Basic_Block * > basic_block_list);
+	// compile
+	void compile();
+	void print_assembly(ostream & file_buffer);
+	void print_icode(ostream & file_buffer);
 };
 
 #endif
