@@ -41,7 +41,7 @@
 };
 
 %token <integer_value> INTEGER_NUMBER BBNUM
-%token <string_value> NAME
+%token <string_value> NAME 
 %token RETURN INTEGER IF ELSE GOTO ASSIGN
 
 %left ne eq
@@ -299,7 +299,7 @@ basic_block:
 		int bb_number = $1;
 		list<Ast *> * exe_stmt = $3;
 
-		CHECK_INPUT((bb_number >= 2), "Illegal basic block lable", get_line_number());
+		
 
 		Basic_Block * bb = new Basic_Block(bb_number, get_line_number());
 
@@ -419,10 +419,9 @@ goto_statement:
 	{
 		if (NOT_ONLY_PARSE)
 		{
-			string str(*$2);
-			if(atoi(str.substr(4, str.length()-1).c_str()) > program_object.max_bb_call)
-				program_object.max_bb_call = atoi(str.substr(4, str.length()-1).c_str());
-			$$ = new Goto_Ast(atoi(str.substr(4, str.length()-1).c_str()));
+			if($2 > program_object.max_bb_call)
+				program_object.max_bb_call = $2;
+			$$ = new Goto_Ast($2);
 		}
 	}
 ;

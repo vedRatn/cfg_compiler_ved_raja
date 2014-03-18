@@ -89,6 +89,10 @@ void Basic_Block::compile()
 
 	machine_dscr_object.validate_init_local_register_mapping();
 
+	Const_Opd<int> * num_opd = new Const_Opd<int>(id_number);
+	Icode_Stmt * label_stml = new Label_IC_Stmt(label_op , num_opd);
+	bb_icode_list.push_back(label_stml);
+
 	// compile the program by visiting each ast in the block
 	list<Ast *>::iterator i;
 	for (i = statement_list.begin(); i != statement_list.end(); i++)
@@ -130,6 +134,7 @@ void Basic_Block::print_assembly(ostream & file_buffer)
 void Basic_Block::print_icode(ostream & file_buffer)
 {
 	list<Icode_Stmt *>::iterator i;
+	file_buffer << "\n" ;
 	for (i = bb_icode_list.begin(); i != bb_icode_list.end(); i++)
 		(*i)->print_icode(file_buffer);
 }

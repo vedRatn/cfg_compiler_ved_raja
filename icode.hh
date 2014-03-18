@@ -63,6 +63,7 @@ typedef enum
 	i_r_op_o1,	/* r <- o1 */
 	i_r_r_op_o1,	/* r <- r op o1 */
 	i_r_o1_op_o2,	/* r <- o1 op o2 */ 
+	i_o1_op_o2_r,   /*added for bne*/
 	i_nsy		/* not specified yet */
 } Icode_Format;
 
@@ -78,7 +79,16 @@ typedef enum
 { 
 	load, 
 	imm_load, 
-	store, 
+	store,
+	slt,
+	sgt,
+	sle,
+	sge,
+	seq,
+	sne,
+	bne,
+	goto_op,
+	label_op,
 	nop 
 } Tgt_Op;
 
@@ -231,6 +241,83 @@ public:
 	void print_icode(ostream & file_buffer);
 	void print_assembly(ostream & file_buffer);
 };
+
+class Label_IC_Stmt: public Icode_Stmt
+{ 
+	Ics_Opd * opd1;   
+
+public:
+	Label_IC_Stmt(Tgt_Op inst_op, Ics_Opd * op1); 
+	~Label_IC_Stmt() {} 
+	Label_IC_Stmt & operator=(const Label_IC_Stmt & rhs);
+
+	Instruction_Descriptor & get_inst_op_of_ics();
+
+	Ics_Opd * get_opd1();
+	void set_opd1(Ics_Opd * io);
+
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+class Control_Flow_IC_Stmt: public Icode_Stmt
+{ 
+	Ics_Opd * opd1;   
+	Ics_Opd * opd2;   
+	Ics_Opd * result; 
+
+public:
+
+	/*For BNE Like statements*/
+	Control_Flow_IC_Stmt(Tgt_Op inst_op, Ics_Opd * opd1, Ics_Opd * opd2, Ics_Opd * result); 
+
+	/*For Goto Statement*/
+	Control_Flow_IC_Stmt(Tgt_Op inst_op, Ics_Opd * opd1); 	
+
+	~Control_Flow_IC_Stmt() {} 
+	Control_Flow_IC_Stmt & operator=(const Control_Flow_IC_Stmt & rhs);
+
+	Instruction_Descriptor & get_inst_op_of_ics();
+
+	Ics_Opd * get_opd1();
+	void set_opd1(Ics_Opd * io);
+
+	Ics_Opd * get_opd2();
+	void set_opd2(Ics_Opd * io);
+
+	Ics_Opd * get_result();
+	void set_result(Ics_Opd * io);
+
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+class Compute_IC_Stmt: public Icode_Stmt
+{ 
+	Ics_Opd * opd1;   
+	Ics_Opd * result; 
+	Ics_Opd * opd2;
+
+public:
+	Compute_IC_Stmt(Tgt_Op inst_op, Ics_Opd * opd1, Ics_Opd * opd2, Ics_Opd * result); 
+	~Compute_IC_Stmt() {} 
+	Compute_IC_Stmt & operator=(const Compute_IC_Stmt & rhs);
+
+	Instruction_Descriptor & get_inst_op_of_ics();
+
+	Ics_Opd * get_opd1();
+	void set_opd1(Ics_Opd * io);
+
+	Ics_Opd * get_result();
+	void set_result(Ics_Opd * io);
+
+	Ics_Opd * get_opd2();
+	void set_opd2(Ics_Opd * io);
+
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
 
 //////////////////////// Intermediate code for Ast statements ////////////////////////
 

@@ -33,6 +33,7 @@
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
 #define AST_SUB_NODE_SPACE "               "
+#define AST_NODE_NODE_SPACE "               "
 
 using namespace std;
 
@@ -61,6 +62,10 @@ public:
 
 	virtual Data_Type get_data_type();
 	virtual bool check_ast();
+
+	virtual int get_successor();
+	virtual bool get_return_value();
+
 	virtual Symbol_Table_Entry & get_symbol_entry();
 
 	virtual void print(ostream & file_buffer) = 0;
@@ -73,6 +78,7 @@ public:
 	virtual Code_For_Ast & compile() = 0;
 	virtual Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra) = 0;
 	virtual Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
+
 };
 
 class Assignment_Ast:public Ast
@@ -92,6 +98,7 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
 };
 
 class Name_Ast:public Ast
@@ -165,6 +172,7 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
 	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 class Relational_Ast: public Ast
@@ -183,8 +191,10 @@ public:
 	bool evaluateReturnValue(Local_Environment & eval);
 	void print(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
 
 	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 class If_Else_Ast: public Ast
@@ -202,6 +212,7 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
 	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 

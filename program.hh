@@ -1,4 +1,3 @@
-
 /*********************************************************************************************
 
                                 cfglp : A CFG Language Processor
@@ -64,6 +63,10 @@ public:
 	// compile
 	void compile();
 	void print_assembly();
+
+	int max_bb;
+	int max_bb_call;
+
 };
 
 #endif
