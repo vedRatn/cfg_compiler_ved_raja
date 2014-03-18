@@ -361,7 +361,7 @@ Code_For_Ast & Name_Ast::compile()
 
 	Code_For_Ast & load_code = *new Code_For_Ast(ic_list, result_register);
 	variable_symbol_entry->update_register(result_register);
-	cout<<result_register->get_name()<< " busy huwa name = "<<variable_symbol_entry->get_variable_name()<<endl;
+	// cout<<result_register->get_name()<< " busy huwa name = "<<variable_symbol_entry->get_variable_name()<<endl;
 	return load_code;
 }
 
@@ -375,7 +375,7 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 	Icode_Stmt * store_stmt = new Move_IC_Stmt(store, register_opd, opd);
 
 	if (command_options.is_do_lra_selected() == false){
-		cout<<store_register->get_name()<< " free huwa name"<<endl;
+		// cout<<store_register->get_name()<< " free huwa name"<<endl;
 		// variable_symbol_entry->free_register(store_register);
 		store_register->clear_lra_symbol_list();
 	}
@@ -472,7 +472,7 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile()
 	Code_For_Ast & num_code = *new Code_For_Ast(ic_list, result_register);
 	string str("number");
 	result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
-	cout<<result_register->get_name()<< " busy huwa nunber"<<endl;
+	// cout<<result_register->get_name()<< " busy huwa nunber"<<endl;
 	return num_code;
 }
 
@@ -760,15 +760,15 @@ Code_For_Ast & Relational_Ast::compile(){
 	}	
 	ic_list.push_back(rel_stmt);
 	if (command_options.is_do_lra_selected() == false){
-		cout<<lhs_register->get_name()<< " free huwa rel"<<endl;
-		cout<<rhs_register->get_name()<< " free huwa rel"<<endl;
+		// cout<<lhs_register->get_name()<< " free huwa rel"<<endl;
+		// cout<<rhs_register->get_name()<< " free huwa rel"<<endl;
 		// variable_symbol_entry->free_register(store_register);
 		lhs_register->clear_lra_symbol_list();
 		rhs_register->clear_lra_symbol_list();
 	}
 	string str("rel");
 	result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
-	cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
 	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
 	return *final_stml;
 }
@@ -852,7 +852,7 @@ Code_For_Ast & If_Else_Ast::compile(){
 	ic_list.push_back(bne_stml);
 	ic_list.push_back(goto_stml);
 	if (command_options.is_do_lra_selected() == false){
-		cout<<rel_code.get_reg()->get_name()<< " free huwa if"<<endl;
+		// cout<<rel_code.get_reg()->get_name()<< " free huwa if"<<endl;
 		// variable_symbol_entry->free_register(store_register);
 		rel_code.get_reg()->clear_lra_symbol_list();
 	}

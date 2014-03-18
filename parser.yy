@@ -140,6 +140,7 @@ procedure_definition:
 		CHECK_INVARIANT((bb_list != NULL), "Basic block list cannot be null");
 
 		current_procedure->set_basic_block_list(*bb_list);
+		CHECK_INVARIANT((program_object.max_bb_call <= program_object.max_bb), "Basic block call invalid");
 	}
 	}
 ;
@@ -299,7 +300,8 @@ basic_block:
 		int bb_number = $1;
 		list<Ast *> * exe_stmt = $3;
 
-		
+		if(bb_number > program_object.max_bb)
+			program_object.max_bb = bb_number;
 
 		Basic_Block * bb = new Basic_Block(bb_number, get_line_number());
 
@@ -445,6 +447,12 @@ relational_statement:
 			$$ = new Relational_Ast($1);
 			$$->check_ast();
 		}
+	}
+|
+	'(' relational_statement ')'
+	{
+		$$ = new Relational_Ast($2);
+			$$->check_ast();
 	}
 |
 	relational_statement le relational_statement

@@ -6,23 +6,9 @@ label2:
  store:	i <- v0
  iLoad:	v0 <- 2
  store:	j <- v0
- iLoad:	v0 <- 2
- store:	k <- v0
- iLoad:	v0 <- 2
- store:	l <- v0
  load:	v0 <- i
- store:	a <- v0
- load:	v0 <- i
- load:	t0 <- a
+ load:	t0 <- j
  slt: t1 <- v0 , t0
- load:	v0 <- j
- slt: t0 <- t1 , v0
- load:	v0 <- a
- sge: t1 <- t0 , v0
- load:	v0 <- k
- sne: t0 <- t1 , v0
- load:	v0 <- i
- seq: t1 <- t0 , v0
  bne: t1 , zero : goto label3
  goto label5
 
