@@ -83,7 +83,6 @@ public:
 	void assign_offsets();
 	int get_size();
 	void set_size(int n);
-
 	void print_assembly(ostream & file_buffer);
 };
 

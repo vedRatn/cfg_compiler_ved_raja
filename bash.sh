@@ -17,10 +17,8 @@ do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
-	file1=${file}.spim
-	./cfglp64 $file -compile
-	cat $file1 > out1
-	./cfglp64-sirki $file -icode
-	cat $file1 > out2
+	file1=${file}
+	./cfglp64 $file -icode -d > out1
+	./cfglp64-sirki $file -icode -d > out2
 	diff -b out1 out2 > tmp/$f
 done
