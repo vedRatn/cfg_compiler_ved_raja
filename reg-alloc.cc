@@ -194,7 +194,7 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			load_needed = false;
 			// cout<<"case 1"<<endl;
 		}
-		else if (destination_register != NULL)
+		else if (destination_register != NULL && destination_register->is_mapping_unique())
 		{
 			result_register = destination_register;
 			is_same_as_destination = true;
@@ -274,6 +274,12 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 
 }
 
+bool Register_Descriptor::is_mapping_unique(){
+	if(lra_symbol_list.size() == 1)
+		return true;
+	return false;
+}
+
 /******************************* Machine Description *****************************************/
 
 void Machine_Description::initialize_register_table()
@@ -343,9 +349,9 @@ void Machine_Description::clear_local_register_mappings()
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		Register_Descriptor * reg_desc = i->second;
+		// reg_desc->print_variables();
 		reg_desc->clear_lra_symbol_list();
 	}
-
 	/* 
 	Note that we do not need to save values at the end
 	of a basic block because the values have already been

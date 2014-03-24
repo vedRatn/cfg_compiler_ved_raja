@@ -7,25 +7,25 @@ main:				# .globl makes main know to the
 	sw $fp, 0($sp)		# Save the frame pointer
 	sub $fp, $sp, 4		# Update the frame pointer
 
-	sub $sp, $sp, 12		# Make space for the locals
+	sub $sp, $sp, 16		# Make space for the locals
 # Prologue ends
 
 
-label2: 
-	lw, $v0, 0($fp)
-	lw, $t0, 8($fp)
+label2:
+	lw $v0, 0($fp)
+	lw $t0, -8($fp)
 	sgt $t1, $v0, $t0
-	lw, $v0, 4($fp)
+	lw $v0, -4($fp)
 	seq $t0, $t1, $v0
-	bne $t0, $zero, label3 
+	bne $t0, $zero, label3
 	j label4
 
-label3: 
+label3:
 
-label4: 
+label4:
 
 # Epilogue Begins
-	add $sp, $sp, 12
+	add $sp, $sp, 16
 	lw $fp, 0($sp)  
 	jr        $31		# Jump back to the operating system.
 # Epilogue Ends

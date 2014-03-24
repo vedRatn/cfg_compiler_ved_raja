@@ -97,7 +97,7 @@ class Register_Descriptor
     void reset_use_for_expr_result();
     void print_variables();
     bool is_temperory();
-
+    bool is_mapping_unique();
     bool is_free();
 };
 
