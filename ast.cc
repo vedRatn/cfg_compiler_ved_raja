@@ -106,6 +106,18 @@ Code_For_Ast & Ast::create_store_stmt(Register_Descriptor * store_register)
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
+COMP_ENUM Ast::get_comp(){
+	stringstream msg;
+	msg << "No get_comp() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
+bool Ast::is_number(){
+	stringstream msg;
+	msg << "No is_number() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line)
@@ -216,8 +228,11 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
-
-	lra.optimize_lra(mc_2m, lhs, rhs);
+	// Only when rhs is a number of variable is optimization required
+	//because otherwise its r2m where no regall is required
+	if(rhs->get_comp() == NONE){
+		lra.optimize_lra(mc_2m, lhs, rhs);
+	}
 	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
 
 	Register_Descriptor * result_register = load_stmt.get_reg();
@@ -251,6 +266,7 @@ Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line)
 	ast_num_child = zero_arity;
 	node_data_type = variable_symbol_entry->get_data_type();
 	lineno = line;
+
 }
 
 Name_Ast::~Name_Ast()
@@ -373,6 +389,9 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 	Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
 
 	Icode_Stmt * store_stmt = new Move_IC_Stmt(store, register_opd, opd);
+
+	store_register->clear_lra_symbol_list();
+	variable_symbol_entry->update_register(store_register);
 
 	if (command_options.is_do_lra_selected() == false){
 		// cout<<store_register->get_name()<< " free huwa name"<<endl;
@@ -586,7 +605,15 @@ Code_For_Ast & Goto_Ast::compile(){
 }
 
 Code_For_Ast & Goto_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	Register_Descriptor * faltu_register = machine_dscr_object.get_new_register();
+	Ics_Opd * opd = new Const_Opd<int>(successor);
 
+	Icode_Stmt * goto_stml = new Control_Flow_IC_Stmt(goto_op, opd);
+	list<Icode_Stmt *> ic_list;
+	ic_list.push_back(goto_stml);
+
+	Code_For_Ast & goto_code = *new Code_For_Ast(ic_list, faltu_register);
+	return goto_code;
 }
 
 /************************************************************************************/
@@ -774,7 +801,100 @@ Code_For_Ast & Relational_Ast::compile(){
 }
 
 Code_For_Ast & Relational_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	
+	if(comp == NONE){
+		return lhs->compile_and_optimize_ast(lra);
+	}
 
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
+	if(lhs->get_comp() == NONE){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, lhs);
+	}
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	if(rhs->get_comp() == NONE){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, rhs);
+	}
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	Register_Descriptor * lhs_register = lhs_stmt.get_reg();
+
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	Register_Descriptor * rhs_register = rhs_stmt.get_reg();
+
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(lhs_register);
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(rhs_register);
+
+	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * rel_stmt;
+	switch(comp){
+		case LE:
+			rel_stmt =  new Compute_IC_Stmt(sle, lhs_opd, rhs_opd, result_opd);
+			break;
+		case GE:
+			rel_stmt =  new Compute_IC_Stmt(sge, lhs_opd, rhs_opd, result_opd);
+			break;
+		case GT:
+			rel_stmt =  new Compute_IC_Stmt(sgt, lhs_opd, rhs_opd, result_opd);
+			break;
+		case LT:
+			rel_stmt =  new Compute_IC_Stmt(slt, lhs_opd, rhs_opd, result_opd);
+			break;
+		case EQ:
+			rel_stmt =  new Compute_IC_Stmt(seq, lhs_opd, rhs_opd, result_opd);
+			break;
+		case NE:
+			rel_stmt =  new Compute_IC_Stmt(sne, lhs_opd, rhs_opd, result_opd);
+			break;
+		default: 
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Relational Ast compile shouln't reach");
+			break;
+	}	
+	ic_list.push_back(rel_stmt);
+	string my_str("temp");
+	if(lhs_register->find_symbol_entry_in_list(*new Symbol_Table_Entry(my_str, int_data_type, -1))){
+		// cout<<"found1 "<<lhs_register->get_name()<<endl;
+		lhs_register->clear_lra_symbol_list();
+	}
+	if(rhs_register->find_symbol_entry_in_list(*new Symbol_Table_Entry(my_str, int_data_type, -1))){
+		// cout<<"found2"<<rhs_register->get_name()<<endl;
+		rhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+	result_register->update_symbol_information(*new Symbol_Table_Entry(my_str, int_data_type, -1));
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
+}
+
+COMP_ENUM Relational_Ast::get_comp(){
+	return comp;
+}
+
+bool Relational_Ast::is_number(){
+	if(comp == NONE){
+		if(typeid(*lhs)==typeid(Number_Ast<int>))
+			return true;
+	}
+	return false;
+}
+
+Symbol_Table_Entry & Relational_Ast::get_symbol_entry(){
+	if(comp == NONE){
+		if(typeid(*lhs)!=typeid(Number_Ast<int>)){
+			return lhs->get_symbol_entry();
+		}
+	}
+	stringstream msg;
+	msg << "No get_symbol_entry() function for " << typeid(*lhs).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
 /************************************************************************************/
@@ -861,7 +981,28 @@ Code_For_Ast & If_Else_Ast::compile(){
 }
 
 Code_For_Ast & If_Else_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	Register_Descriptor * faltu_register = machine_dscr_object.get_new_register();
+	Code_For_Ast & rel_code = rel->compile_and_optimize_ast(lra);
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(rel_code.get_reg());
 
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(machine_dscr_object.spim_register_table[zero]);
+	Ics_Opd * bne_res_opd = new Const_Opd<int>(true_goto->get_successor());
+	Ics_Opd * goto_opd = new Const_Opd<int>(false_goto->get_successor());
+
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (rel_code.get_icode_list().empty() == false)
+		ic_list = rel_code.get_icode_list();
+	Icode_Stmt * bne_stml = new Control_Flow_IC_Stmt(bne, lhs_opd, rhs_opd, bne_res_opd);
+	Icode_Stmt * goto_stml = new Control_Flow_IC_Stmt(goto_op,goto_opd);
+	ic_list.push_back(bne_stml);
+	ic_list.push_back(goto_stml);
+	if (command_options.is_do_lra_selected() == false){
+		// cout<<rel_code.get_reg()->get_name()<< " free huwa if"<<endl;
+		// variable_symbol_entry->free_register(store_register);
+		rel_code.get_reg()->clear_lra_symbol_list();
+	}
+	Code_For_Ast * if_else_code = new Code_For_Ast(ic_list, faltu_register);
+	return *if_else_code;
 }
 
 /************************************************************************************/

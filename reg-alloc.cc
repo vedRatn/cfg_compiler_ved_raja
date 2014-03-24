@@ -81,7 +81,7 @@ bool Register_Descriptor::find_symbol_entry_in_list(Symbol_Table_Entry & sym_ent
 }
 
 void Register_Descriptor::clear_lra_symbol_list()
-{
+{	
 	list<Symbol_Table_Entry *>::iterator i;
 	for (i = lra_symbol_list.begin(); i != lra_symbol_list.end(); i++)
 	{
@@ -133,6 +133,7 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 
 	Register_Descriptor * destination_register, * source_register, * result_register;
 	Symbol_Table_Entry * source_symbol_entry, * destination_symbol_entry;
+	string my_str("temp");
 
 	destination_register = NULL;
 	source_register = NULL;
@@ -160,7 +161,7 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			destination_register = destination_symbol_entry->get_register(); 
 		}
 
-		if (typeid(*source_memory) == typeid(Number_Ast<int>))
+		if (source_memory->is_number())
 			source_register = NULL;
 		else
 		{
@@ -187,13 +188,24 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			load_needed = true;
 		}
 
+		/*if (destination_register){
+			cout<<"ye call huwa"<<endl;
+			destination_symbol_entry->free_register(destination_register); 
+		}*/
+		destination_symbol_entry->update_register(result_register);
+
 		break;
 
 	case mc_2r:
 		CHECK_INVARIANT(source_memory, "Sourse ast pointer cannot be NULL for m2r scenario in lra");
 
-		source_symbol_entry = &(source_memory->get_symbol_entry());
-		source_register = source_symbol_entry->get_register(); 
+		if (source_memory->is_number())
+			source_register = NULL;
+		else
+		{
+			source_symbol_entry = &(source_memory->get_symbol_entry());
+			source_register = source_symbol_entry->get_register(); 
+		}
 
 		if (source_register != NULL)
 		{
@@ -206,6 +218,11 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			result_register = machine_dscr_object.get_new_register();
 			is_a_new_register = true;
 			load_needed = true;
+		}
+
+		if(is_a_new_register){
+			// cout<<"inserting temp for register "<<result_register->get_name()<<endl;
+			result_register->update_symbol_information(*new Symbol_Table_Entry(my_str, int_data_type, -1));
 		}
 
 		break;
@@ -232,10 +249,6 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 	CHECK_INVARIANT ((result_register != NULL), "Inconsistent information in lra");
 	register_description = result_register;
 
-	if (destination_register)
-		destination_symbol_entry->free_register(destination_register); 
-
-	destination_symbol_entry->update_register(result_register);
 }
 
 /******************************* Machine Description *****************************************/

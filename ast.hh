@@ -78,6 +78,9 @@ public:
 	virtual Code_For_Ast & compile() = 0;
 	virtual Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra) = 0;
 	virtual Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
+	virtual COMP_ENUM get_comp();
+	virtual bool is_number();
+
 
 };
 
@@ -195,6 +198,9 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+	COMP_ENUM get_comp();
+	bool is_number();
+	Symbol_Table_Entry & get_symbol_entry();
 };
 
 class If_Else_Ast: public Ast

@@ -451,8 +451,10 @@ relational_statement:
 |
 	'(' relational_statement ')'
 	{
-		$$ = new Relational_Ast($2);
-			$$->check_ast();
+		if (NOT_ONLY_PARSE)
+		{
+			$$ = $2;
+		}
 	}
 |
 	relational_statement le relational_statement
