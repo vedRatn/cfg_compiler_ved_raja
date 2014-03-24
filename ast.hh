@@ -80,7 +80,9 @@ public:
 	virtual Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
 	virtual COMP_ENUM get_comp();
 	virtual bool is_number();
-
+	virtual Register_Descriptor * get_register();
+	virtual void free_register(Register_Descriptor * destination_reg_descr);
+	virtual void update_register(Register_Descriptor * result_reg_descr);
 
 };
 
@@ -121,6 +123,9 @@ public:
 	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	Register_Descriptor * get_register();
+	void free_register(Register_Descriptor * destination_reg_descr);
+	void update_register(Register_Descriptor * result_reg_descr);
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);

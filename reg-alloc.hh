@@ -95,6 +95,8 @@ class Register_Descriptor
 
     bool get_used_for_expr_result();
     void reset_use_for_expr_result();
+    void print_variables();
+    bool is_temperory();
 
     bool is_free();
 };

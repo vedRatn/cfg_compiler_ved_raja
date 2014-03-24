@@ -118,6 +118,24 @@ bool Ast::is_number(){
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
+Register_Descriptor * Ast::get_register(){
+	stringstream msg;
+	msg << "No is_register_associated() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
+void Ast::free_register(Register_Descriptor * destination_reg_descr){
+	stringstream msg;
+	msg << "No free_register() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
+void Ast::update_register(Register_Descriptor * result_reg_descr){
+	stringstream msg;
+	msg << "No update_register() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line)
@@ -233,11 +251,19 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	if(rhs->get_comp() == NONE){
 		lra.optimize_lra(mc_2m, lhs, rhs);
 	}
+	
 	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
 
 	Register_Descriptor * result_register = load_stmt.get_reg();
 
 	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
+	if(rhs->get_comp() != NONE){
+		if(lhs->get_register()!=NULL){
+			// cout<<"freeing register "<<lhs->get_register()->get_name()<<endl;
+			lhs->free_register(lhs->get_register()); 
+		}
+		lhs->update_register(result_register);
+	}
 
 	list<Icode_Stmt *> ic_list;
 
@@ -390,9 +416,15 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 
 	Icode_Stmt * store_stmt = new Move_IC_Stmt(store, register_opd, opd);
 
-	store_register->clear_lra_symbol_list();
-	variable_symbol_entry->update_register(store_register);
-
+	// store_register->clear_lra_symbol_list();
+	// cout<<"I just freed "<<store_register->get_name()<<endl;
+	// variable_symbol_entry->update_register(store_register);
+	// cout<<"Here i am busying "<<store_register->get_name()<<" as register for "<<variable_symbol_entry->get_variable_name()<<endl;
+/*	if(store_register->is_free())
+		cout<<"is now free"<<endl;
+	else
+		cout<<"still busy"<<endl;
+	cout<<endl;*/
 	if (command_options.is_do_lra_selected() == false){
 		// cout<<store_register->get_name()<< " free huwa name"<<endl;
 		// variable_symbol_entry->free_register(store_register);
@@ -429,6 +461,17 @@ Code_For_Ast & Name_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	Code_For_Ast & load_code = *new Code_For_Ast(ic_list, result_register);
 
 	return load_code;
+}
+
+Register_Descriptor * Name_Ast::get_register(){
+	return variable_symbol_entry->get_register();
+}
+
+void Name_Ast::free_register(Register_Descriptor * destination_reg_descr){
+	variable_symbol_entry->free_register(destination_reg_descr);
+}
+void Name_Ast::update_register(Register_Descriptor * result_reg_descr){
+	variable_symbol_entry->update_register(result_reg_descr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -859,12 +902,16 @@ Code_For_Ast & Relational_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
 	}	
 	ic_list.push_back(rel_stmt);
 	string my_str("temp");
-	if(lhs_register->find_symbol_entry_in_list(*new Symbol_Table_Entry(my_str, int_data_type, -1))){
-		// cout<<"found1 "<<lhs_register->get_name()<<endl;
+	// cout<<"LHS PRINTING"<<endl;
+	// lhs_register->print_variables();
+	if(lhs_register->is_temperory()){
+		// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
 		lhs_register->clear_lra_symbol_list();
 	}
-	if(rhs_register->find_symbol_entry_in_list(*new Symbol_Table_Entry(my_str, int_data_type, -1))){
-		// cout<<"found2"<<rhs_register->get_name()<<endl;
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	if(rhs_register->is_temperory()){
+		// cout<<"foundrhs and freed"<<rhs_register->get_name()<<endl;
 		rhs_register->clear_lra_symbol_list();
 	}
 	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
@@ -999,6 +1046,10 @@ Code_For_Ast & If_Else_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
 	if (command_options.is_do_lra_selected() == false){
 		// cout<<rel_code.get_reg()->get_name()<< " free huwa if"<<endl;
 		// variable_symbol_entry->free_register(store_register);
+		rel_code.get_reg()->clear_lra_symbol_list();
+	}
+	if(rel_code.get_reg()->is_temperory()){
+		// cout<<"found rel and freed "<<rel_code.get_reg()->get_name()<<endl;
 		rel_code.get_reg()->clear_lra_symbol_list();
 	}
 	Code_For_Ast * if_else_code = new Code_For_Ast(ic_list, faltu_register);

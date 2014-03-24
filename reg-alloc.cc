@@ -98,6 +98,24 @@ void Register_Descriptor::update_symbol_information(Symbol_Table_Entry & sym_ent
 		lra_symbol_list.push_back(&sym_entry);
 }
 
+void Register_Descriptor::print_variables(){
+	cout<<"printing variables for register "<<get_name()<<endl;
+	for(list<Symbol_Table_Entry *>::iterator it = lra_symbol_list.begin(); it != lra_symbol_list.end(); it++){
+		cout<<(*it)->get_variable_name()<<endl;
+	}
+	cout<<"done"<<endl;
+
+}
+
+bool Register_Descriptor::is_temperory(){
+	for(list<Symbol_Table_Entry *>::iterator it = lra_symbol_list.begin(); it != lra_symbol_list.end(); it++){
+		if((*it)->get_variable_name()=="temp"){
+			return true;
+		}
+	}
+	return false;
+}
+
 //////////////////////////////// Lra_Outcome //////////////////////////////////////////
 
 Lra_Outcome::Lra_Outcome(Register_Descriptor * rdp, bool nr, bool sr, bool dr, bool mv, bool ld)
@@ -174,24 +192,29 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			result_register = source_register;
 			is_same_as_source = true;
 			load_needed = false;
+			// cout<<"case 1"<<endl;
 		}
 		else if (destination_register != NULL)
 		{
 			result_register = destination_register;
 			is_same_as_destination = true;
 			load_needed = true;
+			// cout<<"case 2"<<endl;
 		}
 		else 
 		{
 			result_register = machine_dscr_object.get_new_register();
 			is_a_new_register = true;
 			load_needed = true;
+			// cout<<"case 3"<<endl;
 		}
 
-		/*if (destination_register){
-			cout<<"ye call huwa"<<endl;
+		if (destination_register){
+			// cout<<"ye call huwa"<<endl;
+			// cout<<destination_symbol_entry->get_variable_name()<<" freed of "<<destination_register->get_name();
 			destination_symbol_entry->free_register(destination_register); 
-		}*/
+		}
+		// cout<<destination_symbol_entry->get_variable_name()<<" assigned "<<result_register->get_name()<<endl;
 		destination_symbol_entry->update_register(result_register);
 
 		break;
