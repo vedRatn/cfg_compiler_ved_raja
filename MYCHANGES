@@ -311,3 +311,98 @@ ssible to all.
 2) void procedure_in_proc_map_check(string symbol, int line);
 3) bool is_program_declared(string name);
 4) void global_variable_exist_error(string name, int line);
+
+
+MYCHANGES 5A
+------------
+
+In This part we implemented the intermediate code generation mechanism for Control Flow Statements
+and Relational Statement starting from level 0. For this we had to add the following instructions 
+to the spim_instruction_table:
+
+spim_instruction_table[slt] = new Instruction_Descriptor(slt, "slt", "slt", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[sgt] = new Instruction_Descriptor(sgt, "sgt", "sgt", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[sle] = new Instruction_Descriptor(sle, "sle", "sle", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[sge] = new Instruction_Descriptor(sge, "sge", "sge", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[seq] = new Instruction_Descriptor(seq, "seq", "seq", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[sne] = new Instruction_Descriptor(sne, "sne", "sne", "", i_r_o1_op_o2, a_op_r_o1_o2);
+spim_instruction_table[bne] = new Instruction_Descriptor(bne, "bne", "bne", "", i_o1_op_o2_r, a_op_o1_o2_r);
+spim_instruction_table[goto_op] = new Instruction_Descriptor(goto_op, "goto", "j", "", i_op_o1, a_op_o1);
+spim_instruction_table[label_op] = new Instruction_Descriptor(label_op, "label", "label", "", i_op_o1, a_op_o1);
+
+Moving on we Implemented the following three classes extending them from the Base Class Icode_Stmt
+1) Label_IC_Stmt	
+	This class has just one operand and no result. The operand is just a constand which signifies 
+	the	label number
+2) Control_Flow_IC_Stmt
+	This class deals with two type of statements
+		a) Goto_Stmt
+			This has just one operand say i which is of type Constant and signifies a jump to the 
+			basic block i. This implements unconditional branch for assembly code.
+		b) Bne Type Statement
+			This has two operands and one result. If the two operands are not equal then the program
+			jumps to the basic block pointer by the result.
+
+3) Compute_IC_Stmt
+	This class deals with the sgt type of functions. These functions have two operands, one operator
+	and one result. The value of result is set by applying operator on the two operands.
+
+For all the above three classes the function of central importance which has been implemented is
+	"print_icode(ostream & file_buffer)"
+
+Using the spim_instruction_table and the operands, we print the intermediate in fixed format.
+
+Another thing of fundamental importance to this part mostly going on in background is the regis-
+ter allocation.
+This was done using Register_Descriptor class and its functions like:
+
+	string get_name();
+    void clear_lra_symbol_list();
+
+and also the Symbol_Table_Entry class was used with functions like.
+
+	void free_register(Register_Descriptor * destination_reg_descr);
+	void update_register(Register_Descriptor * result_reg_descr);
+
+Every Load instruction leads to one register going from free to busy state
+Every Store instruction leads to one register going from busy to free state
+Every Compute instruction leads to the two operands going from busy state to free state.
+Every Compute instruction leads to the result register to go from busy state to free state.
+Every Control_Flow_IC_Stmt of type Bne leads to opd1 to become free and the result register
+to become busy.
+
+Whenever a new register is needed the get_new_register() of the Machine_Descriptor is called
+which returns the next free register.
+
+MY CHANGES 5B
+-------------
+In this assignment we had to deal with efficient register allocation for assignment statements,
+relational statements and control flow statements. The lra allocation basically deals with 2 ty-
+pes of statements
+1) mc_2r in which all statements with information going from memory/constant to register are
+dealt with. In our case this involved statements
+	All the relational statements need to have there operands in a register, this loading comes 
+	under the case or memory/constant to register. The branching statements like bne also deals
+	with the same kind of parameters and has to undergo the same lra optimization
+
+
+2) mc_2m in which all statements with information going from memory/constant to memoty are dealt
+with. In our case this involved
+	Assignment statements in which the rhs is either a constant or a variable.
+
+The above cases are dealt with efficiently so as to provide efficient register allocation.
+
+We basically had to write the compile_and_optimize() function of all the Ast children classes.
+In this we recognized which statement are we dealing with. Then optimized it using appropriate
+instruction format. During this process appropriate busying and freeing of registers had to be
+done.
+
+A special case of register was of particular interest in which the register allocation of a value
+to a register is only temperory till this value if used. This mainly happened with the relational
+statement and branching statement operands which were not already alloted a register. In this case
+they were deallocated as soon as they are used once after using. This was implemented by a special
+symbol_table_entry under the name "temp". Whenever taking values from registers as operands if th-
+is special symbol_table_entry was found in their symbol_entry_list then they were freed of this ma-
+ping between "temp" and the register after one use.
+
+
