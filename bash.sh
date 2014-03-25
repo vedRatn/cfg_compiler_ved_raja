@@ -18,9 +18,9 @@ do
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
 	file1=${file}
-	./cfglp64 $file -symtab -compile -icode 
+	./cfglp64 $file -tokens -ast -symtab -compile -icode 
 	cat ${file}.* > out1
-	./cfglp64-sirki $file -symtab -compile -icode 
+	./cfglp64-sirki $file -tokens -ast -symtab -compile -icode 
 	cat ${file}.* > out2
-	diff -b out1 out2 > tmp/$f
+	diff -b -B out1 out2 > tmp/$f
 done

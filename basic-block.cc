@@ -60,7 +60,7 @@ int Basic_Block::get_bb_number()
 }
 void Basic_Block::print_bb(ostream & file_buffer)
 {
-	file_buffer << BB_SPACE << "Basic_Block " << id_number << "\n";
+	file_buffer << "\n" << BB_SPACE << "Basic_Block " << id_number << "\n";
 
 	list<Ast *>::iterator i;
 	for(i = statement_list.begin(); i != statement_list.end(); i++)
@@ -71,7 +71,11 @@ Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file
 {
 	Eval_Result * result = NULL;
 
-	file_buffer << "\n" << BB_SPACE << "Basic Block: " << id_number << "\n";
+	file_buffer << BB_SPACE << "Basic Block: " << id_number;
+
+	if(statement_list.size() == 0){
+		file_buffer << "\n";
+	}
 
 	list <Ast *>::iterator i;
 	for (i = statement_list.begin(); i != statement_list.end(); i++)
@@ -137,4 +141,71 @@ void Basic_Block::print_icode(ostream & file_buffer)
 	file_buffer << "\n" ;
 	for (i = bb_icode_list.begin(); i != bb_icode_list.end(); i++)
 		(*i)->print_icode(file_buffer);
+}
+
+
+Basic_Block * Basic_Block::get_next_bb(list < Basic_Block * > basic_block_list){
+	int value;
+	if(statement_list.size() == 0){
+		/*char error[200];
+		sprintf(error , "Atleast one of true, false, direct successors should be set" , value);
+		string str(error);
+        CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, str);*/
+        value = 0;
+	}else{
+		value = statement_list.back()->next_bb();
+	}
+	// cout<<value<<endl;
+
+	if(value == -1){
+		/*encountered return statement*/
+		return NULL;
+	}
+	if(value == 0){
+		/*continue sequential execution*/
+		bool flag = false;
+		list<Basic_Block *>::iterator i;
+		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		{
+			if((*i)->get_bb_number() == id_number)
+			{
+				flag = true;
+				continue;
+			}
+			if (flag)
+				return (*i);
+		}
+		char error[200];
+		sprintf(error , "Atleast one of true, false, direct successors should be set" , value);
+		string str(error);
+        CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, str);
+	}else{
+		list<Basic_Block *>::iterator i;
+		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		{
+			if((*i)->get_bb_number() == value)
+			{
+				return (*i);
+			}
+		}
+		char error[200];
+		sprintf(error , "bb %d doesn't exist" , value);
+		string str(error);
+        CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, str);
+	}
+}
+
+
+
+int Basic_Block::invalidSuccessor(list < Basic_Block * > basic_block_list){
+	list < int > allIds;
+	for(list < Basic_Block * >::iterator it = basic_block_list.begin() ; it != basic_block_list.end() ; it++){
+		allIds.push_back((*it)->id_number);
+	}
+	for(list < Ast * > :: iterator it = statement_list.begin() ; it != statement_list.end() ; it++){
+		if((*it)->checkSuccessor(allIds) != 0){
+			return (*it)->checkSuccessor(allIds);
+		}
+	}
+	return 0;
 }

@@ -136,6 +136,18 @@ void Ast::update_register(Register_Descriptor * result_reg_descr){
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
+int Ast::next_bb(){
+	stringstream msg;
+	msg << "No next_bb() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
+int Ast::checkSuccessor(list < int > & allIds){
+	stringstream msg;
+	msg << "No checkSuccessor() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line)
@@ -279,6 +291,17 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 	return *assign_stmt;
 }
+
+
+int Assignment_Ast::next_bb(){
+	// print_ast(std::cout);
+	return 0;
+}
+
+int Assignment_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
+}
+
 
 /////////////////////////////////////////////////////////////////
 
@@ -574,6 +597,7 @@ void Return_Ast::print(ostream & file_buffer)
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
+	print(file_buffer);
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
 }
@@ -588,6 +612,14 @@ Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	Code_For_Ast & ret_code = *new Code_For_Ast();
 	return ret_code;
+}
+
+int Return_Ast::next_bb(){
+	return -1;
+}
+
+int Return_Ast::checkSuccessor(list < int > & allIds){
+	return 0;
 }
 
 template class Number_Ast<int>;
@@ -606,8 +638,8 @@ Goto_Ast::~Goto_Ast()
 
 void Goto_Ast::print(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "Goto statement:\n";
-	file_buffer << AST_NODE_SPACE << "Successor: "<<successor<<"\n";
+	file_buffer << "\n" << AST_SPACE << "Goto statement:\n";
+	file_buffer << AST_NODE_SPACE << "Successor: "<<successor;
 }
 
 int Goto_Ast::next_bb(){
@@ -616,6 +648,7 @@ int Goto_Ast::next_bb(){
 
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval, ostream & file_buffer){
 	print(file_buffer);
+	file_buffer << "\n";
 	file_buffer << AST_SPACE << "GOTO (BB "<<successor<<")\n\n";
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
@@ -961,17 +994,19 @@ int If_Else_Ast::next_bb(){
 }
 
 void If_Else_Ast::print(ostream & file_buffer){
+	file_buffer << "\n";
 	file_buffer << AST_SPACE << "If_Else statement:";
 	// cout<<"Here i call rel "<<endl;
 	rel->print(file_buffer);
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "True Successor: "<<true_goto->get_successor()<<"\n";
-	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor()<<"\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: "<<false_goto->get_successor();
 }
 
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval , ostream & file_buffer){
 	print(file_buffer);
 	rel->evaluate(eval, file_buffer);
+	file_buffer << "\n";
 	if(rel->get_return_value())
 		file_buffer << AST_SPACE << "Condition True : Goto (BB "<<true_goto->get_successor()<<")\n";
 	else

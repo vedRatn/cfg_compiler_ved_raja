@@ -1,0 +1,180 @@
+Program:
+
+Global Declarations:
+   Name: c Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: b Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: a Type: INT Entity Type: VAR (No offset assigned yet)
+   Procedure: main, Return Type: void
+   Local Declarartions
+   Name: b Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: g Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: f Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: e Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: d Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: a Type: INT Entity Type: VAR (No offset assigned yet)
+
+      Basic_Block 2
+
+         Asgn:
+            LHS (Name : a)
+            RHS (Num : 3)
+         Asgn:
+            LHS (Name : c)
+            RHS (Num : 2)
+         Asgn:
+            LHS (Name : f)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : d)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : g)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : e)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Return <NOTHING>
+Program:
+
+Global Declarations:
+   Name: c Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: b Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: a Type: INT Entity Type: VAR (No offset assigned yet)
+   Procedure: main, Return Type: void
+   Local Declarartions
+   Name: b Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: g Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: f Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: e Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: d Type: INT Entity Type: VAR (No offset assigned yet)
+   Name: a Type: INT Entity Type: VAR (No offset assigned yet)
+
+      Basic_Block 2
+
+         Asgn:
+            LHS (Name : a)
+            RHS (Num : 3)
+         Asgn:
+            LHS (Name : c)
+            RHS (Num : 2)
+         Asgn:
+            LHS (Name : f)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : d)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : g)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : e)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Return <NOTHING>
+Program:
+
+Global Declarations:
+   Name: c Type: INT Entity Type: VAR Start Offset: 0 End Offset: 4
+   Name: b Type: INT Entity Type: VAR Start Offset: 4 End Offset: 8
+   Name: a Type: INT Entity Type: VAR Start Offset: 8 End Offset: 12
+   Procedure: main, Return Type: void
+   Local Declarartions
+   Name: b Type: INT Entity Type: VAR Start Offset: 0 End Offset: 4
+   Name: g Type: INT Entity Type: VAR Start Offset: 4 End Offset: 8
+   Name: f Type: INT Entity Type: VAR Start Offset: 8 End Offset: 12
+   Name: e Type: INT Entity Type: VAR Start Offset: 12 End Offset: 16
+   Name: d Type: INT Entity Type: VAR Start Offset: 16 End Offset: 20
+   Name: a Type: INT Entity Type: VAR Start Offset: 20 End Offset: 24
+
+      Basic_Block 2
+
+         Asgn:
+            LHS (Name : a)
+            RHS (Num : 3)
+         Asgn:
+            LHS (Name : c)
+            RHS (Num : 2)
+         Asgn:
+            LHS (Name : f)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : d)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : a)
+            RHS (Name : b)
+         Asgn:
+            LHS (Name : g)
+            RHS (Name : d)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : e)
+            RHS (Num : 4)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : e)
+         Asgn:
+            LHS (Name : d)
+            RHS (Name : a)
+         Asgn:
+            LHS (Name : e)
+            RHS (Name : a)
+         Return <NOTHING>

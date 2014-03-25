@@ -114,7 +114,13 @@ Basic_Block & Procedure::get_start_basic_block()
 
 Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 {
-	bool flag = false;
+
+	/*****************************my changes*************************************/
+	return current_bb.get_next_bb(basic_block_list);
+	/****************************************************************************/
+
+
+	/*bool flag = false;
 
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
@@ -128,7 +134,7 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 			return (*i);
 	}
 	
-	return NULL;
+	return NULL;*/
 }
 
 Eval_Result & Procedure::evaluate(ostream & file_buffer)
@@ -141,7 +147,7 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	file_buffer << PROC_SPACE << "Evaluating Procedure " << name << "\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (before evaluating):\n";
 	eval_env.print(file_buffer);
-	file_buffer << "\n";
+	file_buffer << "\n\n";
 	
 	Basic_Block * current_bb = &(get_start_basic_block());
 	while (current_bb)

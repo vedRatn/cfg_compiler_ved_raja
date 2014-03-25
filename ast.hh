@@ -84,6 +84,9 @@ public:
 	virtual void free_register(Register_Descriptor * destination_reg_descr);
 	virtual void update_register(Register_Descriptor * result_reg_descr);
 
+	virtual int next_bb();
+	virtual int checkSuccessor(list < int > & allIds);
+
 };
 
 class Assignment_Ast:public Ast
@@ -103,6 +106,11 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
+	int next_bb();
+
+	int checkSuccessor(list < int > & allIds);
+
 
 };
 
@@ -164,6 +172,9 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
+	int next_bb();
+	int checkSuccessor(list < int > & allIds);
 };
 
 class Goto_Ast: public Ast
@@ -181,6 +192,7 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
 };
 
 class Relational_Ast: public Ast
@@ -224,6 +236,7 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
 };
 
 
