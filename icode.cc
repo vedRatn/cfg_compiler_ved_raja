@@ -135,32 +135,41 @@ void Register_Addr_Opd::print_asm_opd(ostream & file_buffer)
 
 /****************************** Class Const_Opd *****************************/
 
-template <class DATA_TYPE>
-Const_Opd<DATA_TYPE>::Const_Opd(DATA_TYPE n) 
+Const_Opd::Const_Opd(Value_Type n, Data_Type dt) 
 {
 	type = constant_addr;
+	data_type = dt;
 	num = n;
 }
 
-template <class DATA_TYPE>
-Const_Opd<DATA_TYPE> & Const_Opd<DATA_TYPE>::operator=(const Const_Opd<DATA_TYPE> & rhs)
+Const_Opd & Const_Opd::operator=(const Const_Opd & rhs)
 {
 	type = rhs.type;
 	num = rhs.num;
-
+	data_type = rhs.data_type;
 	return *this;
 }
 
-template <class DATA_TYPE>
-void Const_Opd<DATA_TYPE>::print_ics_opd(ostream & file_buffer) 
+void Const_Opd::print_ics_opd(ostream & file_buffer) 
 {
-	file_buffer << num;
+	if(data_type == int_data_type){
+		file_buffer << num.i;
+	}else if(data_type == float_data_type){
+		file_buffer << std::fixed;
+    	file_buffer.precision(2);
+    	file_buffer << num.f;
+	}
 }
 
-template <class DATA_TYPE>
-void Const_Opd<DATA_TYPE>::print_asm_opd(ostream & file_buffer) 
+void Const_Opd::print_asm_opd(ostream & file_buffer) 
 {
-	file_buffer << num;
+	if(data_type == int_data_type){
+		file_buffer << num.i;
+	}else if(data_type == float_data_type){
+		file_buffer << std::fixed;
+    	file_buffer.precision(2);
+    	file_buffer << num.f;
+	}
 }
 
 /****************************** Class Icode_Stmt *****************************/
@@ -533,8 +542,8 @@ Compute_IC_Stmt& Compute_IC_Stmt::operator=(const Compute_IC_Stmt& rhs)
 
 void Compute_IC_Stmt::print_icode(ostream & file_buffer)
 {
-	CHECK_INVARIANT (opd1, "Opd1 cannot be NULL for a move IC Stmt");
-	CHECK_INVARIANT (result, "Result cannot be NULL for a move IC Stmt");
+	CHECK_INVARIANT (opd1, "Opd1 cannot be NULL for a Compute IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
 
 	string operation_name = op_desc.get_name();
 
@@ -551,7 +560,13 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer)
 		opd2->print_ics_opd(file_buffer);
 		file_buffer << "\n";
 		break; 
-
+	case i_r_op_o1:
+		file_buffer << " " << operation_name << ": ";
+		result->print_ics_opd(file_buffer);
+		file_buffer << " <- ";
+		opd1->print_ics_opd(file_buffer);
+		file_buffer << "\n";
+		break;
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 				"Intermediate code format not supported");
 		break;
@@ -560,9 +575,8 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer)
 
 void Compute_IC_Stmt::print_assembly(ostream & file_buffer)
 {
-	CHECK_INVARIANT (opd1, "Opd1 cannot be NULL for a move IC Stmt");
-	CHECK_INVARIANT (opd2, "Opd2 cannot be NULL for a move IC Stmt");
-	CHECK_INVARIANT (result, "Result cannot be NULL for a move IC Stmt");
+	CHECK_INVARIANT (opd1, "Opd1 cannot be NULL for a Compute IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
 	string op_name = op_desc.get_mnemonic();
 
 	Assembly_Format assem_format = op_desc.get_assembly_format();
@@ -576,9 +590,14 @@ void Compute_IC_Stmt::print_assembly(ostream & file_buffer)
 			file_buffer << ", ";
 			opd2->print_asm_opd(file_buffer);
 			file_buffer << "\n";
-
 			break; 
-
+	case a_op_r_o1:
+			file_buffer << "\t" << op_name << " ";
+			result->print_asm_opd(file_buffer);
+			file_buffer << ", ";
+			opd1->print_asm_opd(file_buffer);
+			file_buffer << "\n";
+			break;
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 		break;
 	}
@@ -651,5 +670,3 @@ Instruction_Descriptor::Instruction_Descriptor()
 	ic_format = i_nsy;
 	assem_format = a_nsy;
 }
-
-template class Const_Opd<int>;

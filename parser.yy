@@ -29,6 +29,7 @@
 %union 
 {
 	int integer_value;
+	float float_value;
 	std::string * string_value;
 	pair<Data_Type, string> * decl;
 	list<Ast *> * ast_list;
@@ -41,11 +42,15 @@
 };
 
 %token <integer_value> INTEGER_NUMBER BBNUM
+%token <float_value>  FLOAT_NUMBER 
 %token <string_value> NAME 
-%token RETURN INTEGER IF ELSE GOTO ASSIGN
+%token RETURN INTEGER FLOAT DOUBLE
+%token IF ELSE GOTO ASSIGN
 
 %left ne eq
 %left lt le gt ge
+%left '+' '-'
+%left '/' '*'
 
 %type <symbol_table> optional_variable_declaration_list
 %type <symbol_table> variable_declaration_list
@@ -59,6 +64,7 @@
 %type <ast> goto_statement
 %type <ast> assignment_statement
 %type <ast> relational_statement
+%type <ast> arithmetic_expression
 %type <ast> variable
 %type <ast> constant
 
@@ -256,6 +262,37 @@ declaration:
 		$$ = declar;
 	}
 	}
+|
+	FLOAT NAME 
+
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
+
+		string name = *$2;
+		Data_Type type = float_data_type;
+
+		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
+
+		$$ = declar;
+	}
+	}
+|
+	DOUBLE NAME 
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
+
+		string name = *$2;
+		Data_Type type = float_data_type;
+
+		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
+
+		$$ = declar;
+	}
+	}
 ;
 
 basic_block_list:
@@ -429,32 +466,9 @@ goto_statement:
 ;
 
 relational_statement:
-	variable
+	arithmetic_expression
 	{
-		if (NOT_ONLY_PARSE)
-		{
-			//cout<<"line1 = "<<get_line_number()<<endl;
-			$$ = new Relational_Ast($1);
-			$$->check_ast();
-		}
-	}
-|
-	constant
-	{
-		if (NOT_ONLY_PARSE)
-		{
-			//cout<<"line2 = "<<get_line_number()<<endl;
-			$$ = new Relational_Ast($1);
-			$$->check_ast();
-		}
-	}
-|
-	'(' relational_statement ')'
-	{
-		if (NOT_ONLY_PARSE)
-		{
-			$$ = $2;
-		}
+		$$ = new Relational_Ast($1);
 	}
 |
 	relational_statement le relational_statement
@@ -519,6 +533,151 @@ relational_statement:
 ;
 
 
+arithmetic_expression:
+	constant
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = $1;
+	}
+	}
+|
+	variable
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = $1;
+	}
+	}
+|
+	'(' relational_statement ')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = $2;
+	}
+	}
+|
+	'(' FLOAT ')' variable
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($4, float_data_type);
+	}
+	}
+|
+	'(' INTEGER ')' variable
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($4, int_data_type);
+	}
+	}
+|
+	'(' DOUBLE ')' variable
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($4, float_data_type);
+	}
+	}
+|
+	'(' INTEGER ')' '(' arithmetic_expression ')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($5, int_data_type);
+	}
+	}
+|
+	'(' FLOAT ')' '(' relational_statement ')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($5, float_data_type);
+	}
+	}
+|
+	'(' DOUBLE ')' '(' relational_statement ')'	
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Type_Cast_Ast($5, float_data_type);
+	}
+	}
+|
+	'-' constant
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Unary_Ast($2);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	'-' variable
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Unary_Ast($2);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	'-' '(' relational_statement ')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Unary_Ast($3);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	arithmetic_expression '+' arithmetic_expression
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Plus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	arithmetic_expression '-' arithmetic_expression
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Minus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	arithmetic_expression '*' arithmetic_expression
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Multiplication_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+|
+	arithmetic_expression '/' arithmetic_expression
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		$$ = new Division_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast();
+	}
+	}
+;
+
+
 assignment_statement:
 	variable ASSIGN relational_statement ';'
 	{
@@ -570,11 +729,23 @@ constant:
 	{
 	if (NOT_ONLY_PARSE)
 	{
-		int num = $1;
+		Value_Type vt;
+		vt.i = $1;
 
-		Ast * num_ast = new Number_Ast<int>(num, int_data_type, get_line_number());
+		Ast * num_ast = new Number_Ast(vt, int_data_type, get_line_number());
 
 		$$ = num_ast;
+	}
+	}
+|
+	FLOAT_NUMBER
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		Value_Type vt;
+		vt.f = $1;
+		//cout<<vt.f<<endl;
+		$$ = new Number_Ast(vt, float_data_type, get_line_number());
 	}
 	}
 ;

@@ -31,6 +31,7 @@
 #include <map>
 
 #include"symbol-table.hh"
+#include "local-environment.hh"
 
 /* 
 	This file defines classes for intermediate form of the code generated 
@@ -87,8 +88,23 @@ typedef enum
 	seq,
 	sne,
 	bne,
+	add,
+	sub,
+	divi,
+	mul,
+	neg,
+	add_d,
+	sub_d,
+	mul_d,
+	div_d,
+	store_d,
+	load_d,
+	imm_load_d,
+	mtc1,
+	mfc1,
 	goto_op,
 	label_op,
+	neg_d,
 	nop 
 } Tgt_Op;
 
@@ -175,13 +191,12 @@ public:
 	Register_Addr_Opd & operator=(const Register_Addr_Opd & rhs);
 };
 
-template <class T>
 class Const_Opd: public Ics_Opd
 {
-	T num;
-
+	Value_Type num;
+	Data_Type data_type;
 public:
-	Const_Opd (T num);
+	Const_Opd (Value_Type num, Data_Type dt);
 	~Const_Opd() {}
 
 	void print_ics_opd(ostream & file_buffer);

@@ -140,13 +140,12 @@ public:
 	Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
 };
 
-template <class T>
 class Number_Ast:public Ast
 {
-	T constant;
+	Value_Type constant;
 
 public:
-	Number_Ast(T number, Data_Type constant_data_type, int line);
+	Number_Ast(Value_Type number, Data_Type constant_data_type, int line);
 	~Number_Ast();
 
 	Data_Type get_data_type();
@@ -239,6 +238,130 @@ public:
 
 };
 
+class Type_Cast_Ast: public Ast
+{
+private:
+	Data_Type dest_type;
+	Ast * ast;
+public:
+	Type_Cast_Ast(Ast * ast, Data_Type dt);
+	Data_Type get_data_type();
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	//bool isNumber();
 
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+
+class Arithmetic_Expr_Ast: public Ast
+{
+public:	
+	Arithmetic_Expr_Ast();
+	~Arithmetic_Expr_Ast();
+
+	virtual Data_Type get_data_type() = 0;
+	virtual bool check_ast() = 0;
+	virtual int get_successor();
+	virtual bool get_return_value();
+	virtual void print(ostream & file_buffer) = 0;
+	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
+
+	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+	virtual int next_bb();
+	virtual int checkSuccessor(list < int > & allIds);
+
+	Code_For_Ast & compile() = 0;
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra) = 0;
+	//bool isNumber();
+};
+
+
+class Plus_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Plus_Ast(Ast * l, Ast * r);
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
+	Data_Type get_data_type();
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+class Minus_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Minus_Ast(Ast * l, Ast * r);
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
+	Data_Type get_data_type();
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+class Division_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Division_Ast(Ast * l, Ast * r);
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
+	Data_Type get_data_type();
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+class Multiplication_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * lhs;
+	Ast * rhs;
+public:
+
+	Multiplication_Ast(Ast * l, Ast * r);
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
+	Data_Type get_data_type();
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+class Unary_Ast: public Arithmetic_Expr_Ast
+{
+private:
+	Ast * ast;
+public:
+
+	Unary_Ast(Ast * ast);
+	void print(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	bool check_ast();
+	Data_Type get_data_type();
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
 
 #endif

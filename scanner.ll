@@ -31,6 +31,20 @@ int		{
 			return Parser::INTEGER; 
 		}
 
+float		{
+				store_token_name("FLOAT");
+				ParserBase::STYPE__ * val = getSval();
+				val->string_value = new std::string(matched());
+				return Parser::FLOAT;
+			}
+
+double		{
+				store_token_name("DOUBLE");
+				ParserBase::STYPE__ * val = getSval();
+				val->string_value = new std::string(matched());
+				return Parser::DOUBLE;
+			}
+
 return		{ 
 			store_token_name("RETURN");
 			return Parser::RETURN; 
@@ -62,6 +76,15 @@ goto	{
 				return Parser::INTEGER_NUMBER; 
 			}
 
+[-]?[0-9]*\.[0-9]+ 	{ 
+				store_token_name("FNUM");
+
+				ParserBase::STYPE__ * val = getSval();
+				val->float_value = atof(matched().c_str());
+
+				return Parser::FLOAT_NUMBER; 
+			}
+
 [[:alpha:]_][[:alpha:][:digit:]_]* {
 					store_token_name("NAME");
 
@@ -87,6 +110,11 @@ goto	{
 		store_token_name("ASSIGN_OP");
 		return Parser::ASSIGN;
 	}
+
+[+]|[-]|[*]|[/]	{
+			store_token_name("ARITHOP");
+			return matched()[0];
+		}
 
 [=][=]	{
 			store_token_name("EQ");

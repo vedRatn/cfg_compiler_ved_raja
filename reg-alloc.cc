@@ -59,10 +59,14 @@ bool Register_Descriptor::is_symbol_list_empty()         	{ return lra_symbol_li
 
 bool Register_Descriptor::is_free()     
 { 
-	if ((reg_use == gp_data) && (lra_symbol_list.empty())) 
+	if ((reg_use == gp_data || reg_use == float_use) && (lra_symbol_list.empty())) 
 		return true;
 	else 
 		return false;
+}
+
+Register_Val_Type Register_Descriptor::get_value_type(){
+	return value_type;
 }
 
 void Register_Descriptor::remove_symbol_entry_from_list(Symbol_Table_Entry & sym_entry)
@@ -171,7 +175,7 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		CHECK_INVARIANT(source_memory, 
 			"Sourse ast pointer cannot be NULL for m2m scenario in lra");
 
-		if (typeid(*destination_memory) == typeid(Number_Ast<int>))
+		if (typeid(*destination_memory) == typeid(Number_Ast))
 			destination_register = NULL;
 		else
 		{
@@ -313,6 +317,24 @@ void Machine_Description::initialize_register_table()
 	spim_register_table[sp] = new Register_Descriptor(sp, "sp", int_num, pointer);
 	spim_register_table[fp] = new Register_Descriptor(fp, "fp", int_num, pointer);
 	spim_register_table[ra] = new Register_Descriptor(ra, "ra", int_num, ret_address);
+
+/*	spim_register_table[f0] = new Register_Descriptor(f0, "f0", float_num, float_use);
+	spim_register_table[f1] = new Register_Descriptor(f1, "f1", float_num, float_use);*/
+	spim_register_table[f2] = new Register_Descriptor(f2, "f2", float_num, float_use);
+	spim_register_table[f4] = new Register_Descriptor(f4, "f4", float_num, float_use);
+	spim_register_table[f6] = new Register_Descriptor(f6, "f6", float_num, float_use);
+	spim_register_table[f8] = new Register_Descriptor(f8, "f8", float_num, float_use);
+	spim_register_table[f10] = new Register_Descriptor(f10, "f10", float_num, float_use);
+	spim_register_table[f12] = new Register_Descriptor(f12, "f12", float_num, float_use);
+	spim_register_table[f14] = new Register_Descriptor(f14, "f14", float_num, float_use);
+	spim_register_table[f16] = new Register_Descriptor(f16, "f16", float_num, float_use);
+	spim_register_table[f18] = new Register_Descriptor(f18, "f18", float_num, float_use);
+	spim_register_table[f20] = new Register_Descriptor(f20, "f20", float_num, float_use);
+	spim_register_table[f22] = new Register_Descriptor(f22, "f22", float_num, float_use);
+	spim_register_table[f24] = new Register_Descriptor(f24, "f24", float_num, float_use);
+	spim_register_table[f26] = new Register_Descriptor(f26, "f26", float_num, float_use);
+	spim_register_table[f28] = new Register_Descriptor(f28, "f28", float_num, float_use);
+	spim_register_table[f30] = new Register_Descriptor(f30, "f30", float_num, float_use);
 }
 
 void Machine_Description::initialize_instruction_table()
@@ -327,8 +349,29 @@ void Machine_Description::initialize_instruction_table()
 	spim_instruction_table[seq] = new Instruction_Descriptor(seq, "seq", "seq", "", i_r_o1_op_o2, a_op_r_o1_o2);
 	spim_instruction_table[sne] = new Instruction_Descriptor(sne, "sne", "sne", "", i_r_o1_op_o2, a_op_r_o1_o2);
 	spim_instruction_table[bne] = new Instruction_Descriptor(bne, "bne", "bne", "", i_o1_op_o2_r, a_op_o1_o2_r);
+	spim_instruction_table[add] = new Instruction_Descriptor(add, "add", "add", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[sub] = new Instruction_Descriptor(sub, "sub", "sub", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[divi] = new Instruction_Descriptor(divi, "div", "div", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mul] = new Instruction_Descriptor(mul, "mul", "mul", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[neg] = new Instruction_Descriptor(neg, "uminus", "neg", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[goto_op] = new Instruction_Descriptor(goto_op, "goto", "j", "", i_op_o1, a_op_o1);
 	spim_instruction_table[label_op] = new Instruction_Descriptor(label_op, "label", "label", "", i_op_o1, a_op_o1);
+
+	spim_instruction_table[store_d] = new Instruction_Descriptor(store_d, "store.d", "s.d", "", i_r_op_o1, a_op_o1_r);
+	spim_instruction_table[load_d] = new Instruction_Descriptor(load_d, "load.d", "l.d", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[imm_load_d] = new Instruction_Descriptor(imm_load_d, "iLoad.d", "li.d", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[add_d] = new Instruction_Descriptor(add_d, "add.d", "add.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[sub_d] = new Instruction_Descriptor(sub_d, "sub.d", "sub.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[div_d] = new Instruction_Descriptor(div_d, "div.d", "div.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mul_d] = new Instruction_Descriptor(mul_d, "mul.d", "mul.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mtc1] = new Instruction_Descriptor(mtc1, "mtc1", "mtc1", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[mfc1] = new Instruction_Descriptor(mfc1, "mfc1", "mfc1", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[neg_d] = new Instruction_Descriptor(neg_d, "uminus.d", "neg.d", "", i_r_op_o1, a_op_r_o1);
+
+
+
+	
+
 }
 
 void Machine_Description::validate_init_local_register_mapping()
@@ -337,7 +380,7 @@ void Machine_Description::validate_init_local_register_mapping()
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		Register_Descriptor * reg_desc = i->second;
-		if (reg_desc->get_use_category() == gp_data)
+		if (reg_desc->get_use_category() == gp_data || reg_desc->get_use_category() == float_use)
 			CHECK_INVARIANT(reg_desc->is_free(), 
 					"GP data registers should be free at the start of a basic block");
 	}
@@ -377,4 +420,19 @@ Register_Descriptor * Machine_Description::get_new_register()
 
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 			"Error in get_new_reg or register requirements of input program cannot be met");
+}
+
+Register_Descriptor * Machine_Description::get_new_float_register()
+{
+	Register_Descriptor * reg_desc;
+	map<Spim_Register, Register_Descriptor *>::iterator i;
+	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
+	{
+		reg_desc = i->second;
+		if (reg_desc->is_free() && reg_desc->get_use_category() == float_use)
+			return reg_desc;
+	}
+
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+			"Error in get_new_float_reg or register requirements of input program cannot be met");
 }

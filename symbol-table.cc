@@ -114,17 +114,28 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		string name = (*i)->get_variable_name();
-		if ((*i)->get_data_type() == int_data_type)
-		{
-			Eval_Result * j = new Eval_Result_Value_Int();
+		Eval_Result_Value * j;
+		Value_Type vt;
+		if((*i)->get_data_type() == int_data_type){
+			j = new Eval_Result_Value(int_result);
 			if (scope == global)
 			{
 				j->set_variable_status(true);
-				j->set_value(0);
+				vt.i = 0;
+				j->set_value(vt);
 			}
 
-			local_global_variables_table.put_variable_value(*j, name);
+		}else if((*i)->get_data_type() == float_data_type){
+			j = new Eval_Result_Value(float_result);
+			if (scope == global)
+			{
+				j->set_variable_status(true);
+				vt.f = 0;
+				j->set_value(vt);
+			}
+
 		}
+		local_global_variables_table.put_variable_value(*j, name);
 	}
 }
 
@@ -144,6 +155,7 @@ void Symbol_Table::print(ostream & file_buffer)
 		switch(dt)
 		{
 		case int_data_type: file_buffer << " Type: INT"; break;
+		case float_data_type: file_buffer << "Type FLOAT"; break;
 		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable data type can only be int");
 		} 
 
@@ -195,6 +207,7 @@ int Symbol_Table::get_size_of_value_type(Data_Type dt)
 	switch(dt)
 	{
 	case int_data_type: return 4; break;
+	case float_data_type: return 8; break;
 	case void_data_type: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Attempt to seek size of type void");
 	defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Data type not supperted");
 	}

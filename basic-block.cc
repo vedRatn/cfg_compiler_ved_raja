@@ -92,8 +92,9 @@ void Basic_Block::compile()
 	Code_For_Ast ast_code;
 
 	machine_dscr_object.validate_init_local_register_mapping();
-
-	Const_Opd<int> * num_opd = new Const_Opd<int>(id_number);
+	Value_Type vt;
+	vt.i = id_number;
+	Const_Opd * num_opd = new Const_Opd(vt, int_data_type);
 	Icode_Stmt * label_stml = new Label_IC_Stmt(label_op , num_opd);
 	bb_icode_list.push_back(label_stml);
 
