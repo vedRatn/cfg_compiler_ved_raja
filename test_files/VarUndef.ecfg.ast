@@ -1,0 +1,12 @@
+Program:
+   Procedure: main, Return Type: void
+
+      Basic_Block 2
+
+         Asgn:
+            LHS (Name : c)
+            RHS (
+            Condition: EQ
+               LHS (Name : a)
+               RHS (Name : b))
+         Return <NOTHING>

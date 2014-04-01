@@ -1,0 +1,21 @@
+Program:
+   Procedure: main, Return Type: void
+
+      Basic_Block 2
+
+         If_Else statement:
+            Condition: EQ
+               LHS (
+            Condition: GT
+               LHS (Name : c)
+               RHS (Name : a))
+               RHS (Name : b)
+            True Successor: 3
+            False Successor: 4
+      Basic_Block 3
+
+         Return <NOTHING>
+
+      Basic_Block 4
+
+         Return <NOTHING>

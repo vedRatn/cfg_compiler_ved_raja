@@ -406,3 +406,72 @@ is special symbol_table_entry was found in their symbol_entry_list then they wer
 ping between "temp" and the register after one use.
 
 
+MY CHANGES 6A
+-------------
+
+In this part we introduce the notion of an Arithemetic Statement. This arithemetic statement is now
+used as an atomic unit in a relational statement where earlier this part was played by a variable or 
+constant. The grammar for arithmetic statement which we have written is pretty intutive and un-ambi-
+guos. It goes as follows:
+
+	constant
+	|
+	variable
+	|
+	'-' constant
+	|
+	'-' variable
+	|
+	arithmetic_expression '+' arithmetic_expression
+	|
+	arithmetic_expression '-' arithmetic_expression
+	|
+	arithmetic_expression '*' arithmetic_expression
+	|
+	arithmetic_expression '/' arithmetic_expression
+	|
+	'-' '(' arithmetic_expression ')'
+	|
+	'(' relational_statement ')'
+	;
+
+In order for the grammar to be unambiguous the following order of priority and associativity was 
+decided among the operators of arithemetic expression.
+
+	%left '+' '-'
+	%left '*' '/'
+
+
+We have also broadened the scope of a declaration statement by including types float and double as
+valid datatypes. For scanning these, we have introduced appropriate rules in the scanner.
+
+------
+
+In order to be able to print intermediate code and spim code for Arithmetic statements and Typecast
+statements we had to add the following instructions to the instruction set.
+
+	spim_instruction_table[add] = new Instruction_Descriptor(add, "add", "add", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[sub] = new Instruction_Descriptor(sub, "sub", "sub", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[divi] = new Instruction_Descriptor(divi, "div", "div", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mul] = new Instruction_Descriptor(mul, "mul", "mul", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[neg] = new Instruction_Descriptor(neg, "uminus", "neg", "", i_r_op_o1, a_op_r_o1);
+
+In order to allow manipulation with floating point numbers following instructions were added
+
+	spim_instruction_table[store_d] = new Instruction_Descriptor(store_d, "store.d", "s.d", "", i_r_op_o1, a_op_o1_r);
+	spim_instruction_table[load_d] = new Instruction_Descriptor(load_d, "load.d", "l.d", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[imm_load_d] = new Instruction_Descriptor(imm_load_d, "iLoad.d", "li.d", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[add_d] = new Instruction_Descriptor(add_d, "add.d", "add.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[sub_d] = new Instruction_Descriptor(sub_d, "sub.d", "sub.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[div_d] = new Instruction_Descriptor(div_d, "div.d", "div.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mul_d] = new Instruction_Descriptor(mul_d, "mul.d", "mul.d", "", i_r_o1_op_o2, a_op_r_o1_o2);
+	spim_instruction_table[mtc1] = new Instruction_Descriptor(mtc1, "mtc1", "mtc1", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[mfc1] = new Instruction_Descriptor(mfc1, "mfc1", "mfc1", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[neg_d] = new Instruction_Descriptor(neg_d, "uminus.d", "neg.d", "", i_r_op_o1, a_op_r_o1);
+
+Also register f0, f2, f4, ... , f30 were added to the list of spim_registers for float numbers.
+
+	We added clauses in Icode_Stmt class to deal with printing of the newly added instructions
+
+After building all this basic framework we finally wrote compile statement for the newly added Ast classes.
+This return Code_For_Ast for the corresponding Asts. This was used for printing icode and spim code.

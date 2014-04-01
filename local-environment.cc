@@ -203,8 +203,11 @@ void Local_Environment::print(ostream & file_buffer)
 			{
 				if(vi->get_result_enum() == int_result)
 					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().i << "\n";
-				else if(vi->get_result_enum() == float_result)
+				else if(vi->get_result_enum() == float_result){
+					file_buffer << std::fixed;
+			    	file_buffer.precision(2);
 					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value().f << "\n";
+				}
 			}
 		}
 	}
