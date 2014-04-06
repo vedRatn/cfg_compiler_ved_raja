@@ -120,6 +120,21 @@ bool Register_Descriptor::is_temperory(){
 	return false;
 }
 
+void Register_Descriptor::make_permanent(){
+	// cout << "make permanent called for "<<get_name() <<endl;
+	Symbol_Table_Entry * entry;
+	bool found = false;
+	for(list<Symbol_Table_Entry *>::iterator it = lra_symbol_list.begin(); it != lra_symbol_list.end(); it++){
+		if((*it)->get_variable_name()=="temp"){
+			found = true;
+			entry = (*it);
+			break;
+		}
+	}
+	// cout << " and tehrefore i found "<<entry->get_variable_name() << " and remvoed it "<<endl;
+	remove_symbol_entry_from_list(*entry);
+}
+
 //////////////////////////////// Lra_Outcome //////////////////////////////////////////
 
 Lra_Outcome::Lra_Outcome(Register_Descriptor * rdp, bool nr, bool sr, bool dr, bool mv, bool ld)
@@ -207,7 +222,12 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		}
 		else 
 		{
-			result_register = machine_dscr_object.get_new_register();
+			if(destination_memory->get_data_type() == int_data_type){
+				result_register = machine_dscr_object.get_new_register();
+			}
+			else{
+				result_register = machine_dscr_object.get_new_float_register();
+			}
 			is_a_new_register = true;
 			load_needed = true;
 			// cout<<"case 3"<<endl;
@@ -242,7 +262,10 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		}
 		else 
 		{
-			result_register = machine_dscr_object.get_new_register();
+			if(source_memory->get_data_type() == int_data_type)
+				result_register = machine_dscr_object.get_new_register();
+			else
+				result_register = machine_dscr_object.get_new_float_register();
 			is_a_new_register = true;
 			load_needed = true;
 		}

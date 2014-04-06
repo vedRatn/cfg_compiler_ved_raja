@@ -148,6 +148,12 @@ int Ast::checkSuccessor(list < int > & allIds){
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
+bool Ast::is_trivial(){
+	stringstream msg;
+	msg << "No is_trivial() function for " << typeid(*this).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+}
+
 ////////////////////////////////////////////////////////////////
 
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line)
@@ -260,7 +266,7 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
 	// Only when rhs is a number of variable is optimization required
 	//because otherwise its r2m where no regall is required
-	if(rhs->get_comp() == NONE){
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
 		lra.optimize_lra(mc_2m, lhs, rhs);
 	}
 	
@@ -269,11 +275,13 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	Register_Descriptor * result_register = load_stmt.get_reg();
 
 	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
-	if(rhs->get_comp() != NONE){
+	if(!(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial()))){
 		if(lhs->get_register()!=NULL){
 			// cout<<"freeing register "<<lhs->get_register()->get_name()<<endl;
 			lhs->free_register(lhs->get_register()); 
 		}
+		// cout << " and then busying register "<< result_register->get_name() << " for variable " << lhs->get_symbol_entry().get_variable_name() << endl;
+		result_register->make_permanent();
 		lhs->update_register(result_register);
 	}
 
@@ -526,8 +534,15 @@ Code_For_Ast & Name_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	{
 		Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
 
-		load_stmt = new Move_IC_Stmt(load, opd, register_opd);
-			
+		if(variable_symbol_entry->get_data_type() == int_data_type){
+			load_stmt = new Move_IC_Stmt(load, opd, register_opd);
+		}
+		else if(variable_symbol_entry->get_data_type() == float_data_type){
+			load_stmt = new Move_IC_Stmt(load_d, opd, register_opd);
+		}else{
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Name ast compile type of variable is not valid");
+		}
+
 		ic_list.push_back(load_stmt);
 	}
 
@@ -547,6 +562,9 @@ void Name_Ast::update_register(Register_Descriptor * result_reg_descr){
 	variable_symbol_entry->update_register(result_reg_descr);
 }
 
+bool Name_Ast::is_number(){
+	return false;
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 Number_Ast::Number_Ast(Value_Type number, Data_Type constant_data_type, int line)
@@ -654,14 +672,23 @@ Code_For_Ast & Number_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	else if(node_data_type == float_data_type)
 		opd = new Const_Opd(constant, float_data_type);
 
-	Icode_Stmt * load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
+	Icode_Stmt * load_stmt;
+	if(get_data_type() == int_data_type){
+		load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
+	}else if(get_data_type() == float_data_type){
+		load_stmt = new Move_IC_Stmt(imm_load_d, opd, load_register);
+	}
 
-	list<Icode_Stmt *> ic_list;
+	list<Icode_Stmt *> ic_list = *new list<Icode_Stmt *>;
 	ic_list.push_back(load_stmt);
 
 	Code_For_Ast & num_code = *new Code_For_Ast(ic_list, lra.get_register());
 
 	return num_code;
+}
+
+bool Number_Ast::is_number(){
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1002,19 +1029,14 @@ Code_For_Ast & Relational_Ast::compile(){
 
 Code_For_Ast & Relational_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
-	
-	if(comp == NONE){
-		return lhs->compile_and_optimize_ast(lra);
-	}
-
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
 
-	if(lhs->get_comp() == NONE){
+	if(typeid(*lhs) == typeid(Number_Ast) || typeid(*lhs) == typeid(Name_Ast) || (typeid(*lhs) == typeid(Type_Cast_Ast) && lhs->is_trivial())){
 		/*Only in this case is optimization needed*/
 		lra.optimize_lra(mc_2r, NULL, lhs);
 	}
 	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
-	if(rhs->get_comp() == NONE){
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
 		/*Only in this case is optimization needed*/
 		lra.optimize_lra(mc_2r, NULL, rhs);
 	}
@@ -1083,10 +1105,6 @@ COMP_ENUM Relational_Ast::get_comp(){
 }
 
 bool Relational_Ast::is_number(){
-	if(comp == NONE){
-		if(typeid(*lhs)==typeid(Number_Ast))
-			return true;
-	}
 	return false;
 }
 
@@ -1320,7 +1338,79 @@ Code_For_Ast & Type_Cast_Ast::compile(){
 	}
 }
 
-Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra){}
+Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	Data_Type source_data_type = ast->get_data_type();
+	if(source_data_type == dest_type){
+		// no optimization required
+		return ast->compile_and_optimize_ast(lra);
+	}else{
+		if(typeid(*ast) == typeid(Number_Ast) || typeid(*ast) == typeid(Name_Ast)){
+			lra.optimize_lra(mc_2r, NULL, ast);
+		}
+		Code_For_Ast * final_stml;
+		Code_For_Ast & ast_code = ast->compile_and_optimize_ast(lra);
+		list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+		if (ast_code.get_icode_list().empty() == false)
+			ic_list = ast_code.get_icode_list();	
+		Register_Descriptor * ast_register = ast_code.get_reg();
+
+		Ics_Opd * ast_opd = new Register_Addr_Opd(ast_register);
+
+		if(source_data_type == int_data_type && dest_type == float_data_type){
+			// add a mtc1 statement
+			Register_Descriptor * float_reg = machine_dscr_object.get_new_float_register();
+			Ics_Opd * float_opd = new Register_Addr_Opd(float_reg);
+			Icode_Stmt * mtc1_stml = new Move_IC_Stmt(mtc1, ast_opd, float_opd);
+			ic_list.push_back(mtc1_stml);
+			string str("temp");
+			float_reg->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+			final_stml =  new Code_For_Ast(ic_list, float_reg);
+		}else if(source_data_type == float_data_type && dest_type == int_data_type){
+			// add a mfc1 statement
+			Register_Descriptor * int_reg = machine_dscr_object.get_new_register();
+			Ics_Opd * int_opd = new Register_Addr_Opd(int_reg);
+			Icode_Stmt * mfc1_stml = new Move_IC_Stmt(mfc1, ast_opd, int_opd);
+			ic_list.push_back(mfc1_stml);
+			string str("temp");
+			int_reg->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+			final_stml =  new Code_For_Ast(ic_list, int_reg);
+		}else{
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Type cast compile has invalid source or destination types")
+		}
+		if(ast_register->is_temperory()){
+			// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
+			ast_register->clear_lra_symbol_list();
+		}
+		return *final_stml;
+	}
+}
+
+bool Type_Cast_Ast::is_trivial(){
+	Data_Type source_data_type = ast->get_data_type();
+	if(source_data_type == dest_type && (typeid(*ast) == typeid(Number_Ast) || typeid(*ast) == typeid(Name_Ast))){
+		return true;
+	}
+	return false;
+}
+
+Symbol_Table_Entry & Type_Cast_Ast::get_symbol_entry(){
+	Data_Type source_data_type = ast->get_data_type();
+	if(source_data_type == dest_type &&  typeid(*ast) == typeid(Name_Ast)){
+		return ast->get_symbol_entry();
+	}	
+	stringstream msg;
+	msg << "No get_symbol_entry() function for " << typeid(*ast).name();
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
+
+}
+
+bool Type_Cast_Ast::is_number(){
+	Data_Type source_data_type = ast->get_data_type();
+	if(source_data_type == dest_type && typeid(*ast) == typeid(Number_Ast)){
+		return true;
+	}
+	return false;
+}
 
 /*bool Type_Cast_Ast::isNumber(){
 	return false;
@@ -1475,7 +1565,66 @@ Code_For_Ast & Plus_Ast::compile(){
 }
 
 Code_For_Ast & Plus_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+	string str("temp");
+	if(typeid(*lhs) == typeid(Number_Ast) || typeid(*lhs) == typeid(Name_Ast) || (typeid(*lhs) == typeid(Type_Cast_Ast) && lhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, lhs);
+	}
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, rhs);
+	}
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	Register_Descriptor * lhs_register = lhs_stmt.get_reg();
 
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	Register_Descriptor * rhs_register = rhs_stmt.get_reg();
+
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(lhs_register);
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(rhs_register);
+
+	Register_Descriptor * result_register ;
+	if(lhs_register->get_value_type() == int_num){
+		// addition of integers
+		result_register = machine_dscr_object.get_new_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+	}else if(lhs_register->get_value_type() == float_num){
+		result_register = machine_dscr_object.get_new_float_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, float_data_type, -1));
+	}else{
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Invalid datatype of Plus Ast operands");
+	}
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * plus_stml;
+	if(lhs_register->get_value_type() == int_num){
+		plus_stml =  new Compute_IC_Stmt(add, lhs_opd, rhs_opd, result_opd);	
+	}else{
+		plus_stml = new Compute_IC_Stmt(add_d, lhs_opd, rhs_opd, result_opd);	
+	}
+	ic_list.push_back(plus_stml);
+	// cout<<"LHS PRINTING"<<endl;
+	// lhs_register->print_variables();
+	if(lhs_register->is_temperory()){
+		// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
+		lhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	if(rhs_register->is_temperory()){
+		// cout<<"foundrhs and freed"<<rhs_register->get_name()<<endl;
+		rhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1582,7 +1731,67 @@ Code_For_Ast & Minus_Ast::compile(){
 }
 
 Code_For_Ast & Minus_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+	string str("temp");
 
+	if(typeid(*lhs) == typeid(Number_Ast) || typeid(*lhs) == typeid(Name_Ast) || (typeid(*lhs) == typeid(Type_Cast_Ast) && lhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, lhs);
+	}
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, rhs);
+	}
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	Register_Descriptor * lhs_register = lhs_stmt.get_reg();
+
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	Register_Descriptor * rhs_register = rhs_stmt.get_reg();
+
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(lhs_register);
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(rhs_register);
+
+	Register_Descriptor * result_register ;
+	if(lhs_register->get_value_type() == int_num){
+		// addition of integers
+		result_register = machine_dscr_object.get_new_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+	}else if(lhs_register->get_value_type() == float_num){
+		result_register = machine_dscr_object.get_new_float_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, float_data_type, -1));
+	}else{
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Invalid datatype of Minus Ast operands");
+	}
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * plus_stml;
+	if(lhs_register->get_value_type() == int_num){
+		plus_stml =  new Compute_IC_Stmt(sub, lhs_opd, rhs_opd, result_opd);	
+	}else{
+		plus_stml = new Compute_IC_Stmt(sub_d, lhs_opd, rhs_opd, result_opd);	
+	}
+	ic_list.push_back(plus_stml);
+	// cout<<"LHS PRINTING"<<endl;
+	// lhs_register->print_variables();
+	if(lhs_register->is_temperory()){
+		// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
+		lhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	if(rhs_register->is_temperory()){
+		// cout<<"foundrhs and freed"<<rhs_register->get_name()<<endl;
+		rhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1697,7 +1906,66 @@ Code_For_Ast & Division_Ast::compile(){
 }
 
 Code_For_Ast & Division_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+	string str("temp");
+	if(typeid(*lhs) == typeid(Number_Ast) || typeid(*lhs) == typeid(Name_Ast) || (typeid(*lhs) == typeid(Type_Cast_Ast) && lhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, lhs);
+	}
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, rhs);
+	}
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	Register_Descriptor * lhs_register = lhs_stmt.get_reg();
 
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	Register_Descriptor * rhs_register = rhs_stmt.get_reg();
+
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(lhs_register);
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(rhs_register);
+
+	Register_Descriptor * result_register ;
+	if(lhs_register->get_value_type() == int_num){
+		// addition of integers
+		result_register = machine_dscr_object.get_new_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+	}else if(lhs_register->get_value_type() == float_num){
+		result_register = machine_dscr_object.get_new_float_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, float_data_type, -1));
+	}else{
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Invalid datatype of Division Ast operands");
+	}
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * plus_stml;
+	if(lhs_register->get_value_type() == int_num){
+		plus_stml =  new Compute_IC_Stmt(divi, lhs_opd, rhs_opd, result_opd);	
+	}else{
+		plus_stml = new Compute_IC_Stmt(div_d, lhs_opd, rhs_opd, result_opd);	
+	}
+	ic_list.push_back(plus_stml);
+	// cout<<"LHS PRINTING"<<endl;
+	// lhs_register->print_variables();
+	if(lhs_register->is_temperory()){
+		// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
+		lhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	if(rhs_register->is_temperory()){
+		// cout<<"foundrhs and freed"<<rhs_register->get_name()<<endl;
+		rhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1805,7 +2073,66 @@ Code_For_Ast & Multiplication_Ast::compile(){
 }
 
 Code_For_Ast & Multiplication_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+	string str("temp");
+	if(typeid(*lhs) == typeid(Number_Ast) || typeid(*lhs) == typeid(Name_Ast) || (typeid(*lhs) == typeid(Type_Cast_Ast) && lhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, lhs);
+	}
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	if(typeid(*rhs) == typeid(Number_Ast) || typeid(*rhs) == typeid(Name_Ast) || (typeid(*rhs) == typeid(Type_Cast_Ast) && rhs->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, rhs);
+	}
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	Register_Descriptor * lhs_register = lhs_stmt.get_reg();
 
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	Register_Descriptor * rhs_register = rhs_stmt.get_reg();
+
+	Ics_Opd * lhs_opd = new Register_Addr_Opd(lhs_register);
+	Ics_Opd * rhs_opd = new Register_Addr_Opd(rhs_register);
+
+	Register_Descriptor * result_register ;
+	if(lhs_register->get_value_type() == int_num){
+		// addition of integers
+		result_register = machine_dscr_object.get_new_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+	}else if(lhs_register->get_value_type() == float_num){
+		result_register = machine_dscr_object.get_new_float_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, float_data_type, -1));
+	}else{
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Invalid datatype of Multiplication Ast operands");
+	}
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * plus_stml;
+	if(lhs_register->get_value_type() == int_num){
+		plus_stml =  new Compute_IC_Stmt(mul, lhs_opd, rhs_opd, result_opd);	
+	}else{
+		plus_stml = new Compute_IC_Stmt(mul_d, lhs_opd, rhs_opd, result_opd);	
+	}
+	ic_list.push_back(plus_stml);
+	// cout<<"LHS PRINTING"<<endl;
+	// lhs_register->print_variables();
+	if(lhs_register->is_temperory()){
+		// cout<<"foundlhs and freed "<<lhs_register->get_name()<<endl;
+		lhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	if(rhs_register->is_temperory()){
+		// cout<<"foundrhs and freed"<<rhs_register->get_name()<<endl;
+		rhs_register->clear_lra_symbol_list();
+	}
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+	// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1890,5 +2217,49 @@ Code_For_Ast & Unary_Ast::compile(){
 }
 
 Code_For_Ast & Unary_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+	CHECK_INVARIANT((ast != NULL), "ast cannot be null");
+	string str("temp");
+	if(typeid(*ast) == typeid(Number_Ast) || typeid(*ast) == typeid(Name_Ast) || (typeid(*ast) == typeid(Type_Cast_Ast) && ast->is_trivial())){
+		/*Only in this case is optimization needed*/
+		lra.optimize_lra(mc_2r, NULL, ast);
+	}
+	Code_For_Ast & ast_stmt = ast->compile_and_optimize_ast(lra);
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (ast_stmt.get_icode_list().empty() == false)
+		ic_list = ast_stmt.get_icode_list();
+	Register_Descriptor * ast_register = ast_stmt.get_reg();
 
+	Ics_Opd * ast_opd = new Register_Addr_Opd(ast_register);
+
+	Register_Descriptor * result_register ;
+	if(ast_register->get_value_type() == int_num){
+		// addition of integers
+		result_register = machine_dscr_object.get_new_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, int_data_type, -1));
+	}else if(ast_register->get_value_type() == float_num){
+		result_register = machine_dscr_object.get_new_float_register();
+		result_register->update_symbol_information(*new Symbol_Table_Entry(str, float_data_type, -1));
+	}else{
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, " Invalid datatype of Unary Neg Ast operands");
+	}
+	Ics_Opd * result_opd = new Register_Addr_Opd(result_register);
+	Icode_Stmt * plus_stml;
+	if(ast_register->get_value_type() == int_num){
+		plus_stml =  new Compute_IC_Stmt(neg, ast_opd, NULL, result_opd);	
+	}else{
+		plus_stml = new Compute_IC_Stmt(neg_d, ast_opd, NULL, result_opd);	
+	}
+	ic_list.push_back(plus_stml);
+	// cout<<"ast PRINTING"<<endl;
+	// ast_register->print_variables();
+	if(ast_register->is_temperory()){
+		// cout<<"foundast and freed "<<ast_register->get_name()<<endl;
+		ast_register->clear_lra_symbol_list();
+	}
+	// cout<<"RHS PRINTING"<<endl;
+	// rhs_register->print_variables();
+	// cout<<"inserting2 temp for "<<result_register->get_name()<<endl;
+		// cout<<result_register->get_name()<< " busy huwa relational"<<endl;
+	Code_For_Ast * final_stml = new Code_For_Ast(ic_list, result_register);
+	return *final_stml;
 }

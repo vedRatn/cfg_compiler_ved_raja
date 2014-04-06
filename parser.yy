@@ -468,7 +468,7 @@ goto_statement:
 relational_statement:
 	arithmetic_expression
 	{
-		$$ = new Relational_Ast($1);
+		$$ = $1;
 	}
 |
 	relational_statement le relational_statement
@@ -683,6 +683,7 @@ assignment_statement:
 	{
 	if (NOT_ONLY_PARSE)
 	{
+		//cout << typeid(*$3).name() << endl;
 		CHECK_INVARIANT((($1 != NULL) && ($3 != NULL)), "lhs/rhs cannot be null");
 
 		Ast * lhs = $1;

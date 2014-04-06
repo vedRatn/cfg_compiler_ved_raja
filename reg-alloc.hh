@@ -103,6 +103,7 @@ class Register_Descriptor
     bool is_temperory();
     bool is_mapping_unique();
     bool is_free();
+    void make_permanent();
 };
 
 ////////////////////////////// Lra_Outcome ///////////////////////////////////////

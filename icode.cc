@@ -248,7 +248,7 @@ void Move_IC_Stmt::print_icode(ostream & file_buffer)
 	switch (ic_format)
 	{
 	case i_r_op_o1: 
-			file_buffer << " " << operation_name << ":\t";
+			file_buffer << "\t" << operation_name << ":\t\t";
 			result->print_ics_opd(file_buffer);
 			file_buffer << " <- ";
 			opd1->print_ics_opd(file_buffer);
@@ -447,7 +447,7 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer)
 	{
 	case i_o1_op_o2_r: 
 		CHECK_INVARIANT (result, "Result cannot be NULL for a move IC Stmt");
-		file_buffer << " " << operation_name << ": " ;
+		file_buffer << "\t" << operation_name << ":\t\t";
 		opd1->print_ics_opd(file_buffer);
 		file_buffer << " , ";
 		opd2->print_ics_opd(file_buffer);
@@ -458,7 +458,7 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer)
 		break; 
 
 	case i_op_o1:
-		file_buffer << " " << operation_name ;
+		file_buffer << "\t" << operation_name ;
 		file_buffer << " label";
 		opd1->print_ics_opd(file_buffer);
 		file_buffer << "\n";
@@ -552,7 +552,7 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer)
 	switch (ic_format)
 	{
 	case i_r_o1_op_o2: 
-		file_buffer << " " << operation_name << ": ";
+		file_buffer << "\t" << operation_name << ":\t\t";
 		result->print_ics_opd(file_buffer);
 		file_buffer << " <- ";
 		opd1->print_ics_opd(file_buffer);
@@ -561,7 +561,7 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer)
 		file_buffer << "\n";
 		break; 
 	case i_r_op_o1:
-		file_buffer << " " << operation_name << ": ";
+		file_buffer << "\t" << operation_name << ":\t\t";
 		result->print_ics_opd(file_buffer);
 		file_buffer << " <- ";
 		opd1->print_ics_opd(file_buffer);

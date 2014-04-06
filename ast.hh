@@ -83,7 +83,7 @@ public:
 	virtual Register_Descriptor * get_register();
 	virtual void free_register(Register_Descriptor * destination_reg_descr);
 	virtual void update_register(Register_Descriptor * result_reg_descr);
-
+	virtual bool is_trivial();
 	virtual int next_bb();
 	virtual int checkSuccessor(list < int > & allIds);
 
@@ -134,7 +134,7 @@ public:
 	Register_Descriptor * get_register();
 	void free_register(Register_Descriptor * destination_reg_descr);
 	void update_register(Register_Descriptor * result_reg_descr);
-
+	bool is_number();
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 	Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
@@ -153,7 +153,7 @@ public:
 	void print(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-
+	bool is_number();
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
@@ -252,6 +252,9 @@ public:
 
 	Code_For_Ast & compile();
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+	bool is_number();
+	Symbol_Table_Entry & get_symbol_entry();
+	bool is_trivial();
 };
 
 
